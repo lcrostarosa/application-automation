@@ -22,7 +22,7 @@ export default function TopBar({ userName }: TopBarProps) {
 				<h1
 					className={styles.appTitle}
 					id='app-title'
-					aria-label='Application Follow-up Manager - Main application title'
+					aria-label='Application Automation - Main application title'
 				>
 					Application Autom<span>ai</span>tion
 				</h1>

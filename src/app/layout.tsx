@@ -4,8 +4,7 @@ import './reset.css';
 import './globals.scss';
 
 export const metadata: Metadata = {
-	title:
-		'Application Follow-up Manager - Automate Your Job Application Follow-ups',
+	title: 'Application Automation - Automate Your Job Application Follow-ups',
 	description:
 		'A comprehensive application follow-up management system to automate follow-up emails, track responses, and manage your job search communications.',
 };
