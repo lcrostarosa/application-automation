@@ -129,7 +129,8 @@ const NewEmailForm = () => {
 						{errors.subject && <span>{errors.subject.message}</span>}
 					</div>
 
-					{/* Email Body - Quill Editor */}
+					{/* Email Body - RTE */}
+					<div className={styles['rte-wrapper']}></div>
 
 					{/* Buttons */}
 					<div>
