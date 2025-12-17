@@ -55,7 +55,11 @@ export async function sendGmail({
 		});
 
 		console.log('Email sent successfully!');
-		return result.data;
+		return {
+			messageId: result.data.id,
+			threadId: result.data.threadId,
+			data: result.data,
+		};
 	} catch (error) {
 		console.error('Gmail sending error:', error);
 		throw error;
