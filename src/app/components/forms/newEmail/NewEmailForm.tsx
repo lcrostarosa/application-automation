@@ -12,6 +12,9 @@ import styles from './newEmailForm.module.scss';
 // Component imports
 import TinyEditor from '../../editor/TinyEditor';
 
+// Context imports
+import { useAppContext } from '@/app/context/AppContext';
+
 interface EmailFormData {
 	to: string;
 	subject: string;
@@ -21,6 +24,8 @@ interface EmailFormData {
 }
 
 const NewEmailForm = () => {
+	const { setModalType } = useAppContext();
+
 	const [editorContent, setEditorContent] = useState<string>('');
 	const [sending, setSending] = useState<boolean>(false);
 	const [message, setMessage] = useState('');
@@ -153,7 +158,14 @@ const NewEmailForm = () => {
 									},
 								})}
 							/>
-							<div className={styles['contact-select']}>...</div>
+							<button
+								type='button'
+								className={styles['contact-select']}
+								data-tooltip='Select from contacts'
+								onClick={() => setModalType('newContact')}
+							>
+								...
+							</button>
 						</div>
 						{errors.to && <span>{errors.to.message}</span>}
 					</div>

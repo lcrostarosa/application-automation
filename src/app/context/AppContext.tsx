@@ -34,7 +34,7 @@ export const ContextProvider = ({ children }: ContextProviderProps) => {
 	const [hydrated, setHydrated] = useState(false);
 	const [isTouchDevice, setIsTouchDevice] = useState(false);
 	const [isModalOpen, setIsModalOpen] = useState(true);
-	const [modalType, setModalType] = useState<string | null>('auth');
+	const [modalType, setModalType] = useState<string | null>(null);
 
 	// Fallback defaults for SSR — assumes desktop/non-touch
 	const fallback = {

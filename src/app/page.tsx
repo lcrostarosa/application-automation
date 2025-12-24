@@ -1,4 +1,3 @@
-import React from 'react';
 import { auth0 } from '@/lib/auth0';
 import { redirect } from 'next/navigation';
 
@@ -27,9 +26,7 @@ export default async function Home() {
 					aria-labelledby='login-heading'
 					role='region'
 				>
-					<div className={styles['auth-container']}>
-						<Modal />
-					</div>
+					<Modal backupModalType='auth' />
 				</section>
 			</div>
 		</div>

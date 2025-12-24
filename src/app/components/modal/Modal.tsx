@@ -1,5 +1,6 @@
 'use client';
 
+// Styles imports
 import styles from './modal.module.scss';
 
 // Components imports
@@ -13,18 +14,19 @@ import AuthModal from './modalTypes/auth/AuthModal';
 import RegisterModal from './modalTypes/auth/register/RegisterModal';
 import LoginModal from './modalTypes/auth/login/LoginModal';
 
-const Modal = () => {
+const Modal = ({ backupModalType }: { backupModalType?: string }) => {
 	const { modalType, setModalType, setIsModalOpen } = useAppContext();
+
+	const currentModalType = modalType || backupModalType || null;
+
+	if (!currentModalType) {
+		return null;
+	}
 
 	const handleClose = () => {
 		setIsModalOpen(false);
-		setModalType(modalType === 'login' ? 'auth' : '');
+		setModalType(modalType === 'login' ? 'auth' : null);
 	};
-
-	// Early return if no modal type (shouldn't happen when modal is open)
-	if (!modalType) {
-		return null;
-	}
 
 	interface ModalContent {
 		[key: string]: {
@@ -46,22 +48,33 @@ const Modal = () => {
 			component: <LoginModal />,
 			title: 'Sign In',
 		},
+		newContact: {
+			component: <div>New Contact Form Placeholder</div>,
+			title: 'New Contact',
+		},
 	} as const;
 
 	return (
-		<>
-			<div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-				<div className={styles.modalHeader}>
-					<h2>{modalContent[modalType].title}</h2>
+		<div className={styles.modalScreen}>
+			<div className={styles.modalContainer}>
+				<div
+					className={styles.modalContent}
+					onClick={(e) => e.stopPropagation()}
+				>
+					<div className={styles.modalHeader}>
+						<h2>{modalContent[currentModalType].title}</h2>
+					</div>
+					<div className={styles.modalBody}>
+						{modalContent[currentModalType].component}
+					</div>
 				</div>
-				<div className={styles.modalBody}>
-					{modalContent[modalType].component}
-				</div>
+				{currentModalType &&
+					currentModalType !== 'auth' &&
+					currentModalType !== 'register' && (
+						<CloseButton onClick={handleClose} />
+					)}
 			</div>
-			{modalType !== 'auth' && modalType !== 'register' && (
-				<CloseButton onClick={handleClose} />
-			)}
-		</>
+		</div>
 	);
 };
 

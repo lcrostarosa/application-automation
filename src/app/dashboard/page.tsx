@@ -1,12 +1,10 @@
 // Library imports
-import React from 'react';
 
 // Styles imports
 import styles from './dashboard.module.scss';
 
 // Components imports
 import PreviewTile from '../components/dashboard/previewTile/PreviewTile';
-import TestButton from '../components/testComponents/TestButton';
 
 const Dashboard = () => {
 	return (
@@ -29,7 +27,6 @@ const Dashboard = () => {
 				>
 					Welcome to your application follow-up management center
 				</p>
-				{/* <TestButton /> */}
 			</section>
 
 			<section
