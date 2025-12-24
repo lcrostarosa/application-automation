@@ -6,7 +6,11 @@ import React from 'react';
 // Styles imports
 import styles from './contacts.module.scss';
 
+// MUI imports
+import { Add } from '@mui/icons-material';
+
 // Components imports
+import SearchBar from '@/app/components/ui/searchBar/SearchBar';
 
 const Page = () => {
 	return (
@@ -16,11 +20,25 @@ const Page = () => {
 					Contacts
 				</h1>
 				<p className={styles.welcomeSubtitle} aria-describedby='contacts-title'>
-					Add new contacts or search for existing ones.
+					Search contacts or add a new one.
 				</p>
 			</section>
 
-			<section className={styles['contacts-section']}></section>
+			<section className={styles['contacts-actions']}>
+				<SearchBar
+					placeholder='Search contacts...'
+					className={styles['search-bar']}
+				/>
+
+				<div className={styles['add-contact']}>
+					<button type='button' className={styles['add-contact-button']}>
+						<Add />
+						<span>New Contact</span>
+					</button>
+				</div>
+			</section>
+
+			<section className={styles['contacts-table']}></section>
 		</div>
 	);
 };

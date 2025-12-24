@@ -1,0 +1,130 @@
+.searchbar-wrapper {
+	width: 100%;
+	max-width: 400px;
+
+	.search-container {
+		height: 3rem;
+		display: flex;
+		align-items: center;
+		background-color: var(--color-background-secondary, #f8f9fa);
+		border: 2px solid var(--color-border, #dee2e6);
+		border-radius: var(--border-radius);
+		overflow: hidden;
+		transition: border-color 0.2s ease;
+
+		&:focus-within {
+			border-color: var(--color-primary, #0066cc);
+			box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+		}
+
+		.search-input {
+			flex: 1;
+			padding: 12px 16px;
+			border: none;
+			background: transparent;
+			font-size: 16px;
+			color: var(--color-text, #333);
+			outline: none;
+
+			&::placeholder {
+				color: var(--color-text-muted, #666);
+			}
+
+			&:disabled {
+				opacity: 0.6;
+				cursor: not-allowed;
+			}
+		}
+
+		.search-button {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			padding: 12px 16px;
+			border: 2px solid transparent;
+			background: var(--gradient-primary) border-box;
+			color: white;
+			cursor: pointer;
+			font-size: 16px;
+			font-weight: 600;
+			box-shadow: var(--shadow-sm);
+			transition: all 0.2s ease;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			position: relative;
+			overflow: hidden;
+
+			&::before {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: -100%;
+				width: 100%;
+				height: 100%;
+				background: linear-gradient(
+					90deg,
+					transparent,
+					rgba(255, 255, 255, 0.2),
+					transparent
+				);
+				transition: left 0.5s ease;
+			}
+
+			&:active:not(:disabled) {
+				transform: translateY(0);
+				box-shadow: var(--shadow-md);
+			}
+
+			@media (hover: hover) {
+				&:hover:not(:disabled) {
+					transform: scale(1.05);
+					box-shadow: var(--shadow-lg);
+
+					&::before {
+						left: 100%;
+					}
+				}
+			}
+
+			&:disabled {
+				opacity: 0.6;
+				cursor: not-allowed;
+			}
+		}
+	}
+
+	// Variant for compact size
+	&.compact {
+		max-width: 300px;
+
+		.search-container {
+			.search-input {
+				padding: 8px 12px;
+				font-size: 14px;
+			}
+
+			.search-button {
+				padding: 8px 12px;
+				font-size: 14px;
+			}
+		}
+	}
+
+	// Variant for large size
+	&.large {
+		max-width: 500px;
+
+		.search-container {
+			.search-input {
+				padding: 16px 20px;
+				font-size: 18px;
+			}
+
+			.search-button {
+				padding: 16px 20px;
+				font-size: 18px;
+			}
+		}
+	}
+}
