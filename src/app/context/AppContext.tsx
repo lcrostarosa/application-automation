@@ -33,8 +33,13 @@ interface ContextProviderProps {
 export const ContextProvider = ({ children }: ContextProviderProps) => {
 	const [hydrated, setHydrated] = useState(false);
 	const [isTouchDevice, setIsTouchDevice] = useState(false);
-	const [isModalOpen, setIsModalOpen] = useState(true);
+	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [modalType, setModalType] = useState<string | null>(null);
+
+	// Auto-sync isModalOpen with modalType
+	useEffect(() => {
+		setIsModalOpen(!!modalType);
+	}, [modalType]);
 
 	// Fallback defaults for SSR — assumes desktop/non-touch
 	const fallback = {

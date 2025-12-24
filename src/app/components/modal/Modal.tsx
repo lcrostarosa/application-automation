@@ -13,6 +13,7 @@ import { useAppContext } from '@/app/context/AppContext';
 import AuthModal from './modalTypes/auth/AuthModal';
 import RegisterModal from './modalTypes/auth/register/RegisterModal';
 import LoginModal from './modalTypes/auth/login/LoginModal';
+import NewContactModal from './modalTypes/contacts/newContact/NewContactModal';
 
 const Modal = ({ backupModalType }: { backupModalType?: string }) => {
 	const { modalType, setModalType, setIsModalOpen } = useAppContext();
@@ -49,7 +50,7 @@ const Modal = ({ backupModalType }: { backupModalType?: string }) => {
 			title: 'Sign In',
 		},
 		newContact: {
-			component: <div>New Contact Form Placeholder</div>,
+			component: <NewContactModal />,
 			title: 'New Contact',
 		},
 	} as const;

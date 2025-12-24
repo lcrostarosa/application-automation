@@ -11,6 +11,7 @@ import { Add } from '@mui/icons-material';
 
 // Components imports
 import SearchBar from '@/app/components/ui/searchBar/SearchBar';
+import NewContactButton from '@/app/components/ui/buttons/NewContact';
 
 const Page = () => {
 	return (
@@ -30,12 +31,7 @@ const Page = () => {
 					className={styles['search-bar']}
 				/>
 
-				<div className={styles['add-contact']}>
-					<button type='button' className={styles['add-contact-button']}>
-						<Add />
-						<span>New Contact</span>
-					</button>
-				</div>
+				<NewContactButton />
 			</section>
 
 			<section className={styles['contacts-table']}></section>
