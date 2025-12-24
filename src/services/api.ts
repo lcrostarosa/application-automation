@@ -39,7 +39,7 @@ export const contactAPI = {
 		email: string;
 		phone?: string;
 		linkedin?: string;
-		importance: string;
+		importance?: string;
 		associatedRole?: string;
 	}) =>
 		apiCall('/api/contacts', {

@@ -22,6 +22,8 @@ interface AppContextType {
 	setIsModalOpen: (type: boolean) => void;
 	modalType: string | null;
 	setModalType: (type: string | null) => void;
+	duplicateContact?: boolean;
+	setDuplicateContact: (type: boolean) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -35,6 +37,7 @@ export const ContextProvider = ({ children }: ContextProviderProps) => {
 	const [isTouchDevice, setIsTouchDevice] = useState(false);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [modalType, setModalType] = useState<string | null>(null);
+	const [duplicateContact, setDuplicateContact] = useState<boolean>(false);
 
 	// Auto-sync isModalOpen with modalType
 	useEffect(() => {
@@ -54,6 +57,8 @@ export const ContextProvider = ({ children }: ContextProviderProps) => {
 		setIsModalOpen: () => {},
 		modalType: null,
 		setModalType: () => {},
+		duplicateContact: false,
+		setDuplicateContact: () => {},
 	};
 
 	// Client-side checks only after hydration
@@ -108,6 +113,8 @@ export const ContextProvider = ({ children }: ContextProviderProps) => {
 				setIsModalOpen,
 				modalType,
 				setModalType,
+				duplicateContact,
+				setDuplicateContact,
 		  }
 		: fallback;
 

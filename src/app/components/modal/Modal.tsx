@@ -16,7 +16,8 @@ import LoginModal from './modalTypes/auth/login/LoginModal';
 import NewContactModal from './modalTypes/contacts/NewContactModal';
 
 const Modal = ({ backupModalType }: { backupModalType?: string }) => {
-	const { modalType, setModalType, setIsModalOpen } = useAppContext();
+	const { modalType, setModalType, setIsModalOpen, duplicateContact } =
+		useAppContext();
 
 	const currentModalType = modalType || backupModalType || null;
 
@@ -51,7 +52,7 @@ const Modal = ({ backupModalType }: { backupModalType?: string }) => {
 		},
 		newContact: {
 			component: <NewContactModal />,
-			title: 'New Contact',
+			title: duplicateContact ? 'Update Existing Contact' : 'New Contact',
 		},
 	} as const;
 

@@ -1,4 +1,5 @@
 // Library imports
+import { useState, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 
 // Hooks imports
@@ -24,14 +25,33 @@ interface ContactFormData {
 	associatedRole?: string;
 }
 
+interface DuplicateContact {
+	first: string;
+	last: string;
+	company: string;
+	title: string;
+	email: string;
+	phone: string;
+	linkedin: string;
+	importance: string;
+	associatedRole: string;
+}
+
 const NewContactModal = () => {
-	const { setModalType } = useAppContext();
+	const { setModalType, duplicateContact, setDuplicateContact } =
+		useAppContext();
 	const { mutate: createContact, loading: saving } = useContactCreate();
+	const [submittedData, setSubmittedData] = useState<ContactFormData | null>(
+		null
+	);
+	const [duplicateData, setDuplicateData] = useState<DuplicateContact | null>(
+		null
+	);
 
 	const {
 		register,
 		handleSubmit,
-		formState: { errors },
+		formState: { touchedFields, errors },
 		reset,
 	} = useForm<ContactFormData>({
 		defaultValues: {
@@ -48,13 +68,36 @@ const NewContactModal = () => {
 	});
 
 	const onSubmit: SubmitHandler<ContactFormData> = async (data) => {
-		console.log('Contact form submitted:', data);
-
 		try {
-			await createContact(data);
+			const response = await createContact(data);
+
+			// Handle duplicate contact scenario
+			if (response.success === false && response.duplicate) {
+				setSubmittedData(data);
+				console.log('Duplicate contact detected:', response.existingContact);
+				const duplicateData: DuplicateContact = {
+					first: response.existingContact?.firstName || '',
+					last: response.existingContact?.lastName || '',
+					company: response.existingContact?.company || '',
+					title: response.existingContact?.title || '',
+					email: response.existingContact?.email || '',
+					phone: response.existingContact?.phone || '',
+					linkedin: response.existingContact?.linkedIn || '',
+					importance: response.existingContact?.importance?.toString() || '',
+					associatedRole: response.existingContact?.associatedRole || '',
+				};
+
+				setDuplicateData(duplicateData);
+				reset({
+					...duplicateData,
+				});
+				return;
+			}
 
 			reset();
 			setModalType(null);
+			setSubmittedData(null);
+			setDuplicateContact(false);
 		} catch (error) {
 			// Error handling is done in the hook
 		}
@@ -85,7 +128,12 @@ const NewContactModal = () => {
 									message: 'First name must be at least 2 characters',
 								},
 							})}
-							className={errors.first ? styles.error : ''}
+							className={`${errors.first ? styles.error : ''} ${
+								submittedData?.first !== duplicateData?.first &&
+								!touchedFields.first
+									? styles['field-updated']
+									: ''
+							}`}
 						/>
 						{errors.first && (
 							<span className={styles['error-message']}>
@@ -106,7 +154,12 @@ const NewContactModal = () => {
 									message: 'Last name must be at least 2 characters',
 								},
 							})}
-							className={errors.last ? styles.error : ''}
+							className={`${errors.last ? styles.error : ''} ${
+								submittedData?.last !== duplicateData?.last &&
+								!touchedFields.last
+									? styles['field-updated']
+									: ''
+							}`}
 						/>
 						{errors.last && (
 							<span className={styles['error-message']}>
@@ -120,12 +173,32 @@ const NewContactModal = () => {
 				<div className={styles['form-row']}>
 					<div className={styles['input-group']}>
 						<label htmlFor='company'>Company</label>
-						<input type='text' id='company' {...register('company')} />
+						<input
+							type='text'
+							id='company'
+							{...register('company')}
+							className={`${
+								submittedData?.company !== duplicateData?.company &&
+								!touchedFields.company
+									? styles['field-updated']
+									: ''
+							}`}
+						/>
 					</div>
 
 					<div className={styles['input-group']}>
 						<label htmlFor='title'>Job Title</label>
-						<input type='text' id='title' {...register('title')} />
+						<input
+							type='text'
+							id='title'
+							{...register('title')}
+							className={`${
+								submittedData?.title !== duplicateData?.title &&
+								!touchedFields.title
+									? styles['field-updated']
+									: ''
+							}`}
+						/>
 					</div>
 				</div>
 
@@ -143,7 +216,12 @@ const NewContactModal = () => {
 									message: 'Invalid email address',
 								},
 							})}
-							className={errors.email ? styles.error : ''}
+							className={`${errors.email ? styles.error : ''} ${
+								submittedData?.email !== duplicateData?.email &&
+								!touchedFields.email
+									? styles['field-updated']
+									: ''
+							}`}
 						/>
 						{errors.email && (
 							<span className={styles['error-message']}>
@@ -158,7 +236,12 @@ const NewContactModal = () => {
 							type='tel'
 							id='phone'
 							{...register('phone')}
-							placeholder='(555) 123-4567'
+							className={`${
+								submittedData?.phone !== duplicateData?.phone &&
+								!touchedFields.phone
+									? styles['field-updated']
+									: ''
+							}`}
 						/>
 					</div>
 				</div>
@@ -176,8 +259,12 @@ const NewContactModal = () => {
 									message: 'Please enter a valid LinkedIn URL',
 								},
 							})}
-							placeholder='https://linkedin.com/in/username'
-							className={errors.linkedin ? styles.error : ''}
+							className={`${errors.linkedin ? styles.error : ''} ${
+								submittedData?.linkedin !== duplicateData?.linkedin &&
+								!touchedFields.linkedin
+									? styles['field-updated']
+									: ''
+							}`}
 						/>
 						{errors.linkedin && (
 							<span className={styles['error-message']}>
@@ -187,13 +274,16 @@ const NewContactModal = () => {
 					</div>
 
 					<div className={styles['input-group']}>
-						<label htmlFor='importance'>Importance *</label>
+						<label htmlFor='importance'>Importance</label>
 						<select
 							id='importance'
-							{...register('importance', {
-								required: 'Please select importance level',
-							})}
-							className={errors.importance ? styles.error : ''}
+							{...register('importance')}
+							className={`${
+								submittedData?.importance !== duplicateData?.importance &&
+								!touchedFields.importance
+									? styles['field-updated']
+									: ''
+							}`}
 						>
 							<option value=''>Select importance...</option>
 							<option value='1'>1 - Low Priority</option>
@@ -202,11 +292,6 @@ const NewContactModal = () => {
 							<option value='4'>4 - High Priority</option>
 							<option value='5'>5 - Critical</option>
 						</select>
-						{errors.importance && (
-							<span className={styles['error-message']}>
-								{errors.importance.message}
-							</span>
-						)}
 					</div>
 				</div>
 
@@ -217,7 +302,12 @@ const NewContactModal = () => {
 						type='text'
 						id='associatedRole'
 						{...register('associatedRole')}
-						className={errors.associatedRole ? styles.error : ''}
+						className={`${errors.associatedRole ? styles.error : ''} ${
+							submittedData?.associatedRole !== duplicateData?.associatedRole &&
+							!touchedFields.associatedRole
+								? styles['field-updated']
+								: ''
+						}`}
 						placeholder='ex: Junior Engineer'
 					/>
 					{errors.associatedRole && (
@@ -233,7 +323,13 @@ const NewContactModal = () => {
 						type='submit'
 						className={`${styles['save-button']} button contact`}
 					>
-						Save Contact
+						{duplicateContact
+							? saving
+								? 'Updating...'
+								: 'Update Contact'
+							: saving
+							? 'Saving...'
+							: 'Save Contact'}
 					</button>
 					<button
 						type='button'
@@ -243,6 +339,13 @@ const NewContactModal = () => {
 						Cancel
 					</button>
 				</div>
+
+				{/* Error Detected */}
+				{duplicateContact && !Object.values(touchedFields).some(Boolean) && (
+					<div className={styles['error-duplicate']}>
+						<h3>Duplicate Contact Detected</h3>
+					</div>
+				)}
 			</form>
 		</div>
 	);

@@ -33,9 +33,9 @@ export async function POST(req: NextRequest) {
 		} = await req.json();
 
 		// 4. Validate required fields
-		if (!first || !last || !email || !importance) {
+		if (!first || !last || !email) {
 			return NextResponse.json(
-				{ error: 'Missing required fields: first, last, email, importance' },
+				{ error: 'Missing required fields: first, last, email' },
 				{ status: 400 }
 			);
 		}
@@ -49,10 +49,66 @@ export async function POST(req: NextRequest) {
 		});
 
 		if (existingContact) {
-			return NextResponse.json(
-				{ error: 'Contact with this email already exists' },
-				{ status: 409 }
-			);
+			const isIdentical =
+				existingContact.firstName === first &&
+				existingContact.lastName === last &&
+				existingContact.company === (company || null) &&
+				existingContact.title === (title || null) &&
+				existingContact.email === email &&
+				existingContact.phone === (phone || null) &&
+				existingContact.linkedIn === (linkedin || null) &&
+				existingContact.importance === parseInt(importance) &&
+				existingContact.associatedRole === (associatedRole || null);
+
+			if (isIdentical) {
+				// Pretend we created it - return success with existing contact
+				return NextResponse.json({
+					success: true,
+					contact: {
+						id: existingContact.id,
+						firstName: existingContact.firstName,
+						lastName: existingContact.lastName,
+						company: existingContact.company,
+						title: existingContact.title,
+						email: existingContact.email,
+						phone: existingContact.phone,
+						linkedIn: existingContact.linkedIn,
+						importance: existingContact.importance,
+						associatedRole: existingContact.associatedRole,
+						createdAt: existingContact.createdAt.toISOString(),
+						updatedAt: existingContact.updatedAt.toISOString(),
+					},
+				});
+			}
+
+			// Return duplicate data for comparison instead of error
+			return NextResponse.json({
+				success: false,
+				duplicate: true,
+				existingContact: {
+					id: existingContact.id,
+					firstName: existingContact.firstName,
+					lastName: existingContact.lastName,
+					company: existingContact.company,
+					title: existingContact.title,
+					email: existingContact.email,
+					phone: existingContact.phone,
+					linkedIn: existingContact.linkedIn,
+					importance: existingContact.importance,
+					associatedRole: existingContact.associatedRole,
+				},
+				submittedData: {
+					first,
+					last,
+					company: company || null,
+					title: title || null,
+					email,
+					phone: phone || null,
+					linkedin: linkedin || null,
+					importance: parseInt(importance),
+					associatedRole: associatedRole || null,
+				},
+			});
 		}
 
 		// 6. Create contact in database
