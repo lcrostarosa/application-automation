@@ -13,7 +13,7 @@ import { useAppContext } from '@/app/context/AppContext';
 import AuthModal from './modalTypes/auth/AuthModal';
 import RegisterModal from './modalTypes/auth/register/RegisterModal';
 import LoginModal from './modalTypes/auth/login/LoginModal';
-import NewContactModal from './modalTypes/contacts/newContact/NewContactModal';
+import NewContactModal from './modalTypes/contacts/NewContactModal';
 
 const Modal = ({ backupModalType }: { backupModalType?: string }) => {
 	const { modalType, setModalType, setIsModalOpen } = useAppContext();

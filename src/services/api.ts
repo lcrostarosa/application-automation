@@ -28,3 +28,22 @@ export const repliesAPI = {
 	getAll: () => apiCall('/api/replies'),
 	checkForNew: () => apiCall('/api/check-replies', { method: 'POST' }),
 };
+
+// Contact API functions
+export const contactAPI = {
+	create: (contactData: {
+		first: string;
+		last: string;
+		company?: string;
+		title?: string;
+		email: string;
+		phone?: string;
+		linkedin?: string;
+		importance: string;
+		associatedRole?: string;
+	}) =>
+		apiCall('/api/contacts', {
+			method: 'POST',
+			body: JSON.stringify(contactData),
+		}),
+};

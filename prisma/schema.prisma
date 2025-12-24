@@ -39,11 +39,12 @@ model Contact {
   firstName      String?
   lastName       String?
   company        String?
+  title          String?
   phone          String?
   linkedIn       String?
   importance     Int?
   associatedRole String?   // e.g. "Junior Engineer"
-  active         Boolean   @default(true )
+  active         Boolean   @default(false )
   lastActivity   DateTime?
   replied        Boolean   @default(false)
   validEmail     Boolean? 
