@@ -67,7 +67,7 @@ const Modal = ({ backupModalType }: { backupModalType?: string }) => {
 	} as const;
 
 	return (
-		<div className={styles.modalScreen}>
+		<div className={styles.modalScreen} onClick={() => setModalType(null)}>
 			<div
 				className={styles.modalContainer}
 				style={{ maxWidth: modalContent[currentModalType].width }}
