@@ -46,7 +46,7 @@
 		}
 
 		thead {
-			background-color: var(--color-secondary-light);
+			background: var(--gradient-primary-light);
 
 			tr {
 				th {
@@ -82,7 +82,7 @@
 
 				@media (hover: hover) {
 					&:hover {
-						background: var(--gradient-primary-light);
+						background: var(--gradient-primary-lighter);
 						cursor: pointer;
 					}
 				}
