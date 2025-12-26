@@ -1,7 +1,7 @@
 'use client';
 
 // Library imports
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 
 // Hooks imports
@@ -25,7 +25,7 @@ interface EmailFormData {
 }
 
 const NewEmailForm = () => {
-	const { setModalType } = useAppContext();
+	const { setModalType, selectedContact, setSelectedContact } = useAppContext();
 	const { mutate: sendEmail, loading: sending } = useEmailSend();
 
 	const [editorContent, setEditorContent] = useState<string>('');
@@ -37,6 +37,7 @@ const NewEmailForm = () => {
 		handleSubmit,
 		formState: { errors },
 		reset,
+		setValue,
 	} = useForm<EmailFormData>({
 		defaultValues: {
 			to: '',
@@ -46,6 +47,12 @@ const NewEmailForm = () => {
 			sendWithoutReviewAfter: '',
 		},
 	});
+
+	useEffect(() => {
+		if (selectedContact?.email) {
+			setValue('to', selectedContact.email);
+		}
+	}, [selectedContact, setValue]);
 
 	const onSubmit: SubmitHandler<EmailFormData> = async (data) => {
 		try {
@@ -59,6 +66,7 @@ const NewEmailForm = () => {
 
 			// Success handling is done in the hook
 			setEditorContent('');
+			setSelectedContact(null);
 			reset(); // Reset form fields
 		} catch (error) {
 			// Error handling is done in the hook
@@ -144,7 +152,7 @@ const NewEmailForm = () => {
 								type='button'
 								className={styles['contact-select']}
 								data-tooltip='Select from contacts'
-								onClick={() => setModalType('newContact')}
+								onClick={() => setModalType('searchContacts')}
 							>
 								...
 							</button>

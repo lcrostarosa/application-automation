@@ -187,7 +187,7 @@ const NewContactModal = () => {
 					</div>
 
 					<div className={styles['input-group']}>
-						<label htmlFor='title'>Job Title</label>
+						<label htmlFor='title'>Title</label>
 						<input
 							type='text'
 							id='title'

@@ -65,3 +65,29 @@ export interface ContactUpdateData {
 	importance?: string;
 	associatedRole?: string;
 }
+
+export interface ContactFromDB {
+	id: number;
+	email: string;
+	ownerId: number;
+	firstName: string | null;
+	lastName: string | null;
+	company: string | null;
+	title: string | null;
+	phone: string | null;
+	linkedIn: string | null;
+	importance: number | null;
+	associatedRole: string | null;
+	active: boolean;
+	lastActivity: Date | null;
+	replied: boolean;
+	validEmail: boolean | null;
+	createdAt: Date;
+	updatedAt: Date;
+	autoCreated: boolean;
+}
+
+// For contact of contacts (response from get all)
+export interface ContactsResponse {
+	contacts: [ContactFromDB];
+}

@@ -1,5 +1,6 @@
 'use client';
 
+// Libraries imports
 import {
 	createContext,
 	useContext,
@@ -7,8 +8,13 @@ import {
 	useEffect,
 	ReactNode,
 } from 'react';
+import { usePathname } from 'next/navigation';
 
+// MUI imports
 import { useMediaQuery } from '@mui/material';
+
+// Types imports
+import { ContactFromDB } from '@/types/contactTypes';
 
 interface AppContextType {
 	isTouchDevice: boolean;
@@ -24,6 +30,8 @@ interface AppContextType {
 	setModalType: (type: string | null) => void;
 	duplicateContact?: boolean;
 	setDuplicateContact: (type: boolean) => void;
+	selectedContact: ContactFromDB | null;
+	setSelectedContact: (contact: ContactFromDB | null) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -33,16 +41,26 @@ interface ContextProviderProps {
 }
 
 export const ContextProvider = ({ children }: ContextProviderProps) => {
+	const pathname = usePathname();
+
 	const [hydrated, setHydrated] = useState(false);
 	const [isTouchDevice, setIsTouchDevice] = useState(false);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [modalType, setModalType] = useState<string | null>(null);
 	const [duplicateContact, setDuplicateContact] = useState<boolean>(false);
+	const [selectedContact, setSelectedContact] = useState<ContactFromDB | null>(
+		null
+	);
 
 	// Auto-sync isModalOpen with modalType
 	useEffect(() => {
 		setIsModalOpen(!!modalType);
 	}, [modalType]);
+
+	// Reset selectedContact on pathname change
+	useEffect(() => {
+		setSelectedContact(null);
+	}, [pathname]);
 
 	// Fallback defaults for SSR — assumes desktop/non-touch
 	const fallback = {
@@ -59,6 +77,8 @@ export const ContextProvider = ({ children }: ContextProviderProps) => {
 		setModalType: () => {},
 		duplicateContact: false,
 		setDuplicateContact: () => {},
+		selectedContact: null,
+		setSelectedContact: () => {},
 	};
 
 	// Client-side checks only after hydration
@@ -115,6 +135,8 @@ export const ContextProvider = ({ children }: ContextProviderProps) => {
 				setModalType,
 				duplicateContact,
 				setDuplicateContact,
+				selectedContact,
+				setSelectedContact,
 		  }
 		: fallback;
 

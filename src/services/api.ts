@@ -39,6 +39,10 @@ export const contactAPI = {
 			method: 'POST',
 			body: JSON.stringify(contactData),
 		}),
+	read: () =>
+		apiCall('/api/contacts', {
+			method: 'GET',
+		}),
 	update: (contactData: ContactUpdateData) =>
 		apiCall(`/api/contacts/${contactData.id}`, {
 			method: 'PUT',

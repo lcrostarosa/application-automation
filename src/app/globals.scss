@@ -2,7 +2,9 @@
 	/* 60% - Main colors (very light grays and whites) */
 	--background-primary: #fafbfc;
 	--background-secondary: #ffffff;
-	--background-tertiary: #f8f9fa;
+	--background-tertiary: hsl(210, 17%, 98%);
+	--background-tertiary-med: hsl(185, 100%, 96%);
+	--background-tertiary-dark: hsl(180, 100%, 70%);
 	--text-primary: #2d3748;
 	--text-secondary: #4a5568;
 	--text-muted: #718096;
@@ -14,12 +16,21 @@
 		#67e8f9 50%,
 		#6ee7b7 100%
 	);
+	--gradient-primary-light: linear-gradient(
+		135deg,
+		hsla(188, 86%, 53%, 0.5) 0%,
+		hsla(187, 92%, 69%, 0.5) 50%,
+		hsla(156, 72%, 67%, 0.5) 100%
+	);
 	--gradient-secondary: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%);
 	--gradient-subtle: linear-gradient(135deg, #f0fdff 0%, #f0fdf4 100%);
 	--gradient-accessible: linear-gradient(135deg, #cffafe 0%, #d1fae5 100%);
-	--color-primary: #22d3ee;
-	--color-primary-hover: #06b6d4;
-	--color-secondary: #67e8f9;
+	--color-primary: hsl(188, 86%, 53%);
+	--color-primary-light: hsl(188, 86%, 70%);
+	--color-primary-hover: hsl(189, 94%, 43%);
+	--color-primary-hover-light: hsl(189, 94%, 70%);
+	--color-secondary: hsl(187, 92%, 69%);
+	--color-secondary-light: hsl(187, 92%, 85%);
 	--color-success: #6ee7b7;
 	--color-teal: #5eead4;
 

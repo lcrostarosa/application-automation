@@ -1,0 +1,111 @@
+.searchcontactsmodal-wrapper {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	max-height: 70vh;
+	overflow-y: auto;
+
+	.controls {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+
+		.icon {
+			color: var(--color-primary);
+			font-size: 2.75rem;
+		}
+
+		.refreshButton {
+			height: 100%;
+			aspect-ratio: 1;
+			background: none;
+			border: none;
+			border-radius: var(--border-radius-sm);
+			cursor: pointer;
+			transform: scaleX(-1);
+		}
+	}
+
+	.contacts-table {
+		width: 100%;
+		border-collapse: separate;
+		overflow: hidden;
+		border-radius: var(--border-radius);
+
+		.sm {
+			min-width: 6rem;
+		}
+
+		.md {
+			max-width: 12rem;
+		}
+
+		.lrg {
+			max-width: 14rem;
+		}
+
+		thead {
+			background-color: var(--color-secondary-light);
+
+			tr {
+				th {
+					vertical-align: middle;
+					cursor: pointer;
+					padding: 0.5rem 1rem;
+					text-align: left;
+					border-bottom: 2px solid var(--border-light);
+					white-space: nowrap;
+
+					.sort {
+						display: flex;
+						align-items: center;
+						justify-content: space-between;
+						gap: 0.5rem;
+					}
+
+					&:not(:last-child) {
+						border-right: 1.5px solid var(--border-light);
+					}
+				}
+			}
+		}
+
+		tbody {
+			tr {
+				&:nth-child(odd) {
+					background-color: var(--background-tertiary);
+				}
+				&:nth-child(even) {
+					background-color: var(--background-tertiary-med);
+				}
+
+				@media (hover: hover) {
+					&:hover {
+						background: var(--gradient-primary-light);
+						cursor: pointer;
+					}
+				}
+
+				td {
+					padding: 0.5rem 1rem;
+
+					white-space: nowrap;
+					overflow-x: auto;
+					scrollbar-width: none; /* Firefox */
+					-ms-overflow-style: none; /* IE and Edge */
+
+					&::-webkit-scrollbar {
+						width: 0;
+						height: 0;
+						background: transparent;
+					}
+
+					&:last-child {
+						text-align: right;
+					}
+				}
+			}
+		}
+	}
+}

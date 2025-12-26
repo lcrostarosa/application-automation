@@ -2,6 +2,38 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth0 } from '@/lib/auth0';
 import { prisma } from '@/lib/prisma';
 
+export async function GET(req: NextRequest) {
+	try {
+		// 1. Check authentication
+		const session = await auth0.getSession();
+		if (!session?.user) {
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+		}
+
+		// 2. Get user from database
+		const user = await prisma.user.findUnique({
+			where: { auth0Id: session.user.sub },
+		});
+		if (!user) {
+			return NextResponse.json({ error: 'User not found' }, { status: 404 });
+		}
+
+		// 3. Fetch contacts for the user
+		const contacts = await prisma.contact.findMany({
+			where: { ownerId: user.id },
+		});
+
+		// 4. Return contacts
+		return NextResponse.json({ contacts });
+	} catch (error: any) {
+		console.error('Error fetching contacts:', error);
+		return NextResponse.json(
+			{ error: error.message || 'Failed to fetch contacts' },
+			{ status: 500 }
+		);
+	}
+}
+
 export async function POST(req: NextRequest) {
 	try {
 		// 1. Check authentication

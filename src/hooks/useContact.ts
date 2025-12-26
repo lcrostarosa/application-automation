@@ -1,11 +1,24 @@
-import { useMutation } from './api';
+import { useMutation, useQuery } from './api';
 import { contactAPI } from '@/services/api';
 import { useAppContext } from '@/app/context/AppContext';
 import {
 	ContactData,
 	ContactResponse,
+	ContactsResponse,
 	ContactUpdateData,
 } from '@/types/contactTypes';
+
+export const useContactsGetAll = () => {
+	return useQuery<ContactsResponse>('contacts-get-all', contactAPI.read, {
+		immediate: true,
+		onSuccess: (response) => {
+			console.log('Contacts fetched successfully:', response.contacts);
+		},
+		onError: (error) => {
+			console.error('Failed to fetch contacts:', error);
+		},
+	});
+};
 
 export const useContactCreate = () => {
 	const { setDuplicateContact } = useAppContext();
