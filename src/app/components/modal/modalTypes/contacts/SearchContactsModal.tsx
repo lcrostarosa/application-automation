@@ -1,9 +1,9 @@
 'use client';
 
 // Library imports
-import { useContactsGetAll } from '@/hooks/useContact';
 
 // Hooks imports
+import { useContactsGetAll } from '@/hooks/useContact';
 
 // Styles imports
 import styles from './searchContactsModal.module.scss';

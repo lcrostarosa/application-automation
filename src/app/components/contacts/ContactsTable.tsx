@@ -35,7 +35,6 @@ const ContactsTable = ({
 		replied: boolean;
 	};
 }) => {
-	console.log(contacts);
 	const { setSelectedContact } = useAppContext();
 	type SortableContactColumn = 'firstName' | 'lastName' | 'company';
 
