@@ -1,5 +1,7 @@
-import { useQuery, useMutation } from './api';
 import { repliesAPI } from '@/services/api';
+
+// Tanstack React Query
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface Reply {
 	id: number;
@@ -13,23 +15,22 @@ interface Reply {
 	};
 }
 
-export const useReplies = () => {
-	return useQuery<Reply[]>('replies', repliesAPI.getAll, {
-		immediate: true,
-		onError: (error) => {
-			console.error('Error fetching replies:', error);
-		},
+export const useGetAllReplies = () => {
+	return useQuery<Reply[]>({
+		queryKey: ['replies-get-all'],
+		queryFn: repliesAPI.getAll,
 	});
 };
 
-export const useCheckReplies = () => {
-	return useMutation(() => repliesAPI.checkForNew(), {
+export const useCheckNewReplies = () => {
+	return useMutation({
+		mutationFn: repliesAPI.checkForNew,
 		onSuccess: () => {
 			alert('Checked for replies successfully!');
 		},
-		onError: (error) => {
-			console.error('Error:', error);
-			alert('Error checking for replies');
+		onError: (error: Error) => {
+			console.error('Error checking for replies:', error);
+			alert(`Error checking for replies: ${error.message}`);
 		},
 	});
 };

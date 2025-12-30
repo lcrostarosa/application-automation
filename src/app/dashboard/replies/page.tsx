@@ -1,11 +1,12 @@
 'use client';
 
-import { useReplies, useCheckReplies } from '@/hooks/useReplies';
+import { useGetAllReplies, useCheckNewReplies } from '@/hooks/useReplies';
 import styles from './repliesPage.module.scss';
 
 export default function RepliesPage() {
-	const { data: replies = [], loading, refetch } = useReplies();
-	const { mutate: checkForNewReplies, loading: checking } = useCheckReplies();
+	const { data: replies = [], isPending, refetch } = useGetAllReplies();
+	const { mutateAsync: checkForNewReplies, isPending: checking } =
+		useCheckNewReplies();
 
 	const handleCheckReplies = async () => {
 		try {
