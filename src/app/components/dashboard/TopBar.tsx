@@ -2,7 +2,7 @@
 import styles from './topBar.module.scss';
 
 // Components imports
-import LogoutButton from '../ui/buttons/LogoutButton';
+import LogoutButton from '../buttons/LogoutButton';
 
 interface TopBarProps {
 	userName: string;

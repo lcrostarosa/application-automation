@@ -10,8 +10,8 @@ import styles from './contacts.module.scss';
 import { Add } from '@mui/icons-material';
 
 // Components imports
-import SearchBar from '@/app/components/ui/searchBar/SearchBar';
-import NewContactButton from '@/app/components/ui/buttons/NewContact';
+import SearchBar from '@/app/components/contacts/searchBar/SearchBar';
+import NewContactButton from '@/app/components/buttons/NewContact';
 
 const Page = () => {
 	return (

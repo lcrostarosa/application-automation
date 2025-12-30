@@ -2,15 +2,15 @@
 import styles from './authModal.module.scss';
 
 // Components imports
-import ActionButton from '../../buttons/ActionButton';
+import ModalActionButton from '@/app/components/buttons/ModalActionButton';
 
 // Context imports
 
 const AuthModal = () => {
 	return (
 		<div className={styles.authModal}>
-			<ActionButton modalType='register' />
-			<ActionButton modalType='login' />
+			<ModalActionButton modalType='register' />
+			<ModalActionButton modalType='login' />
 		</div>
 	);
 };

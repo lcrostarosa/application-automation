@@ -3,7 +3,7 @@
 // Context imports
 import { useAppContext } from '@/app/context/AppContext';
 
-const BackButton = ({
+const ModalBackButton = ({
 	modalRedirect,
 	title,
 }: {
@@ -28,4 +28,4 @@ const BackButton = ({
 	);
 };
 
-export default BackButton;
+export default ModalBackButton;

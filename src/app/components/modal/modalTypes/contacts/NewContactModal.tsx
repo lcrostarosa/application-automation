@@ -17,10 +17,10 @@ import styles from './newContactModal.module.scss';
 import { useAppContext } from '@/app/context/AppContext';
 
 const NewContactModal = () => {
-	const { setModalType, duplicateContact, setDuplicateContact } =
-		useAppContext();
-	const { mutate: createContact, loading: saving } = useContactCreate();
-	const { mutate: updateContact, loading: updating } = useContactUpdate();
+	const { setModalType, setDuplicateContact } = useAppContext();
+	const { mutateAsync: createContact, isPending: saving } = useContactCreate();
+	const { mutateAsync: updateContact, isPending: updating } =
+		useContactUpdate();
 
 	const {
 		register,
@@ -51,7 +51,7 @@ const NewContactModal = () => {
 	} = useDuplicateContactHandler();
 
 	const onSubmit: SubmitHandler<ContactFormData> = async (data) => {
-		if (duplicateContact) {
+		if (isDuplicateMode) {
 			try {
 				// Ensure contactId exists
 				if (!contactId) {
@@ -78,7 +78,6 @@ const NewContactModal = () => {
 				reset();
 				setModalType(null);
 				clearDuplicateState();
-				setDuplicateContact(false);
 			} catch (error) {
 				// Error handling is done in the hook
 			}
@@ -98,7 +97,6 @@ const NewContactModal = () => {
 			reset();
 			setModalType(null);
 			clearDuplicateState();
-			setDuplicateContact(false);
 		} catch (error) {
 			// Error handling is done in the hook
 		}
@@ -328,7 +326,7 @@ const NewContactModal = () => {
 						type='submit'
 						className={`${styles['save-button']} button contact`}
 					>
-						{duplicateContact
+						{isDuplicateMode
 							? updating
 								? 'Updating...'
 								: 'Update Contact'
@@ -338,6 +336,7 @@ const NewContactModal = () => {
 					</button>
 					<button
 						type='button'
+						name='cancel'
 						onClick={handleCancel}
 						className={`${styles['cancel-button']} button`}
 					>

@@ -10,11 +10,6 @@ export async function PUT(
 		const contactId = parseInt(id);
 		const body = await request.json();
 
-		console.log('PUT /api/contacts/[id] - Received data:', {
-			contactId,
-			body,
-		});
-
 		// Remove id from the update data since we don't want to update the ID
 		const { id: bodyId, ...updateData } = body;
 
@@ -27,8 +22,6 @@ export async function PUT(
 			where: { id: contactId },
 			data: updateData,
 		});
-
-		console.log('Successfully updated contact:', updatedContact);
 
 		return NextResponse.json({
 			success: true,
