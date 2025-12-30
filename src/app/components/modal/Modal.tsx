@@ -4,7 +4,7 @@
 import styles from './modal.module.scss';
 
 // Components imports
-import CloseButton from '../ui/buttons/CloseButton';
+import CloseButton from '../buttons/CloseButton';
 
 // Context ipmorts
 import { useAppContext } from '@/app/context/AppContext';

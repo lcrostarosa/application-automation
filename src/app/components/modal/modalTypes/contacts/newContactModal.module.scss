@@ -132,6 +132,7 @@
 				cursor: pointer;
 				transition: all 0.2s ease;
 				box-shadow: var(--shadow-sm);
+				overflow: hidden;
 
 				&::before {
 					content: '';

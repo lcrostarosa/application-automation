@@ -3,7 +3,7 @@
 // Context imports
 import { useAppContext } from '@/app/context/AppContext';
 
-const ActionButton = ({ modalType }: { modalType: string }) => {
+const ModalActionButton = ({ modalType }: { modalType: string }) => {
 	const { setModalType } = useAppContext();
 
 	const handleClick = () => {
@@ -24,4 +24,4 @@ const ActionButton = ({ modalType }: { modalType: string }) => {
 	);
 };
 
-export default ActionButton;
+export default ModalActionButton;

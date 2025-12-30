@@ -8,14 +8,14 @@ import styles from './registerModal.module.scss';
 // Icon imports
 
 // Components imports
-import BackButton from '../../../buttons/BackButton';
+import ModalBackButton from '@/app/components/buttons/ModalBackButton';
 
 // Context imports
 
 const RegisterModal = () => {
 	return (
 		<div className={styles.registerModal}>
-			<BackButton modalRedirect='auth' title='Back' />
+			<ModalBackButton modalRedirect='auth' title='Back' />
 		</div>
 	);
 };

@@ -12,7 +12,7 @@ import styles from './searchContactsModal.module.scss';
 import { Refresh } from '@mui/icons-material';
 
 // Components imports
-import SearchBar from '@/app/components/ui/searchBar/SearchBar';
+import SearchBar from '@/app/components/contacts/searchBar/SearchBar';
 import ContactsTable from '@/app/components/contacts/ContactsTable';
 
 // Context imports
@@ -22,7 +22,12 @@ import { useAppContext } from '@/app/context/AppContext';
 
 const SearchContactsModal = () => {
 	const { setModalType } = useAppContext();
-	const { data: contactsData, error, loading, refetch } = useContactsGetAll();
+	const {
+		data: contactsData,
+		error,
+		isPending: loading,
+		refetch,
+	} = useContactsGetAll();
 
 	const contacts = contactsData?.contacts || [];
 
@@ -37,12 +42,12 @@ const SearchContactsModal = () => {
 				<button
 					className={styles.refreshButton}
 					type='button'
-					onClick={refetch}
+					onClick={() => refetch()}
 				>
 					<Refresh className={styles.icon} />
 				</button>
 			</div>
-			{error && <p style={{ color: 'red' }}>Error: {error}</p>}
+			{error && <p style={{ color: 'red' }}>Error: {error.message}</p>}
 			<ContactsTable
 				contacts={contacts}
 				onRowClick={onRowClick}

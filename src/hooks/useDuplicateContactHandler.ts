@@ -1,6 +1,5 @@
 // src/hooks/useDuplicateContactHandler.ts
 import { useState } from 'react';
-import { set } from 'react-hook-form';
 
 // Types imports
 import { ContactFormData } from '@/types/contactTypes';
