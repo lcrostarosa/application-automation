@@ -24,11 +24,6 @@ export const useContactCreate = () => {
 	return useMutation<ContactResponse, Error, ContactData>({
 		mutationFn: contactAPI.create,
 
-		onError: (error: Error) => {
-			console.error('Failed to create contact:', error);
-			alert(`Failed to create contact: ${error.message}`);
-		},
-
 		onSuccess: (response: ContactResponse, _contactData: ContactData) => {
 			// If API reports duplicate, set duplicate mode and do not add anything
 			if (response.success === false && response.duplicate) {
@@ -57,6 +52,11 @@ export const useContactCreate = () => {
 			);
 		},
 
+		onError: (error: Error) => {
+			console.error('Failed to create contact:', error);
+			alert(`Failed to create contact: ${error.message}`);
+		},
+
 		onSettled: () => {
 			// Ensure eventual consistency
 			queryClient.invalidateQueries({ queryKey: ['contacts-get-all'] });
@@ -70,13 +70,6 @@ export const useContactUpdate = () => {
 
 	return useMutation<ContactResponse, Error, ContactUpdateData>({
 		mutationFn: contactAPI.update,
-
-		// No optimistic update: only update cache after server confirms
-
-		onError: (error: Error) => {
-			console.error('Failed to update contact:', error);
-			alert(`Failed to update contact: ${error.message}`);
-		},
 
 		onSuccess: (response: ContactResponse, updateData: ContactUpdateData) => {
 			setDuplicateContact(false);
@@ -97,9 +90,15 @@ export const useContactUpdate = () => {
 				// If server only returns contact id or similar, simply invalidate to refetch authoritative data
 				queryClient.invalidateQueries({ queryKey: ['contacts-get-all'] });
 			}
+
 			alert(
 				`Contact updated successfully! ${response.contact.firstName} ${response.contact.lastName}`
 			);
+		},
+
+		onError: (error: Error) => {
+			console.error('Failed to update contact:', error);
+			alert(`Failed to update contact: ${error.message}`);
 		},
 
 		onSettled: () => {

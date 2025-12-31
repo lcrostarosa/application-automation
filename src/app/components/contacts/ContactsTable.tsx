@@ -25,7 +25,7 @@ const ContactsTable = ({
 	columns,
 }: {
 	contacts: ContactFromDB[];
-	onRowClick?: () => void;
+	onRowClick?: (contactId: number) => void;
 	columns: {
 		associatedRole: boolean;
 		importance: boolean;
@@ -58,7 +58,7 @@ const ContactsTable = ({
 
 	const handleClick = (contact: ContactFromDB) => {
 		setSelectedContact(contact);
-		if (onRowClick) onRowClick();
+		if (onRowClick) onRowClick(contact.id);
 	};
 
 	const sortedContacts = [...contacts].sort((a, b) => {

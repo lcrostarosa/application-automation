@@ -21,3 +21,22 @@ export async function getAllContacts() {
 
 	return contacts;
 }
+
+export async function getContactById(contactId: number) {
+	const session = await auth0.getSession();
+
+	if (!session?.user) {
+		console.error('No user session found, redirecting to home page.');
+		redirect('/');
+	}
+
+	const user = await prisma.user.findUnique({
+		where: { auth0Id: session.user.sub },
+	});
+
+	const contact = await prisma.contact.findFirst({
+		where: { ownerId: user?.id, id: contactId },
+	});
+
+	return contact;
+}

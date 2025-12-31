@@ -31,7 +31,7 @@ const SearchContactsModal = () => {
 
 	const contacts = contactsData?.contacts || [];
 
-	const onRowClick = () => {
+	const onRowClick = (_contactId: number) => {
 		setModalType(null);
 	};
 

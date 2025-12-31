@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useContactsGetAll } from '@/hooks/useContact';
 import ContactsTable from '@/app/components/contacts/ContactsTable';
 import type { ContactFromDB, ContactsResponse } from '@/types/contactTypes';
+import { redirect } from 'next/navigation';
 
 export default function ContactsClient({
 	initialContacts,
@@ -25,9 +26,14 @@ export default function ContactsClient({
 	const { data } = useContactsGetAll();
 	const contacts = data?.contacts || [];
 
+	const handleRowClick = (contactId: number) => {
+		redirect(`/dashboard/contacts/${contactId}`);
+	};
+
 	return (
 		<ContactsTable
 			contacts={contacts}
+			onRowClick={(contactId) => handleRowClick(contactId)}
 			columns={{
 				associatedRole: true,
 				importance: true,
