@@ -3,6 +3,7 @@
 	:global(.tox-tinymce) {
 		border: none;
 		border-radius: 8px;
+		overflow: visible;
 	}
 
 	// Style the toolbar
@@ -31,35 +32,13 @@
 		outline: none;
 
 		&::before {
-			border-color: hsl(188, 40%, 50%) !important;
-			box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.2) !important;
+			border: 2px solid var(--color-primary) !important;
 		}
 	}
 
 	// Style the editor iframe body
 	:global(.tox-edit-area__iframe) {
 		background: white;
-	}
-}
-
-// Style the log button
-.logButton {
-	margin-top: 16px;
-	padding: 8px 16px;
-	background: #007bff;
-	color: white;
-	border: none;
-	border-radius: 4px;
-	cursor: pointer;
-	font-size: 14px;
-
-	&:hover {
-		background: #0056b3;
-	}
-
-	&:focus {
-		outline: 2px solid #80bdff;
-		outline-offset: 2px;
 	}
 }
 

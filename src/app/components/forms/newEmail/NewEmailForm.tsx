@@ -34,6 +34,7 @@ const NewEmailForm = () => {
 
 	const {
 		register,
+		watch,
 		handleSubmit,
 		formState: { errors },
 		reset,
@@ -47,6 +48,9 @@ const NewEmailForm = () => {
 			sendWithoutReviewAfter: '',
 		},
 	});
+
+	const reviewBeforeSendingChecked = watch('reviewBeforeSending');
+	const followingUp = watch('followUpCadence') !== 'none';
 
 	useEffect(() => {
 		if (selectedContact?.email) {
@@ -125,6 +129,7 @@ const NewEmailForm = () => {
 							<TinyEditor setEditorContent={setEditorContent} />
 						</div>
 					</section>
+
 					<section className={styles['form-settings']}>
 						<h2>Automation Settings:</h2>
 						{/* Follow-up Cadence */}
@@ -139,49 +144,57 @@ const NewEmailForm = () => {
 									})}
 								>
 									<option value=''>Select cadence...</option>
-									<option value='2day'>Every 2 days</option>
 									<option value='3day'>Every 3 days</option>
-									<option value='32day'>Wait 3 then Wait 2 Repeat</option>
+									<option value='31day'>3... 1... 3... 1... Repeat</option>
 									<option value='weekly'>Weekly on {today}</option>
 									<option value='biweekly'>Bi-weekly on {today}</option>
+									<option value='none'>No Follow-up</option>
 								</select>
 							</div>
 							{errors.followUpCadence && (
 								<span>{errors.followUpCadence.message}</span>
 							)}
 						</div>
-						{/* Review Before Sending */}
-						<div className={styles['input-group']}>
-							<div className={styles.input}>
-								<label htmlFor='reviewBeforeSending'>
-									Review Before Sending:
-								</label>
-								<input
-									className={styles.checkbox}
-									type='checkbox'
-									id='reviewBeforeSending'
-									{...register('reviewBeforeSending')}
-								/>
-							</div>
-						</div>
-						{/* Send without Review after */}
-						<div className={styles['input-group']}>
-							<div className={styles.input}>
-								<label htmlFor='sendWithoutReviewAfter'>
-									Send without Review after:
-								</label>
-								<select
-									className={styles.select}
-									id='sendWithoutReviewAfter'
-									{...register('sendWithoutReviewAfter')}
-								>
-									<option value=''>Select time...</option>
-									<option value='1day'>1 Day</option>
-									<option value='2days'>2 Days</option>
-									<option value='never'>Never</option>
-								</select>
-							</div>
-						</div>
+
+						{followingUp && (
+							<>
+								{/* Review Before Sending */}
+								<div className={styles['input-group']}>
+									<div className={styles.input}>
+										<label htmlFor='reviewBeforeSending'>
+											Review Before Sending:
+										</label>
+										<input
+											className={styles.checkbox}
+											type='checkbox'
+											id='reviewBeforeSending'
+											{...register('reviewBeforeSending')}
+										/>
+									</div>
+								</div>
+
+								{/* Send without Review after */}
+								{reviewBeforeSendingChecked && (
+									<div className={styles['input-group']}>
+										<div className={styles.input}>
+											<label htmlFor='sendWithoutReviewAfter'>
+												Send without Review after:
+											</label>
+											<select
+												className={styles.select}
+												id='sendWithoutReviewAfter'
+												{...register('sendWithoutReviewAfter')}
+											>
+												<option value=''>Select time...</option>
+												<option value='1day'>1 Day</option>
+												<option value='2days'>2 Days</option>
+												<option value='never'>Never</option>
+											</select>
+										</div>
+									</div>
+								)}
+							</>
+						)}
 
 						{/* Send Buttons */}
 						<button
