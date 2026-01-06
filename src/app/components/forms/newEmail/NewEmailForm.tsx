@@ -15,6 +15,7 @@ import TinyEditor from '../../editor/TinyEditor';
 
 // Context imports
 import { useAppContext } from '@/app/context/AppContext';
+import { useEmailContext } from '@/app/context/EmailContext';
 
 interface EmailFormData {
 	to: string;
@@ -33,28 +34,24 @@ const NewEmailForm = ({
 }) => {
 	const { setModalType, selectedContact, setSelectedContact, setErrors } =
 		useAppContext();
+	const { setPendingEmail, clearEmailContext } = useEmailContext();
+
 	const { mutateAsync: sendEmail, isPending: sending } = useEmailSend();
 
 	const [editorContent, setEditorContent] = useState<string>('');
 
 	const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
 
-	const {
-		register,
-		watch,
-		handleSubmit,
-		formState: { errors },
-		reset,
-		setValue,
-	} = useForm<EmailFormData>({
-		defaultValues: {
-			to: contactEmail || '',
-			subject: '',
-			followUpCadence: '',
-			reviewBeforeSending: false,
-			sendWithoutReviewAfter: '',
-		},
-	});
+	const { register, watch, handleSubmit, reset, setValue } =
+		useForm<EmailFormData>({
+			defaultValues: {
+				to: contactEmail || '',
+				subject: '',
+				followUpCadence: '',
+				reviewBeforeSending: false,
+				sendWithoutReviewAfter: '',
+			},
+		});
 
 	const extractFormErrors = (errors: FieldErrors<EmailFormData>): string[] => {
 		return Object.values(errors)
@@ -88,6 +85,9 @@ const NewEmailForm = ({
 			await sendEmail({
 				to: contactEmail ? contactEmail : data.to,
 				subject: data.subject || 'Email from Application',
+				cadenceType: data.followUpCadence,
+				reviewBeforeSending: data.reviewBeforeSending,
+				sendWithoutReviewAfter: data.sendWithoutReviewAfter,
 				body:
 					editorContent ||
 					'This is an email from the application automation system.',
@@ -221,8 +221,8 @@ const NewEmailForm = ({
 												})}
 											>
 												<option value=''>Select time...</option>
-												<option value='1day'>1 Day</option>
-												<option value='2days'>2 Days</option>
+												<option value='1'>1 Day</option>
+												<option value='2'>2 Days</option>
 												<option value='never'>Never</option>
 											</select>
 										</div>

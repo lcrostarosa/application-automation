@@ -8,6 +8,7 @@ import CloseButton from '../buttons/CloseButton';
 
 // Context ipmorts
 import { useAppContext } from '@/app/context/AppContext';
+import { useEmailContext } from '@/app/context/EmailContext';
 
 // Modals
 import AuthModal from './modalTypes/auth/AuthModal';
@@ -18,6 +19,7 @@ import SearchContactsModal from './modalTypes/contacts/SearchContactsModal';
 import EditContactModal from './modalTypes/contacts/EditContactModal';
 import DeleteContactModal from './modalTypes/contacts/DeleteContactModal';
 import ErrorModal from './modalTypes/error/ErrorModal';
+import OverrideModal from './modalTypes/error/OverrideModal';
 
 const Modal = ({ backupModalType }: { backupModalType?: string }) => {
 	const {
@@ -31,8 +33,16 @@ const Modal = ({ backupModalType }: { backupModalType?: string }) => {
 		errors,
 		clearErrors,
 	} = useAppContext();
+	const {
+		showOverrideModal,
+		setShowOverrideModal,
+		pendingEmail,
+		setPendingEmail,
+		clearEmailContext,
+	} = useEmailContext();
 
-	const currentModalType = modalType || backupModalType || null;
+	const currentModalType =
+		modalType || (showOverrideModal && 'override') || backupModalType || null;
 
 	if (!currentModalType) {
 		return null;
@@ -45,6 +55,7 @@ const Modal = ({ backupModalType }: { backupModalType?: string }) => {
 		modalType === 'editContact' && setDuplicateContact(false);
 		modalType === 'deleteContact' && setSelectedContact(null);
 		modalType === 'error' && clearErrors();
+		showOverrideModal && clearEmailContext();
 	};
 
 	interface ModalContent {
@@ -93,6 +104,16 @@ const Modal = ({ backupModalType }: { backupModalType?: string }) => {
 		error: {
 			component: <ErrorModal errors={errors} clearErrors={clearErrors} />,
 			title: 'Error(s):',
+			width: '31.5rem',
+		},
+		override: {
+			component: (
+				<OverrideModal
+					emailData={pendingEmail!}
+					clearErrors={clearEmailContext}
+				/>
+			),
+			title: 'Conflict: Existing Sequence',
 			width: '31.5rem',
 		},
 	} as const;

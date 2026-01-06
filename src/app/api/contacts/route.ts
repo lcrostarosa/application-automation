@@ -1,21 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth0 } from '@/lib/auth0';
+import { getApiUser } from '@/services/getUserService';
 import { prisma } from '@/lib/prisma';
 
 export async function GET(req: NextRequest) {
 	try {
 		// 1. Check authentication
-		const session = await auth0.getSession();
-		if (!session?.user) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-		}
-
-		// 2. Get user from database
-		const user = await prisma.user.findUnique({
-			where: { auth0Id: session.user.sub },
-		});
-		if (!user) {
-			return NextResponse.json({ error: 'User not found' }, { status: 404 });
+		const { user, error } = await getApiUser();
+		if (error) {
+			return NextResponse.json(
+				{ error: error.error },
+				{ status: error.status }
+			);
 		}
 
 		// 3. Fetch contacts for the user
@@ -37,18 +32,12 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
 	try {
 		// 1. Check authentication
-		const session = await auth0.getSession();
-		if (!session?.user) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-		}
-
-		// 2. Get user from database
-		const user = await prisma.user.findUnique({
-			where: { auth0Id: session.user.sub },
-		});
-
-		if (!user) {
-			return NextResponse.json({ error: 'User not found' }, { status: 404 });
+		const { user, error } = await getApiUser();
+		if (error) {
+			return NextResponse.json(
+				{ error: error.error },
+				{ status: error.status }
+			);
 		}
 
 		// 3. Parse request body

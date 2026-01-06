@@ -11,6 +11,9 @@ import TopBar from '../components/dashboard/TopBar';
 import SideBar from '../components/dashboard/SideBar';
 import Modal from '../components/modal/Modal';
 
+// Context
+import { EmailContextProvider } from '../context/EmailContext';
+
 export default async function DashboardLayout({
 	children,
 }: {
@@ -28,20 +31,17 @@ export default async function DashboardLayout({
 	await findOrCreateUser(user);
 
 	return (
-		<>
+		<EmailContextProvider>
 			<div
 				className={styles.dashboardLayout}
 				role='application'
 				aria-labelledby='app-title'
 			>
-				{/* Top Bar */}
 				<TopBar userName={user?.given_name || 'User'} />
 
 				<div className={styles.mainContent} role='main'>
-					{/* Side Bar */}
 					<SideBar />
 
-					{/* Main Content Area */}
 					<main
 						className={styles.dashboardContent}
 						role='main'
@@ -54,6 +54,6 @@ export default async function DashboardLayout({
 				</div>
 			</div>
 			<Modal />
-		</>
+		</EmailContextProvider>
 	);
 }

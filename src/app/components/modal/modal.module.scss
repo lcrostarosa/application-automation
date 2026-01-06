@@ -23,6 +23,7 @@
 		border: 0.0625rem solid var(--border-light);
 		position: relative;
 		transition: all 0.3s ease;
+		line-height: 1.25;
 
 		/* Inset shadow for depth */
 		&::after {

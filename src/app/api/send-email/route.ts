@@ -1,48 +1,124 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendGmail } from '@/lib/gmail';
 import { storeSentEmail } from '@/services/emailService';
-import { auth0 } from '@/lib/auth0';
+import { getApiUser } from '@/services/getUserService';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {
 	try {
-		const session = await auth0.getSession();
-
-		if (!session?.user) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+		const { user, error } = await getApiUser();
+		if (error) {
+			return NextResponse.json(
+				{ error: error.error },
+				{ status: error.status }
+			);
 		}
 
-		const { to, subject, body } = await req.json();
+		const {
+			to,
+			subject,
+			reviewBeforeSending,
+			cadenceType,
+			sendWithoutReviewAfter,
+			body,
+			override,
+		} = await req.json();
 
-		if (!to || !subject || !body) {
+		if (
+			!to ||
+			!subject ||
+			!body ||
+			(reviewBeforeSending === true && !sendWithoutReviewAfter) ||
+			!cadenceType
+		) {
 			return NextResponse.json(
 				{ error: 'Missing parameters' },
 				{ status: 400 }
 			);
 		}
 
-		const result = await sendGmail({ to, subject, html: body });
-
-		const user = await prisma.user.findUnique({
-			where: { auth0Id: session.user.sub },
-		});
-
-		if (user && result.messageId && result.threadId) {
-			await storeSentEmail({
-				email: to,
-				ownerId: user.id,
-				subject,
-				contents: body,
-				messageId: result.messageId,
-				threadId: result.threadId,
+		// Helper: deactivate sequence
+		const deactivateSequence = async () => {
+			const existingSequence = await prisma.sequence.findFirst({
+				where: { contact: { email: to }, ownerId: user.id, active: true },
 			});
+
+			if (existingSequence) {
+				await prisma.sequence.update({
+					where: { id: existingSequence.id },
+					data: { active: false },
+				});
+			}
+		};
+
+		// Helper: send email and update contact
+		const sendAndStoreEmail = async () => {
+			const result = await sendGmail({ to, subject, html: body });
+
+			if (user && result.messageId && result.threadId) {
+				const { updatedContact } = await storeSentEmail({
+					email: to,
+					ownerId: user.id,
+					subject,
+					contents: body,
+					cadenceType,
+					reviewBeforeSending,
+					sendWithoutReviewAfter,
+					messageId: result.messageId,
+					threadId: result.threadId,
+				});
+
+				return NextResponse.json({
+					success: true,
+					messageId: result.messageId,
+					threadId: result.threadId,
+					contact: updatedContact,
+				});
+			}
+
+			return NextResponse.json(
+				{ error: 'Failed to send email or create message.' },
+				{ status: 500 }
+			);
+		};
+
+		// Handle override: true logic
+		if (override) {
+			await deactivateSequence();
+			return await sendAndStoreEmail();
 		}
 
-		return NextResponse.json({
-			success: true,
-			messageId: result.messageId,
-			threadId: result.threadId,
+		// Check if user part of existing sequence
+		const existingSequence = await prisma.sequence.findFirst({
+			where: {
+				contact: {
+					email: to,
+				},
+				ownerId: user.id,
+				active: true,
+			},
 		});
+
+		if (existingSequence) {
+			return NextResponse.json(
+				{
+					sequenceExists: true,
+					activeSequenceId: existingSequence.id,
+					emailData: {
+						to,
+						subject,
+						reviewBeforeSending,
+						cadenceType,
+						sendWithoutReviewAfter,
+						body,
+					},
+					message: 'Contact already part of an active sequence.',
+				},
+				{ status: 409 }
+			);
+		}
+
+		return await sendAndStoreEmail();
 	} catch (error: any) {
 		console.error('Email send error:', error);
 		return NextResponse.json({ error: error.message }, { status: 500 });

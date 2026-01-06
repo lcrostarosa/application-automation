@@ -1,21 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { auth0 } from '@/lib/auth0';
+import { getApiUser } from '@/services/getUserService';
 
 export async function GET(req: NextRequest) {
 	try {
-		const session = await auth0.getSession();
-
-		if (!session?.user) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-		}
-
-		const user = await prisma.user.findUnique({
-			where: { auth0Id: session.user.sub },
-		});
-
-		if (!user) {
-			return NextResponse.json({ error: 'User not found' }, { status: 404 });
+		const { user, error } = await getApiUser();
+		if (error) {
+			return NextResponse.json(
+				{ error: error.error },
+				{ status: error.status }
+			);
 		}
 
 		const replies = await prisma.emailReply.findMany({

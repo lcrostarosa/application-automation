@@ -126,7 +126,8 @@ a {
 
 	&.login,
 	&.send-email,
-	&.delete {
+	&.delete,
+	&.override {
 		background: var(--gradient-primary) border-box;
 		color: white;
 		box-shadow: var(--shadow-sm);

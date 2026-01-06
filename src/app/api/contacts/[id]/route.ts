@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { auth0 } from '@/lib/auth0';
+import { getApiUser } from '@/services/getUserService';
 
 export async function GET(
 	request: NextRequest,
@@ -31,18 +31,12 @@ export async function PUT(
 ) {
 	try {
 		// 1. Check authentication
-		const session = await auth0.getSession();
-		if (!session?.user) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-		}
-
-		// 2. Get user from database
-		const user = await prisma.user.findUnique({
-			where: { auth0Id: session.user.sub },
-		});
-
-		if (!user) {
-			return NextResponse.json({ error: 'User not found' }, { status: 404 });
+		const { user, error } = await getApiUser();
+		if (error) {
+			return NextResponse.json(
+				{ error: error.error },
+				{ status: error.status }
+			);
 		}
 
 		const { id } = await params;
@@ -110,19 +104,12 @@ export async function DELETE(
 ) {
 	try {
 		// 1. Check authentication
-		const session = await auth0.getSession();
-
-		if (!session?.user) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-		}
-
-		// 2. Get user from database
-		const user = await prisma.user.findUnique({
-			where: { auth0Id: session.user.sub },
-		});
-
-		if (!user) {
-			return NextResponse.json({ error: 'User not found' }, { status: 404 });
+		const { user, error } = await getApiUser();
+		if (error) {
+			return NextResponse.json(
+				{ error: error.error },
+				{ status: error.status }
+			);
 		}
 
 		const { id } = await params;
@@ -130,7 +117,7 @@ export async function DELETE(
 		const contactId = parseInt(id);
 
 		await prisma.contact.delete({
-			where: { id: contactId },
+			where: { id: contactId, ownerId: user.id },
 		});
 
 		return NextResponse.json({ success: true });

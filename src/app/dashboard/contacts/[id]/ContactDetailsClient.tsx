@@ -158,7 +158,7 @@ export default function ContactDetailsClient({
 							</div>
 						)}
 						<div className={styles['info-row']}>
-							<span className={styles.label}>Active Cadence:</span>
+							<span className={styles.label}>Active Sequence:</span>
 							<span className={styles.value} style={{ fontWeight: '600' }}>
 								{contact?.active ? 'Yes' : 'No'}
 							</span>

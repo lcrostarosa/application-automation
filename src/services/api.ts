@@ -1,5 +1,6 @@
 // Types imports
 import { ContactData, ContactUpdateData } from '@/types/contactTypes';
+import { SentEmailData } from '@/types/emailTypes';
 
 // Generic fetch wrapper
 const apiCall = async (url: string, options: RequestInit = {}) => {
@@ -13,6 +14,8 @@ const apiCall = async (url: string, options: RequestInit = {}) => {
 	if (!response.ok) {
 		const error = new Error(data.error || `HTTP ${response.status}`);
 		(error as any).duplicate = data.duplicate || false;
+		(error as any).status = response.status;
+		(error as any).responseData = data;
 		throw error;
 	}
 
@@ -21,7 +24,7 @@ const apiCall = async (url: string, options: RequestInit = {}) => {
 
 // Email API functions
 export const emailAPI = {
-	send: (emailData: { to: string; subject: string; body: string }) =>
+	send: (emailData: SentEmailData) =>
 		apiCall('/api/send-email', {
 			method: 'POST',
 			body: JSON.stringify(emailData),
