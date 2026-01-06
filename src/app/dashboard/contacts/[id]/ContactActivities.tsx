@@ -17,8 +17,15 @@ import NewEmailForm from '@/app/components/forms/newEmail/NewEmailForm';
 
 // Types imports
 import { ContactFromDB } from '@/types/contactTypes';
+import { SequencesResponse } from '@/types/sequenceTypes';
 
-const ContactActivities = ({ contact }: { contact: ContactFromDB }) => {
+const ContactActivities = ({
+	contact,
+	sequences,
+}: {
+	contact: ContactFromDB;
+	sequences: SequencesResponse;
+}) => {
 	type SelectedType = 'active' | 'previous' | 'email';
 	const [selected, setSelected] = useState<SelectedType>('active');
 

@@ -62,3 +62,20 @@ export const contactAPI = {
 			method: 'DELETE',
 		}),
 };
+
+// Sequence API functions
+export const sequenceAPI = {
+	readAll: () => apiCall('/api/sequences', { method: 'GET' }),
+	readAllByContactId: (contactId: number) =>
+		apiCall(`/api/sequences/contact/${contactId}`, {
+			method: 'GET',
+		}),
+	readUnique: (sequenceId: number) =>
+		apiCall(`/api/sequences/${sequenceId}`, {
+			method: 'GET',
+		}),
+	deactivate: (sequenceId: number) =>
+		apiCall(`/api/sequences/${sequenceId}`, {
+			method: 'PUT',
+		}),
+};

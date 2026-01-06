@@ -20,6 +20,7 @@ import {
 
 // Types imports
 import type { ContactFromDB } from '@/types/contactTypes';
+import type { SequencesResponse } from '@/types/sequenceTypes';
 
 // Components
 import EditContactButton from '@/app/components/buttons/EditContactButton';
@@ -28,8 +29,10 @@ import ContactActivities from './ContactActivities';
 
 export default function ContactDetailsClient({
 	initialContact,
+	initialSequences,
 }: {
 	initialContact: ContactFromDB;
+	initialSequences: SequencesResponse;
 }) {
 	const queryClient = useQueryClient();
 
@@ -41,7 +44,14 @@ export default function ContactDetailsClient({
 				initialContact
 			);
 		}
-	}, [initialContact, queryClient]);
+
+		if (initialSequences) {
+			queryClient.setQueryData<SequencesResponse>(
+				['sequences-by-contact-id', initialContact.id],
+				initialSequences
+			);
+		}
+	}, [initialContact, initialSequences, queryClient]);
 
 	const { data } = useContactGetUnique(initialContact.id);
 	const contact = data || initialContact;
@@ -174,7 +184,7 @@ export default function ContactDetailsClient({
 					</div>
 				</div>
 			</section>
-			<ContactActivities contact={contact} />
+			<ContactActivities contact={contact} sequences={initialSequences} />
 		</>
 	);
 }
