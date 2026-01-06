@@ -46,7 +46,12 @@ const OverrideModal = ({
 				</h2>
 			</div>
 			<div className={styles.buttons}>
-				<button type='button' className='button override' onClick={clearErrors}>
+				<button
+					type='button'
+					className='button override'
+					onClick={handleOverride}
+					disabled={sending}
+				>
 					Override
 				</button>
 				<button type='button' className='button cancel' onClick={clearErrors}>

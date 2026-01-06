@@ -34,7 +34,7 @@ const NewEmailForm = ({
 }) => {
 	const { setModalType, selectedContact, setSelectedContact, setErrors } =
 		useAppContext();
-	const { setPendingEmail, clearEmailContext } = useEmailContext();
+	const { resetForm, setResetForm } = useEmailContext();
 
 	const { mutateAsync: sendEmail, isPending: sending } = useEmailSend();
 
@@ -47,7 +47,7 @@ const NewEmailForm = ({
 			defaultValues: {
 				to: contactEmail || '',
 				subject: '',
-				followUpCadence: '',
+				followUpCadence: '3day',
 				reviewBeforeSending: false,
 				sendWithoutReviewAfter: '',
 			},
@@ -73,14 +73,12 @@ const NewEmailForm = ({
 		}
 	}, [selectedContact, contactEmail, setValue]);
 
-	const onSubmit: SubmitHandler<EmailFormData> = async (data) => {
-		if (active) {
-			console.log(
-				'Contact has an active cadence. Consider pausing it before sending a new email.'
-			);
-			return;
-		}
+	useEffect(() => {
+		resetForm && reset();
+		setResetForm(false);
+	}, [resetForm, setResetForm]);
 
+	const onSubmit: SubmitHandler<EmailFormData> = async (data) => {
 		try {
 			await sendEmail({
 				to: contactEmail ? contactEmail : data.to,
@@ -176,7 +174,6 @@ const NewEmailForm = ({
 										required: 'Please select a follow-up cadence',
 									})}
 								>
-									<option value=''>Select cadence...</option>
 									<option value='3day'>Every 3 days</option>
 									<option value='31day'>3... 1... 3... 1... Repeat</option>
 									<option value='weekly'>Weekly on {today}</option>

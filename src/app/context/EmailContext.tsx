@@ -21,6 +21,8 @@ interface EmailContextType {
 	lastError: any;
 	setLastError: (err: any) => void;
 	clearEmailContext: () => void;
+	resetForm: boolean;
+	setResetForm: (callback: boolean) => void;
 }
 
 const EmailContext = createContext<EmailContextType | undefined>(undefined);
@@ -31,11 +33,13 @@ export const EmailContextProvider = ({ children }: { children: ReactNode }) => {
 	);
 	const [showOverrideModal, setShowOverrideModal] = useState(false);
 	const [lastError, setLastError] = useState<any>(null);
+	const [resetForm, setResetForm] = useState<boolean>(false);
 
 	const clearEmailContext = () => {
 		setPendingEmail(null);
 		setShowOverrideModal(false);
 		setLastError(null);
+		setResetForm(true);
 	};
 
 	return (
@@ -48,6 +52,8 @@ export const EmailContextProvider = ({ children }: { children: ReactNode }) => {
 				lastError,
 				setLastError,
 				clearEmailContext,
+				resetForm,
+				setResetForm,
 			}}
 		>
 			{children}
