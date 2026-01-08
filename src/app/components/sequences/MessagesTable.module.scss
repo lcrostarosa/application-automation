@@ -40,6 +40,10 @@
 					border-right: 1.5px solid var(--border-light);
 				}
 			}
+
+			&.nested-row {
+				background: var(--gradient-greyscale) !important;
+			}
 		}
 	}
 
@@ -76,6 +80,14 @@
 
 				&.right {
 					text-align: right;
+				}
+			}
+
+			&.nested-row {
+				@media (hover: hover) {
+					&:hover {
+						background: var(--gradient-greyscale-lighter) !important;
+					}
 				}
 			}
 		}

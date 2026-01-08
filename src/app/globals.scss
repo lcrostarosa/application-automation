@@ -28,6 +28,18 @@
 		hsla(187, 92%, 69%, 0.25) 50%,
 		hsla(156, 72%, 67%, 0.25) 100%
 	);
+	--gradient-greyscale: linear-gradient(
+		135deg,
+		hsl(0, 0%, 80%) 0%,
+		hsl(0, 0%, 83%) 50%,
+		hsl(0, 0%, 85%) 100%
+	);
+	--gradient-greyscale-lighter: linear-gradient(
+		135deg,
+		hsl(0, 0%, 87%) 0%,
+		hsl(0, 0%, 89%) 50%,
+		hsl(0, 0%, 91%) 100%
+	);
 	--gradient-danger: linear-gradient(135deg, #f59f0a, #f8bc54);
 	--gradient-secondary: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%);
 	--gradient-subtle: linear-gradient(135deg, #f0fdff 0%, #f0fdf4 100%);

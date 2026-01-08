@@ -78,6 +78,14 @@
 					text-align: right;
 				}
 			}
+
+			&.expanded-row {
+				background: var(--gradient-primary-lighter);
+			}
+
+			&.selected {
+				background: var(--gradient-primary-lighter);
+			}
 		}
 	}
 }

@@ -14,8 +14,14 @@ import { SwapVert } from '@mui/icons-material';
 // Types imports
 import { MessageFromDB } from '@/types/messageTypes';
 
-const MessagesTable = ({ messages }: { messages: MessageFromDB[] }) => {
-	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+const MessagesTable = ({
+	messages,
+	nested,
+}: {
+	messages: MessageFromDB[];
+	nested?: boolean;
+}) => {
+	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
 	const handleSort = () => {
 		setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -32,7 +38,7 @@ const MessagesTable = ({ messages }: { messages: MessageFromDB[] }) => {
 	return (
 		<table className={styles['messages-table']}>
 			<thead>
-				<tr>
+				<tr className={nested ? styles['nested-row'] : ''}>
 					<th className={styles.md}>
 						<span className={styles.sort}>Email</span>
 					</th>
@@ -54,7 +60,7 @@ const MessagesTable = ({ messages }: { messages: MessageFromDB[] }) => {
 					const status = messageDateDay > today;
 
 					return (
-						<tr key={message.id}>
+						<tr key={message.id} className={nested ? styles['nested-row'] : ''}>
 							<td className={styles.md}>{message.subject}</td>
 							<td className={styles.lrg}>{message.contents}</td>
 							<td className={styles.sm}>{status ? 'Upcoming' : 'Sent'}</td>
