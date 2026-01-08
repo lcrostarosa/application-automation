@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 			if (existingSequence) {
 				await prisma.sequence.update({
 					where: { id: existingSequence.id },
-					data: { active: false },
+					data: { active: false, endDate: new Date() },
 				});
 			}
 		};
