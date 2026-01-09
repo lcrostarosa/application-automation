@@ -45,8 +45,6 @@ const ContactActivities = ({
 	const previousSequences: SequenceFromDB[] = sequenceList.filter(
 		(seq) => !seq.active
 	);
-	console.log('activeSequence', activeSequence);
-	console.log('previousSequences', previousSequences);
 
 	const activityContent: ActivityContent = {
 		active: {

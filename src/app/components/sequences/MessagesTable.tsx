@@ -70,8 +70,6 @@ const MessagesTable = ({
 					const status = messageDateDay > today;
 					const parsedContent = parseEmailContent(message.contents);
 
-					console.log(parsedContent);
-
 					return (
 						<tr
 							key={message.id}
