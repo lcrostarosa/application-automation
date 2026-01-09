@@ -10,23 +10,21 @@ import styles from './errorModal.module.scss';
 // Components imports
 
 // Context imports
+import { useEmailContext } from '@/app/context/EmailContext';
+import { useAppContext } from '@/app/context/AppContext';
 
 // Type imports
 import { SentEmailData } from '@/types/emailTypes';
 
-const OverrideModal = ({
-	emailData,
-	clearErrors,
-}: {
-	emailData: SentEmailData;
-	clearErrors: () => void;
-}) => {
+const OverrideModal = () => {
 	const { mutateAsync: sendEmail, isPending: sending } = useEmailSend();
+	const { clearEmailContext, pendingEmail } = useEmailContext();
+	const { setModalType } = useAppContext();
 
 	const handleOverride = async () => {
 		try {
-			await sendEmail({ ...emailData, override: true });
-			clearErrors();
+			await sendEmail({ ...pendingEmail!, override: true });
+			clearEmailContext();
 		} catch (error) {
 			// Error handling is managed in the hook
 		}
@@ -54,7 +52,14 @@ const OverrideModal = ({
 				>
 					Override
 				</button>
-				<button type='button' className='button cancel' onClick={clearErrors}>
+				<button
+					type='button'
+					className='button cancel'
+					onClick={() => {
+						clearEmailContext();
+						setModalType(null);
+					}}
+				>
 					Cancel
 				</button>
 			</div>

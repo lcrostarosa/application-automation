@@ -37,17 +37,8 @@ const Modal = ({ backupModalType }: { backupModalType?: string }) => {
 		alertMessage,
 		setAlertMessage,
 	} = useAppContext();
-	const {
-		showOverrideModal,
-		setShowOverrideModal,
-		pendingEmail,
-		setPendingEmail,
-		clearEmailContext,
-		selectedSequenceId,
-	} = useEmailContext();
 
-	const currentModalType =
-		modalType || (showOverrideModal && 'override') || backupModalType || null;
+	const currentModalType = modalType || backupModalType || null;
 
 	if (!currentModalType) {
 		return null;
@@ -61,7 +52,6 @@ const Modal = ({ backupModalType }: { backupModalType?: string }) => {
 		modalType === 'deleteContact' && setSelectedContact(null);
 		modalType === 'error' && clearErrors();
 		modalType === 'alert' && setAlertMessage(null);
-		showOverrideModal && clearEmailContext();
 	};
 
 	interface ModalContent {
@@ -113,12 +103,7 @@ const Modal = ({ backupModalType }: { backupModalType?: string }) => {
 			width: '31.5rem',
 		},
 		override: {
-			component: (
-				<OverrideModal
-					emailData={pendingEmail!}
-					clearErrors={clearEmailContext}
-				/>
-			),
+			component: <OverrideModal />,
 			title: 'Conflict: Existing Sequence',
 			width: '31.5rem',
 		},
@@ -129,7 +114,7 @@ const Modal = ({ backupModalType }: { backupModalType?: string }) => {
 			width: '31.5rem',
 		},
 		deactivateSequence: {
-			component: <DeactivateSequenceModal sequenceId={selectedSequenceId!} />,
+			component: <DeactivateSequenceModal />,
 			title: 'Deactivate Sequence',
 			width: '31.5rem',
 		},

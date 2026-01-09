@@ -8,8 +8,6 @@ import { PendingEmailData } from '@/types/emailTypes';
 interface EmailContextType {
 	pendingEmail: PendingEmailData | null;
 	setPendingEmail: (data: PendingEmailData | null) => void;
-	showOverrideModal: boolean;
-	setShowOverrideModal: (show: boolean) => void;
 	lastError: any;
 	setLastError: (err: any) => void;
 	clearEmailContext: () => void;
@@ -25,7 +23,6 @@ export const EmailContextProvider = ({ children }: { children: ReactNode }) => {
 	const [pendingEmail, setPendingEmail] = useState<PendingEmailData | null>(
 		null
 	);
-	const [showOverrideModal, setShowOverrideModal] = useState(false);
 	const [lastError, setLastError] = useState<any>(null);
 	const [resetForm, setResetForm] = useState<boolean>(false);
 	const [selectedSequenceId, setSelectedSequenceId] = useState<number | null>(
@@ -34,7 +31,6 @@ export const EmailContextProvider = ({ children }: { children: ReactNode }) => {
 
 	const clearEmailContext = () => {
 		setPendingEmail(null);
-		setShowOverrideModal(false);
 		setLastError(null);
 		setResetForm(true);
 	};
@@ -44,8 +40,6 @@ export const EmailContextProvider = ({ children }: { children: ReactNode }) => {
 			value={{
 				pendingEmail,
 				setPendingEmail,
-				showOverrideModal,
-				setShowOverrideModal,
 				lastError,
 				setLastError,
 				clearEmailContext,

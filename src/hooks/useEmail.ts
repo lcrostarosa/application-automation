@@ -27,7 +27,7 @@ interface EmailResponse {
 
 export const useEmailSend = () => {
 	const { setModalType, setAlertMessage } = useAppContext();
-	const { setShowOverrideModal, setPendingEmail } = useEmailContext();
+	const { setPendingEmail } = useEmailContext();
 	const queryClient = useQueryClient();
 
 	return useMutation({
@@ -69,7 +69,7 @@ export const useEmailSend = () => {
 		onError: (error: any, emailData: EmailData) => {
 			if (error.status === 409 && error.responseData?.sequenceExists) {
 				setPendingEmail({ ...error.responseData.emailData, override: true });
-				setShowOverrideModal(true);
+				setModalType('override');
 			} else {
 				console.error('Error sending email:', error);
 

@@ -13,15 +13,15 @@ import { useEmailContext } from '@/app/context/EmailContext';
 
 // Types imports
 
-const DeactivateSequenceModal = ({ sequenceId }: { sequenceId: number }) => {
+const DeactivateSequenceModal = () => {
 	const { setModalType } = useAppContext();
 	const { setSelectedSequenceId, selectedSequenceId } = useEmailContext();
 	const { mutateAsync: deactivateSequence, isPending: deactivating } =
-		useSequenceDeactivate(sequenceId);
+		useSequenceDeactivate(selectedSequenceId!);
 
 	const handleDelete = async () => {
 		try {
-			await deactivateSequence(sequenceId);
+			await deactivateSequence(selectedSequenceId!);
 			setModalType(null);
 			setSelectedSequenceId(null);
 		} catch (error) {
