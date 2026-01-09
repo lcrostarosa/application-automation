@@ -45,6 +45,8 @@
 
 	tbody {
 		tr {
+			line-height: 1.25;
+
 			&:nth-child(odd) {
 				background-color: var(--background-tertiary);
 			}
@@ -61,7 +63,7 @@
 
 			td {
 				padding: 0.5rem 1rem;
-
+				line-height: 1.25;
 				white-space: nowrap;
 				overflow-x: auto;
 				scrollbar-width: none; /* Firefox */
