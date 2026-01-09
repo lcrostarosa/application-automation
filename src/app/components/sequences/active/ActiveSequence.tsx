@@ -20,6 +20,9 @@ const ActiveSequence = ({ sequence }: { sequence: SequenceFromDB }) => {
 	const endDate = sequence.endDate
 		? new Date(sequence.endDate).toLocaleDateString()
 		: null;
+	const nextStepDue = sequence.nextStepDue
+		? new Date(sequence.nextStepDue).toLocaleDateString()
+		: 'N/A';
 
 	return (
 		<div className={styles['active-sequence-table']}>
@@ -37,6 +40,10 @@ const ActiveSequence = ({ sequence }: { sequence: SequenceFromDB }) => {
 								new Date(sequence.createdAt)
 							)}
 						</span>
+					</div>
+					<div className={styles.title}>
+						<span className={styles.label}>Next Step Due:</span>
+						<span className={styles.value}>{nextStepDue}</span>
 					</div>
 				</div>
 				<div className={styles['dates-info']}>

@@ -63,11 +63,6 @@ export async function storeSentEmail({
 		indefinite: null,
 	};
 
-	// Establish next step due date
-	nextStepDueDate = new Date(
-		Date.now() + cadenceTypeMapping[cadenceType] * 24 * 60 * 60 * 1000
-	);
-
 	// Check if user selected 'Review Before Sending' and set sendDelay accordingly
 	if (
 		sendWithoutReviewAfter === 'never' ||
@@ -96,20 +91,69 @@ export async function storeSentEmail({
 		: null;
 
 	// If sequenceId is provided, use existing sequence. Otherwise, create new one.
-	let sequence;
 
 	if (sequenceId) {
 		// Follow-up email: use existing sequence
-		sequence = await prisma.sequence.findUnique({
+		const sequence = await prisma.sequence.findUnique({
 			where: { id: sequenceId },
 		});
 
 		if (!sequence) {
 			throw new Error(`Sequence with id ${sequenceId} not found`);
 		}
+
+		// Calculate next step due date based on sequence type
+		if (sequence.sequenceType === '31day') {
+			const delay = sequence.currentStep % 2 === 0 ? 3 : 1;
+			sequence.nextStepDue = new Date(Date.now() + delay * 24 * 60 * 60 * 1000);
+		} else {
+			sequence.nextStepDue = new Date(
+				Date.now() +
+					cadenceTypeMapping[sequence.sequenceType] * 24 * 60 * 60 * 1000
+			);
+		}
+
+		const [createdMessage, updatedContact, updatedSequence] =
+			await prisma.$transaction([
+				prisma.message.create({
+					data: {
+						contactId: contact.id,
+						ownerId,
+						sequenceId: sequence.id,
+						subject,
+						contents,
+						direction: 'outbound',
+						messageId,
+						threadId,
+						date: new Date(),
+					},
+				}),
+				prisma.contact.update({
+					where: { id: contact.id },
+					data: { lastActivity: new Date(), active: true },
+				}),
+				prisma.sequence.update({
+					where: { id: sequence.id },
+					data: {
+						nextStepDue: sequence.nextStepDue,
+						currentStep: sequence.currentStep + 1,
+					},
+				}),
+			]);
+
+		return { createdMessage, updatedContact, updatedSequence };
 	} else {
+		// For 31day pattern, first step is always 3 days
+		if (cadenceType === '31day') {
+			nextStepDueDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+		} else {
+			nextStepDueDate = new Date(
+				Date.now() + cadenceTypeMapping[cadenceType] * 24 * 60 * 60 * 1000
+			);
+		}
+
 		// First email: create new sequence
-		sequence = await prisma.sequence.create({
+		const sequence = await prisma.sequence.create({
 			data: {
 				title: subject,
 				contactId: contact.id,
@@ -122,28 +166,28 @@ export async function storeSentEmail({
 				endDate,
 			},
 		});
+
+		// Transaction safety: create message in transaction
+		const [createdMessage, updatedContact] = await prisma.$transaction([
+			prisma.message.create({
+				data: {
+					contactId: contact.id,
+					ownerId,
+					sequenceId: sequence.id,
+					subject,
+					contents,
+					direction: 'outbound',
+					messageId,
+					threadId,
+					date: new Date(),
+				},
+			}),
+			prisma.contact.update({
+				where: { id: contact.id },
+				data: { lastActivity: new Date(), active: true },
+			}),
+		]);
+
+		return { createdMessage, updatedContact };
 	}
-
-	// Transaction safety: create message in transaction
-	const [createdMessage, updatedContact] = await prisma.$transaction([
-		prisma.message.create({
-			data: {
-				contactId: contact.id,
-				ownerId,
-				sequenceId: sequence.id,
-				subject,
-				contents,
-				direction: 'outbound',
-				messageId,
-				threadId,
-				date: new Date(),
-			},
-		}),
-		prisma.contact.update({
-			where: { id: contact.id },
-			data: { lastActivity: new Date(), active: true },
-		}),
-	]);
-
-	return { createdMessage, updatedContact };
 }
