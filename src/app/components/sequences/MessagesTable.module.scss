@@ -81,6 +81,22 @@
 				&.right {
 					text-align: right;
 				}
+
+				&.content-cell {
+					.parsed-content {
+						width: 100%;
+						white-space: normal;
+						display: flex;
+						flex-direction: column;
+						gap: 1rem;
+
+						.message-preview {
+							white-space: nowrap;
+							overflow: hidden;
+							text-overflow: ellipsis;
+						}
+					}
+				}
 			}
 
 			&.nested-row {

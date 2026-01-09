@@ -9,7 +9,8 @@ import styles from './messagesTable.module.scss';
 // MUI imports
 import { SwapVert } from '@mui/icons-material';
 
-// Context imports
+// Helper functions imports
+import { parseEmailContent } from '@/lib/helperFunctions';
 
 // Types imports
 import { MessageFromDB } from '@/types/messageTypes';
@@ -22,9 +23,18 @@ const MessagesTable = ({
 	nested?: boolean;
 }) => {
 	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+	const [selectedMessage, setSelectedMessage] = useState<number | null>(null);
 
 	const handleSort = () => {
 		setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+	};
+
+	const handleClick = (messageId: number) => {
+		if (selectedMessage === messageId) {
+			setSelectedMessage(null);
+		} else {
+			setSelectedMessage(messageId);
+		}
 	};
 
 	const sortedMessages = [...messages].sort((a, b) => {
@@ -58,11 +68,29 @@ const MessagesTable = ({
 				{sortedMessages.map((message) => {
 					const messageDateDay = new Date(message.date);
 					const status = messageDateDay > today;
+					const parsedContent = parseEmailContent(message.contents);
+
+					console.log(parsedContent);
 
 					return (
-						<tr key={message.id} className={nested ? styles['nested-row'] : ''}>
+						<tr
+							key={message.id}
+							className={nested ? styles['nested-row'] : ''}
+							onClick={() => handleClick(message.id)}
+						>
 							<td className={styles.md}>{message.subject}</td>
-							<td className={styles.lrg}>{message.contents}</td>
+							<td className={`${styles.lrg} ${styles['content-cell']}`}>
+								<div className={styles['parsed-content']}>
+									<span className={styles['message-preview']}>
+										{parsedContent[0]}
+									</span>
+									{selectedMessage === message.id &&
+										parsedContent.length > 1 &&
+										parsedContent
+											.slice(1)
+											.map((text, index) => <span key={index}>{text}</span>)}
+								</div>
+							</td>
 							<td className={styles.sm}>{status ? 'Upcoming' : 'Sent'}</td>
 							<td className={styles.sm}>
 								{messageDateDay.toLocaleDateString()}
