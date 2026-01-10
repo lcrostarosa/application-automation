@@ -14,6 +14,7 @@ import styles from './contactPage.module.scss';
 import NewEmailForm from '@/app/components/forms/newEmail/NewEmailForm';
 import ActiveSequence from '@/app/components/sequences/active/ActiveSequence';
 import PreviousSequencesTable from '@/app/components/sequences/PreviousSequencesTable';
+import AllActivitiesTable from '@/app/components/sequences/AllActivitiesTable';
 
 // Context imports
 
@@ -53,29 +54,31 @@ const ContactActivities = ({
 		(seq) => !seq.active
 	);
 
-	interface PreviousActivity {
-		type: 'message' | 'sequence';
-		sortDate: Date;
-		details: MessageFromDB | SequenceFromDB;
-	}
+	// interface PreviousActivity {
+	// 	type: 'message' | 'sequence';
+	// 	sortDate: Date;
+	// 	details: MessageFromDB | SequenceFromDB;
+	// }
 
-	let previousActivities: PreviousActivity[] = [];
+	// let previousActivities: PreviousActivity[] = [];
 
-	messageList.forEach((message) => {
-		previousActivities.push({
-			type: 'message',
-			sortDate: new Date(message.createdAt),
-			details: message,
-		});
-	});
+	// messageList.forEach((message) => {
+	// 	previousActivities.push({
+	// 		type: 'message',
+	// 		sortDate: new Date(message.createdAt),
+	// 		details: message,
+	// 	});
+	// });
 
-	previousSequences.forEach((sequence) => {
-		previousActivities.push({
-			type: 'sequence',
-			sortDate: new Date(sequence.endDate!),
-			details: sequence,
-		});
-	});
+	// previousSequences.forEach((sequence) => {
+	// 	previousActivities.push({
+	// 		type: 'sequence',
+	// 		sortDate: new Date(sequence.endDate!),
+	// 		details: sequence,
+	// 	});
+	// });
+
+	// NEED TO TAKE PREVIOUS ACTIVITIES AND PREVIOUS SEQUENCES AND EXTRACT ALL MESSAGES FROM EACH INTO ONE ARRAY TO PASS TO ALL ACTIVITIES TABLE
 
 	const activityContent: ActivityContent = {
 		active: {
@@ -92,7 +95,7 @@ const ContactActivities = ({
 				previousSequences.length > 0 ? (
 					<PreviousSequencesTable
 						sequences={previousSequences}
-						previousActivities={previousActivities}
+						// previousActivities={previousActivities}
 					/>
 				) : (
 					<div className={styles.activity}>
@@ -102,6 +105,9 @@ const ContactActivities = ({
 		},
 		email: {
 			component: <NewEmailForm contactEmail={contact.email} />,
+		},
+		all: {
+			component: <AllActivitiesTable sequences={[]} previousActivities={[]} />,
 		},
 	};
 

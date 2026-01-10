@@ -12,24 +12,24 @@ import { SwapVert } from '@mui/icons-material';
 
 // Types imports
 import { SequenceFromDB } from '@/types/sequenceTypes';
-import { MessageFromDB } from '@/types/messageTypes';
+// import { MessageFromDB } from '@/types/messageTypes';
 
 // Components
 import MessagesTable from './MessagesTable';
-import SequencesTable from './SequencesTable';
+// import SequencesTable from './SequencesTable';
 
-interface PreviousActivity {
-	type: 'message' | 'sequence';
-	sortDate: Date;
-	details: MessageFromDB | SequenceFromDB;
-}
+// interface PreviousActivity {
+// 	type: 'message' | 'sequence';
+// 	sortDate: Date;
+// 	details: MessageFromDB | SequenceFromDB;
+// }
 
 const PreviousSequencesTable = ({
 	sequences,
-	previousActivities,
-}: {
+}: // previousActivities,
+{
 	sequences: SequenceFromDB[];
-	previousActivities: PreviousActivity[];
+	// previousActivities: PreviousActivity[];
 }) => {
 	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 	const [selectedSequence, setSelectedSequence] = useState<number | null>(null);

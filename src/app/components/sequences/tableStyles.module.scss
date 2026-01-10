@@ -21,7 +21,7 @@
 			background: var(--gradient-primary-light);
 
 			&.nested {
-				background: var(--gradient-greyscale);
+				background: var(--gradient-greyscale) !important;
 			}
 
 			th {
