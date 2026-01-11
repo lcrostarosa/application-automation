@@ -8,12 +8,16 @@ import styles from './tableStyles.module.scss';
 import { SwapVert } from '@mui/icons-material';
 
 // Types imports
-import { MessageFromDB } from '@/types/messageTypes';
+import { MessagesWithActiveSequence } from '@/types/messageTypes';
 
 // Components
 import MessagesTable from './MessagesTable';
 
-const AllActivitiesTable = ({ messages }: { messages: MessageFromDB[] }) => {
+const AllActivitiesTable = ({
+	messages,
+}: {
+	messages: MessagesWithActiveSequence[];
+}) => {
 	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 	const [selectedActivity, setSelectedActivity] = useState<number | null>(null);
 
@@ -37,6 +41,10 @@ const AllActivitiesTable = ({ messages }: { messages: MessageFromDB[] }) => {
 		}
 	};
 
+	// ADD ACTIVE OR INACTIVE SEQUENCE COLUMN
+
+	console.log('All Activities Messages:', messages);
+
 	return (
 		<table className={styles.table}>
 			<thead className={styles.tableHeader}>
@@ -44,6 +52,7 @@ const AllActivitiesTable = ({ messages }: { messages: MessageFromDB[] }) => {
 					<th className={styles.sm}>
 						<span className={styles.sort}>Type</span>
 					</th>
+					<th className={styles.sm}>Status</th>
 					<th className={styles.lrg}>Name</th>
 					<th className={styles.sm} onClick={() => handleSort()}>
 						<span className={styles.sort}>
@@ -69,7 +78,18 @@ const AllActivitiesTable = ({ messages }: { messages: MessageFromDB[] }) => {
 								}}
 							>
 								<td className={styles.sm}>
-									{message.sequenceId ? 'Sequence Email' : 'Stand-alone Email'}
+									{message.sequenceId ? 'Sequence' : 'Stand-alone Email'}
+								</td>
+								<td className={styles.sm}>
+									{message.sequenceId ? (
+										message.activeSequence ? (
+											<span className={styles.active}>Active</span>
+										) : (
+											<span className={styles.inactive}>Inactive</span>
+										)
+									) : (
+										<span className={styles.na}>N/A</span>
+									)}
 								</td>
 								<td
 									className={`${styles.md} ${styles.left}`}

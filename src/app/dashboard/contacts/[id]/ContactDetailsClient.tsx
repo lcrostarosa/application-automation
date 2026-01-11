@@ -23,7 +23,7 @@ import {
 // Types imports
 import type { ContactFromDB } from '@/types/contactTypes';
 import type { SequencesResponse } from '@/types/sequenceTypes';
-import type { MessagesResponse } from '@/types/messageTypes';
+import type { MessagesWithActiveSequence } from '@/types/messageTypes';
 
 // Components
 import EditContactButton from '@/app/components/buttons/EditContactButton';
@@ -37,7 +37,7 @@ export default function ContactDetailsClient({
 }: {
 	initialContact: ContactFromDB;
 	initialSequences: SequencesResponse;
-	initialAllMessages: MessagesResponse;
+	initialAllMessages: MessagesWithActiveSequence[];
 }) {
 	const queryClient = useQueryClient();
 
@@ -58,7 +58,7 @@ export default function ContactDetailsClient({
 		}
 
 		if (initialAllMessages) {
-			queryClient.setQueryData<MessagesResponse>(
+			queryClient.setQueryData<MessagesWithActiveSequence[]>(
 				['all-messages-by-contact-id', initialContact.id],
 				initialAllMessages
 			);
@@ -73,7 +73,16 @@ export default function ContactDetailsClient({
 		initialContact.id
 	);
 
-	const { messages: allMessages } = allMessagesData || initialAllMessages;
+	const { messages } = allMessagesData || {};
+
+	const messagesWithActive = messages?.map((message) => {
+		const activeSequence = sequences.sequences.find(
+			(sequence) => sequence.id === message.sequenceId && sequence.active
+		);
+		return { ...message, activeSequence: !!activeSequence };
+	});
+
+	const allMessages = messagesWithActive || initialAllMessages;
 
 	const importance: Record<number, string> = {
 		1: 'Lowest',

@@ -24,3 +24,7 @@ export interface MessageFromDB {
 export interface MessagesResponse {
 	messages: MessageFromDB[] | [];
 }
+
+export interface MessagesWithActiveSequence extends MessageFromDB {
+	activeSequence: boolean;
+}

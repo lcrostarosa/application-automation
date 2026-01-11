@@ -21,7 +21,7 @@ import AllActivitiesTable from '@/app/components/sequences/AllActivitiesTable';
 // Types imports
 import { ContactFromDB } from '@/types/contactTypes';
 import { SequencesResponse, SequenceFromDB } from '@/types/sequenceTypes';
-import { MessageFromDB } from '@/types/messageTypes';
+import { MessagesWithActiveSequence } from '@/types/messageTypes';
 
 const ContactActivities = ({
 	contact,
@@ -30,7 +30,7 @@ const ContactActivities = ({
 }: {
 	contact: ContactFromDB;
 	sequences: SequencesResponse;
-	allMessages: MessageFromDB[];
+	allMessages: MessagesWithActiveSequence[];
 }) => {
 	type SelectedType = 'active' | 'previous' | 'email' | 'all';
 	const [selected, setSelected] = useState<SelectedType>('active');

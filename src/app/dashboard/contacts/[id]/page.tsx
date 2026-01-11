@@ -5,7 +5,6 @@ import Link from 'next/link';
 // Services imports
 import { getContactById } from '@/services/contactsService';
 import { getSequencesByContactId } from '@/services/sequenceService';
-import { getStandaloneMessagesByContactId } from '@/services/messageService';
 import { getAllMessagesByContactId } from '@/services/messageService';
 
 // Styles imports
@@ -25,13 +24,18 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
 		sequences: [],
 	};
 
-	const standaloneMessages = (await getStandaloneMessagesByContactId(
-		Number(id)
-	)) || { messages: [] };
-
-	const allMessages = (await getAllMessagesByContactId(Number(id))) || {
+	const { messages } = (await getAllMessagesByContactId(Number(id))) || {
 		messages: [],
 	};
+
+	const { sequences } = sequencesData;
+
+	const initialMessages = messages.map((message) => {
+		const activeSequence = sequences.find(
+			(sequence) => sequence.id === message.sequenceId && sequence.active
+		);
+		return { ...message, activeSequence: !!activeSequence };
+	});
 
 	if (!contact) {
 		redirect('/dashboard/contacts');
@@ -42,7 +46,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
 			<ContactDetailsClient
 				initialContact={contact}
 				initialSequences={sequencesData}
-				initialAllMessages={allMessages}
+				initialAllMessages={initialMessages}
 			/>
 			<Link
 				href='/dashboard/contacts'
