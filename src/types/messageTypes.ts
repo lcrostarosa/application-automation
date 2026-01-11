@@ -21,6 +21,6 @@ export interface MessageFromDB {
 	threadId: string | null;
 }
 
-export interface StandaloneMessagesResponse {
+export interface MessagesResponse {
 	messages: MessageFromDB[] | [];
 }

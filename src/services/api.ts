@@ -86,4 +86,8 @@ export const messageAPI = {
 		apiCall(`/api/messages/contact/${contactId}/standalone`, {
 			method: 'GET',
 		}),
+	readAllByContactId: (contactId: number) =>
+		apiCall(`/api/messages/contact/${contactId}`, {
+			method: 'GET',
+		}),
 };

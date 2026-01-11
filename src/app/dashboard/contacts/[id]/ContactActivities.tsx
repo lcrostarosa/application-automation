@@ -21,19 +21,16 @@ import AllActivitiesTable from '@/app/components/sequences/AllActivitiesTable';
 // Types imports
 import { ContactFromDB } from '@/types/contactTypes';
 import { SequencesResponse, SequenceFromDB } from '@/types/sequenceTypes';
-import {
-	StandaloneMessagesResponse,
-	MessageFromDB,
-} from '@/types/messageTypes';
+import { MessageFromDB } from '@/types/messageTypes';
 
 const ContactActivities = ({
 	contact,
 	sequences,
-	standaloneMessages,
+	allMessages,
 }: {
 	contact: ContactFromDB;
 	sequences: SequencesResponse;
-	standaloneMessages: StandaloneMessagesResponse;
+	allMessages: MessageFromDB[];
 }) => {
 	type SelectedType = 'active' | 'previous' | 'email' | 'all';
 	const [selected, setSelected] = useState<SelectedType>('active');
@@ -45,7 +42,7 @@ const ContactActivities = ({
 	}
 
 	const { sequences: sequenceList } = sequences;
-	const { messages: messageList } = standaloneMessages;
+	const messageList = allMessages;
 
 	const activeSequence: SequenceFromDB | undefined = sequenceList.find(
 		(seq) => seq.active
@@ -53,32 +50,6 @@ const ContactActivities = ({
 	const previousSequences: SequenceFromDB[] = sequenceList.filter(
 		(seq) => !seq.active
 	);
-
-	// interface PreviousActivity {
-	// 	type: 'message' | 'sequence';
-	// 	sortDate: Date;
-	// 	details: MessageFromDB | SequenceFromDB;
-	// }
-
-	// let previousActivities: PreviousActivity[] = [];
-
-	// messageList.forEach((message) => {
-	// 	previousActivities.push({
-	// 		type: 'message',
-	// 		sortDate: new Date(message.createdAt),
-	// 		details: message,
-	// 	});
-	// });
-
-	// previousSequences.forEach((sequence) => {
-	// 	previousActivities.push({
-	// 		type: 'sequence',
-	// 		sortDate: new Date(sequence.endDate!),
-	// 		details: sequence,
-	// 	});
-	// });
-
-	// NEED TO TAKE PREVIOUS ACTIVITIES AND PREVIOUS SEQUENCES AND EXTRACT ALL MESSAGES FROM EACH INTO ONE ARRAY TO PASS TO ALL ACTIVITIES TABLE
 
 	const activityContent: ActivityContent = {
 		active: {
@@ -107,7 +78,7 @@ const ContactActivities = ({
 			component: <NewEmailForm contactEmail={contact.email} />,
 		},
 		all: {
-			component: <AllActivitiesTable sequences={[]} previousActivities={[]} />,
+			component: <AllActivitiesTable messages={messageList} />,
 		},
 	};
 

@@ -8,26 +8,12 @@ import styles from './tableStyles.module.scss';
 import { SwapVert } from '@mui/icons-material';
 
 // Types imports
-import { SequenceFromDB } from '@/types/sequenceTypes';
 import { MessageFromDB } from '@/types/messageTypes';
 
 // Components
 import MessagesTable from './MessagesTable';
-import SequencesTable from './SequencesTable';
 
-interface PreviousActivity {
-	type: 'message' | 'sequence';
-	sortDate: Date;
-	details: MessageFromDB | SequenceFromDB;
-}
-
-const AllActivitiesTable = ({
-	sequences,
-	previousActivities,
-}: {
-	sequences: SequenceFromDB[];
-	previousActivities: PreviousActivity[];
-}) => {
+const AllActivitiesTable = ({ messages }: { messages: MessageFromDB[] }) => {
 	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 	const [selectedActivity, setSelectedActivity] = useState<number | null>(null);
 
@@ -35,12 +21,12 @@ const AllActivitiesTable = ({
 		setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
 	};
 
-	console.log('Previous Activities:', previousActivities);
-
-	const sortedActivities = [...previousActivities].sort((a, b) => {
-		const dateA = a.sortDate.getTime();
-		const dateB = b.sortDate.getTime();
-		return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+	const sortedMessages = messages.sort((a, b) => {
+		const dateA = new Date(a.createdAt);
+		const dateB = new Date(b.createdAt);
+		return sortOrder === 'asc'
+			? dateA.getTime() - dateB.getTime()
+			: dateB.getTime() - dateA.getTime();
 	});
 
 	const handleClick = (index: number) => {
@@ -69,9 +55,9 @@ const AllActivitiesTable = ({
 				</tr>
 			</thead>
 			<tbody>
-				{sortedActivities.map((activity, index) => {
+				{sortedMessages.map((message, index) => {
 					const sequenceCompletionDate = new Date(
-						activity.sortDate!
+						message.createdAt
 					).toLocaleDateString();
 
 					return (
@@ -83,50 +69,32 @@ const AllActivitiesTable = ({
 								}}
 							>
 								<td className={styles.sm}>
-									{activity.type === 'sequence'
-										? 'Sequence Email'
-										: 'Stand-alone Email'}
+									{message.sequenceId ? 'Sequence Email' : 'Stand-alone Email'}
 								</td>
 								<td
 									className={`${styles.md} ${styles.left}`}
 									style={{ fontWeight: '600' }}
 								>
-									{activity.type === 'sequence'
-										? (activity.details as SequenceFromDB).title
-										: (activity.details as MessageFromDB).subject}
+									{message.sequenceId ? message.subject : message.subject}
 								</td>
 
 								<td className={`${styles.sm} ${styles.right}`}>
 									{sequenceCompletionDate}
 								</td>
 								<td className={`${styles.sm} ${styles.right}`}>
-									{activity.type === 'sequence'
-										? (activity.details as SequenceFromDB).emailReplies.length >
-										  0
+									{message.sequenceId
+										? message.hasReply
 											? 'Yes'
 											: 'No'
-										: activity.type === 'message' &&
-										  (activity.details as MessageFromDB).hasReply
+										: message.hasReply
 										? 'Yes'
 										: 'No'}
 								</td>
 							</tr>
-							{selectedActivity === index && activity.type === 'sequence' ? (
+							{selectedActivity === index ? (
 								<tr className={styles['expanded-row']}>
 									<td colSpan={6}>
-										<SequencesTable
-											sequence={activity.details as SequenceFromDB}
-											nested={true}
-										/>
-									</td>
-								</tr>
-							) : selectedActivity === index && activity.type === 'message' ? (
-								<tr className={styles['expanded-row']}>
-									<td colSpan={6}>
-										<MessagesTable
-											messages={[activity.details as MessageFromDB]}
-											nested={true}
-										/>
+										<MessagesTable messages={[message]} nested={true} />
 									</td>
 								</tr>
 							) : null}

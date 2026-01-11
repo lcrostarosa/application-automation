@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useContactGetUnique } from '@/hooks/useContact';
 import { useSequencesByContactId } from '@/hooks/useSequence';
-import { useStandaloneMessagesByContactId } from '@/hooks/useMessages';
+import { useAllMessagesByContactId } from '@/hooks/useMessages';
 
 // Styles imports
 import styles from './contactPage.module.scss';
@@ -23,7 +23,7 @@ import {
 // Types imports
 import type { ContactFromDB } from '@/types/contactTypes';
 import type { SequencesResponse } from '@/types/sequenceTypes';
-import type { StandaloneMessagesResponse } from '@/types/messageTypes';
+import type { MessagesResponse } from '@/types/messageTypes';
 
 // Components
 import EditContactButton from '@/app/components/buttons/EditContactButton';
@@ -33,11 +33,11 @@ import ContactActivities from './ContactActivities';
 export default function ContactDetailsClient({
 	initialContact,
 	initialSequences,
-	initialStandaloneMessages,
+	initialAllMessages,
 }: {
 	initialContact: ContactFromDB;
 	initialSequences: SequencesResponse;
-	initialStandaloneMessages: StandaloneMessagesResponse;
+	initialAllMessages: MessagesResponse;
 }) {
 	const queryClient = useQueryClient();
 
@@ -57,10 +57,10 @@ export default function ContactDetailsClient({
 			);
 		}
 
-		if (initialStandaloneMessages) {
-			queryClient.setQueryData<StandaloneMessagesResponse>(
-				['standalone-messages-by-contact-id', initialContact.id],
-				initialStandaloneMessages
+		if (initialAllMessages) {
+			queryClient.setQueryData<MessagesResponse>(
+				['all-messages-by-contact-id', initialContact.id],
+				initialAllMessages
 			);
 		}
 	}, []);
@@ -69,12 +69,11 @@ export default function ContactDetailsClient({
 	const contact = data || initialContact;
 	const { data: sequencesData } = useSequencesByContactId(initialContact.id);
 	const sequences = sequencesData || initialSequences;
-	const { data: standaloneMessagesData } = useStandaloneMessagesByContactId(
+	const { data: allMessagesData } = useAllMessagesByContactId(
 		initialContact.id
 	);
 
-	const standaloneMessages =
-		standaloneMessagesData || initialStandaloneMessages;
+	const { messages: allMessages } = allMessagesData || initialAllMessages;
 
 	const importance: Record<number, string> = {
 		1: 'Lowest',
@@ -206,7 +205,7 @@ export default function ContactDetailsClient({
 			<ContactActivities
 				contact={contact}
 				sequences={sequences}
-				standaloneMessages={standaloneMessages}
+				allMessages={allMessages}
 			/>
 		</>
 	);

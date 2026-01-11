@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { getContactById } from '@/services/contactsService';
 import { getSequencesByContactId } from '@/services/sequenceService';
 import { getStandaloneMessagesByContactId } from '@/services/messageService';
+import { getAllMessagesByContactId } from '@/services/messageService';
 
 // Styles imports
 import styles from './contactPage.module.scss';
@@ -28,6 +29,10 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
 		Number(id)
 	)) || { messages: [] };
 
+	const allMessages = (await getAllMessagesByContactId(Number(id))) || {
+		messages: [],
+	};
+
 	if (!contact) {
 		redirect('/dashboard/contacts');
 	}
@@ -37,7 +42,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
 			<ContactDetailsClient
 				initialContact={contact}
 				initialSequences={sequencesData}
-				initialStandaloneMessages={standaloneMessages}
+				initialAllMessages={allMessages}
 			/>
 			<Link
 				href='/dashboard/contacts'
