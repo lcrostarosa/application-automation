@@ -125,6 +125,10 @@
 				background: var(--gradient-primary-lighter);
 			}
 
+			&.selectedMessage {
+				background: var(--background-tertiary) !important;
+			}
+
 			&.nested {
 				&.selected {
 					background: var(--gradient-greyscale-lighter);

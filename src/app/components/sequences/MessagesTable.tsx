@@ -30,6 +30,10 @@ const MessagesTable = ({
 	};
 
 	const handleClick = (messageId: number) => {
+		const selection =
+			typeof window !== 'undefined' ? window.getSelection?.()?.toString() : '';
+		if (selection && selection.length > 0) return;
+
 		if (selectedMessage === messageId) {
 			setSelectedMessage(null);
 		} else {
@@ -74,7 +78,9 @@ const MessagesTable = ({
 						<tr
 							key={message.id}
 							onClick={() => handleClick(message.id)}
-							className={nested ? styles.nested : ''}
+							className={`${nested ? styles.nested : ''} ${
+								selectedMessage === message.id ? styles.selectedMessage : ''
+							}`}
 						>
 							<td className={styles.md}>{message.subject}</td>
 							<td className={`${styles.lrg} ${styles['content-cell']}`}>
