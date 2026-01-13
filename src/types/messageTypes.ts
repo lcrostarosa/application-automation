@@ -9,6 +9,7 @@ export interface MessageFromDB {
 	lastError: string | null;
 	messageId: string | null;
 	needsApproval: boolean;
+	approvalDeadline: Date | null;
 	ownerId: number;
 	replyDate: Date | null;
 	scheduledAt: Date | null;

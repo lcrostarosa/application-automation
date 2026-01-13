@@ -39,13 +39,10 @@ export async function storeSentEmail({
 	cadenceDuration,
 	messageId,
 	threadId,
+	inReplyTo,
 	sequenceId,
 }: StoredEmailData) {
 	const contact = await findOrCreateContact(email, ownerId);
-
-	// Declare variables for send delay and next step due date
-	let sendDelay = null;
-	let nextStepDueDate = null;
 
 	const cadenceTypeMapping: { [key: string]: number } = {
 		'1day': 1,
@@ -64,31 +61,20 @@ export async function storeSentEmail({
 		indefinite: null,
 	};
 
-	// Check if user selected 'Review Before Sending' and set sendDelay accordingly
-	if (
+	// Send delay in days
+	const sendDelay =
 		sendWithoutReviewAfter === 'never' ||
 		sendWithoutReviewAfter === '' ||
 		!reviewBeforeSending
-	) {
-		sendDelay = null;
-	} else {
-		sendDelay = sendWithoutReviewAfter
+			? null
+			: sendWithoutReviewAfter
 			? parseInt(sendWithoutReviewAfter)
 			: null;
-	}
 
-	// Handle sendDelay and nextStepDueDate calculation
-	// if (sendDelay) {
-	// If there's a send delay, set next step due date based on that
-	// Process will look like: If there is a review before sending send delay, if the user reviews and clicks send, override the send delay and send immediately
-	// Else: If the user does not review, email will automatically send after the delay time period has passed
-	// }
+	const sequenceDuration = cadenceDurationMapping[cadenceDuration];
 
-	const endDate = cadenceDurationMapping[cadenceDuration]
-		? new Date(
-				Date.now() +
-					cadenceDurationMapping[cadenceDuration] * 24 * 60 * 60 * 1000
-		  )
+	const endDate = sequenceDuration
+		? new Date(Date.now() + sequenceDuration * 24 * 60 * 60 * 1000)
 		: null;
 
 	// If cadenceType is 'none', no follow-up emails
@@ -103,6 +89,7 @@ export async function storeSentEmail({
 					direction: 'outbound',
 					messageId,
 					threadId,
+					inReplyTo: inReplyTo || null,
 					createdAt: new Date(),
 					status: 'sent',
 				},
@@ -131,10 +118,14 @@ export async function storeSentEmail({
 			const delay = sequence.currentStep % 2 === 0 ? 3 : 1;
 			sequence.nextStepDue = new Date(Date.now() + delay * 24 * 60 * 60 * 1000);
 		} else {
-			sequence.nextStepDue = new Date(
-				Date.now() +
-					cadenceTypeMapping[sequence.sequenceType] * 24 * 60 * 60 * 1000
+			const sequenceDelay = cadenceTypeMapping[sequence.sequenceType];
+			const nextStepDueDate = new Date(
+				Date.now() + sequenceDelay * 24 * 60 * 60 * 1000
 			);
+
+			sequence.endDate && nextStepDueDate > sequence.endDate
+				? (sequence.nextStepDue = null)
+				: (sequence.nextStepDue = nextStepDueDate);
 		}
 
 		const [createdMessage, updatedContact, updatedSequence] =
@@ -149,12 +140,19 @@ export async function storeSentEmail({
 						direction: 'outbound',
 						messageId,
 						threadId,
+						inReplyTo: inReplyTo || null,
 						createdAt: new Date(),
+						status: reviewBeforeSending ? 'pending' : 'sent',
+						needsApproval: reviewBeforeSending,
+						approvalDeadline:
+							reviewBeforeSending && sendDelay
+								? new Date(Date.now() + sendDelay * 60 * 1000)
+								: null,
 					},
 				}),
 				prisma.contact.update({
 					where: { id: contact.id },
-					data: { lastActivity: new Date(), active: true },
+					data: { lastActivity: new Date() },
 				}),
 				prisma.sequence.update({
 					where: { id: sequence.id },
@@ -168,13 +166,12 @@ export async function storeSentEmail({
 		return { createdMessage, updatedContact, updatedSequence };
 	} else {
 		// For 31day pattern, first step is always 3 days
-		if (cadenceType === '31day') {
-			nextStepDueDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
-		} else {
-			nextStepDueDate = new Date(
-				Date.now() + cadenceTypeMapping[cadenceType] * 24 * 60 * 60 * 1000
-			);
-		}
+		const nextStepDueDate =
+			cadenceType === '31day'
+				? new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
+				: new Date(
+						Date.now() + cadenceTypeMapping[cadenceType] * 24 * 60 * 60 * 1000
+				  );
 
 		// First email: create new sequence
 		const sequence = await prisma.sequence.create({
@@ -203,7 +200,14 @@ export async function storeSentEmail({
 					direction: 'outbound',
 					messageId,
 					threadId,
+					inReplyTo: inReplyTo || null,
 					createdAt: new Date(),
+					needsApproval: reviewBeforeSending,
+					status: reviewBeforeSending ? 'pending' : 'sent',
+					approvalDeadline:
+						reviewBeforeSending && sendDelay
+							? new Date(Date.now() + sendDelay * 60 * 1000)
+							: null,
 				},
 			}),
 			prisma.contact.update({

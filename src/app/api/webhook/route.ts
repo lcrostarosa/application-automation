@@ -140,7 +140,7 @@ async function processMessage(gmail: any, messageId: string) {
 					direction: 'inbound',
 					messageId: messageId,
 					threadId: threadId,
-					date: new Date(parseInt(message.data.internalDate)),
+					createdAt: new Date(parseInt(message.data.internalDate)),
 				},
 			});
 

@@ -25,7 +25,7 @@ export default function TopBar({ userName }: TopBarProps) {
 							id='app-title'
 							aria-label='Application Automation - Main application title'
 						>
-							Application Autom<span>ai</span>tion
+							Repl<span>ai</span>All
 						</h1>
 					</Link>
 					<div

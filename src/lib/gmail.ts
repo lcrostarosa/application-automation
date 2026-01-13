@@ -11,11 +11,18 @@ export async function sendGmail({
 	subject,
 	text,
 	html,
+	inReplyTo,
+	references,
+	threadId,
 }: {
 	to: string;
 	subject: string;
 	text?: string;
 	html?: string;
+	// Optional threading headers / thread id for replies
+	inReplyTo?: string; // original message-id (e.g. <abc@google.com>)
+	references?: string[]; // list of message-ids to include in References header
+	threadId?: string; // Gmail threadId to explicitly attach to
 }) {
 	try {
 		// Create OAuth2 client
@@ -31,34 +38,64 @@ export async function sendGmail({
 		// Get Gmail API instance
 		const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
 
-		// Create email content
-		const emailContent = [
-			`To: ${to}`,
-			`From: ${SENDER_EMAIL}`,
-			`Subject: ${subject}`,
-			'Content-Type: text/html; charset=utf-8',
-			'',
-			html || text || '',
-		].join('\n');
+		// Build headers for threading if provided
+		const headers: string[] = [];
+		headers.push(`To: ${to}`);
+		headers.push(`From: ${SENDER_EMAIL}`);
+		headers.push(`Subject: ${subject}`);
+		if (inReplyTo) headers.push(`In-Reply-To: ${inReplyTo}`);
+		if (references && references.length > 0)
+			headers.push(`References: ${references.join(' ')}`);
 
-		// Encode email in base64
-		const encodedMessage = Buffer.from(emailContent).toString('base64');
+		// Minimal HTML/plain multipart fallback
+		headers.push('MIME-Version: 1.0');
+		headers.push('Content-Type: text/html; charset=utf-8');
+
+		const body = html || text || '';
+		const emailContent = headers.join('\r\n') + '\r\n\r\n' + body;
+
+		// Gmail API expects base64url encoding (RFC 4648 §5) - replace +/ with -_ and strip padding
+		const encodedMessage = Buffer.from(emailContent)
+			.toString('base64')
+			.replace(/\+/g, '-')
+			.replace(/\//g, '_')
+			.replace(/=+$/, '');
 
 		console.log('Sending email via Gmail API...');
 
 		// Send email using Gmail API directly
+		const requestBody: any = { raw: encodedMessage };
+		if (threadId) requestBody.threadId = threadId;
+
 		const result = await gmail.users.messages.send({
 			userId: 'me',
-			requestBody: {
-				raw: encodedMessage,
-			},
+			requestBody,
 		});
+
+		// Fetch metadata for the sent message to extract the RFC Message-ID header
+		let messageHeaderId: string | null = null;
+		try {
+			const sent = await gmail.users.messages.get({
+				userId: 'me',
+				id: result.data.id!,
+				format: 'metadata',
+				metadataHeaders: ['Message-ID'],
+			});
+			const headers = sent.data.payload?.headers || [];
+			const mid = headers.find(
+				(h: any) => h.name.toLowerCase() === 'message-id'
+			);
+			if (mid && mid.value) messageHeaderId = mid.value;
+		} catch (err) {
+			console.warn('Failed to fetch sent message metadata:', err);
+		}
 
 		console.log('Email sent successfully!');
 		return {
 			messageId: result.data.id,
 			threadId: result.data.threadId,
 			data: result.data,
+			messageHeaderId,
 		};
 	} catch (error) {
 		console.error('Gmail sending error:', error);

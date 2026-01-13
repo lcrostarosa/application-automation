@@ -9,6 +9,7 @@ export interface StoredEmailData {
 	cadenceDuration: string;
 	messageId: string;
 	threadId: string;
+	inReplyTo?: string;
 	sequenceId?: number;
 }
 
