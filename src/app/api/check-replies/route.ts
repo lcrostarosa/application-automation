@@ -164,6 +164,7 @@ async function processMessage(gmail: any, messageId: string) {
 					where: { id: sequenceId },
 					data: {
 						active: false,
+						endDate: new Date(),
 					},
 				});
 
