@@ -34,7 +34,7 @@ export async function getAllPendingMessages() {
 	}
 
 	const messages = await prisma.message.findMany({
-		where: { ownerId: user.id, status: 'pending' },
+		where: { ownerId: user.id, status: { in: ['pending', 'scheduled'] } },
 		orderBy: { createdAt: 'desc' },
 	});
 

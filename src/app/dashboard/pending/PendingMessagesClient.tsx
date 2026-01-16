@@ -32,7 +32,5 @@ export default function PendingMessagesClient({
 	const { data } = useMessagesGetAllPending();
 	const messages = data?.messages || [];
 
-	console.log(messages);
-
 	return <PendingMessagesTable messages={messages} />;
 }

@@ -9,13 +9,17 @@ import { Editor as TinyMCEEditor } from 'tinymce';
 import styles from './tinyEditor.module.scss';
 
 const TinyEditor = ({
+	height,
+	initialValue,
 	setEditorContent,
 }: {
+	height?: number;
+	initialValue?: string;
 	setEditorContent: (content: string) => void;
 }) => {
 	const editorRef = useRef<TinyMCEEditor | null>(null);
 
-	const [value, setValue] = useState<string>('');
+	const [value, setValue] = useState<string>(initialValue || '');
 	const sizeLimit = 4000;
 
 	const handleEditorChange = (content: string, editor: TinyMCEEditor) => {
@@ -44,9 +48,9 @@ const TinyEditor = ({
 				}}
 				onEditorChange={handleEditorChange}
 				onBeforeAddUndo={handleBeforeAddUndo}
-				initialValue='<p></p>'
+				initialValue={initialValue || '<p></p>'}
 				init={{
-					height: 500,
+					height: height || 500,
 					menubar: false,
 					plugins: [
 						'advlist',
