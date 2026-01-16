@@ -4,7 +4,7 @@
 import styles from './dashboard.module.scss';
 
 // Components imports
-import PreviewTile from '../components/dashboard/previewTile/PreviewTile';
+import PreviewTile from '../components/pageSpecificComponents/dashboard/previewTile/PreviewTile';
 
 const Dashboard = () => {
 	return (

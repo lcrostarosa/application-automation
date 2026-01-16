@@ -5,7 +5,7 @@ import React from 'react';
 import styles from './sideBar.module.scss';
 
 // Components imports
-import NavigationItem from './NavigationItem';
+import NavigationItem from '../navigationItem/NavigationItem';
 
 interface SidebarProps {
 	currentPath?: string;

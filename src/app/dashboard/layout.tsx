@@ -11,9 +11,9 @@ import { findOrCreateUser } from '@/services/userService';
 import styles from './dashboard.module.scss';
 
 // Components imports
-import TopBar from '../components/dashboard/TopBar';
-import SideBarClient from '../components/dashboard/SideBarClient';
-import SideBar from '../components/dashboard/SideBar';
+import TopBar from '../components/pageSpecificComponents/dashboard/TopBar';
+import SideBarClient from '../components/pageSpecificComponents/dashboard/sideBar/SideBarClient';
+import SideBar from '../components/pageSpecificComponents/dashboard/sideBar/SideBar';
 import Modal from '../components/modal/Modal';
 
 // Context

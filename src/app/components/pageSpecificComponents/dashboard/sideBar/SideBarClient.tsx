@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import SideBar from './SideBar';
 import { useMessagesGetAllPending } from '@/hooks/useMessages';

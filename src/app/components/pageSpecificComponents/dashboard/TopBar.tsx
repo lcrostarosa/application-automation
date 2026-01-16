@@ -4,7 +4,7 @@ import Link from 'next/link';
 import styles from './topBar.module.scss';
 
 // Components imports
-import LogoutButton from '../buttons/LogoutButton';
+import LogoutButton from '../../buttons/LogoutButton';
 
 interface TopBarProps {
 	userName: string;
