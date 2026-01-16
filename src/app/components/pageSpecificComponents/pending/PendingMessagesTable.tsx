@@ -7,7 +7,7 @@ import { useState } from 'react';
 import styles from './pendingMessagesTable.module.scss';
 
 // MUI imports
-import { SwapVert } from '@mui/icons-material';
+import { Edit, SwapVert } from '@mui/icons-material';
 
 // Helper functions imports
 import { parseEmailContent } from '@/lib/helperFunctions';
@@ -50,25 +50,23 @@ const PendingMessagesTable = ({
 	return (
 		<table className={styles.table}>
 			<thead className={styles.tableHeader}>
-				<tr className={nested ? styles.nested : ''}>
-					<th className={styles.md}>
-						<span className={styles.sort}>Email</span>
-					</th>
-					<th className={styles.lrg}>
-						<span className={styles.sort}>Content</span>
-					</th>
+				<tr>
+					<th className={styles.md}>Email</th>
+					<th className={styles.lrg}>Content</th>
 					<th className={styles.sm}>Status</th>
 					<th className={styles.sm} onClick={() => handleSort()}>
 						<span className={styles.sort}>
-							Send Date
+							Scheduled Date
 							<SwapVert fontSize='small' />
 						</span>
+					</th>
+					<th colSpan={2} className={styles.sm}>
+						Actions
 					</th>
 				</tr>
 			</thead>
 			<tbody>
 				{sortedMessages.map((message) => {
-					console.log('message from map', message);
 					const messageDateDay = message.sentAt
 						? new Date(message.sentAt)
 						: new Date(message.scheduledAt!);
@@ -86,26 +84,8 @@ const PendingMessagesTable = ({
 								selectedMessage === message.id ? styles.selectedMessage : ''
 							}`}
 						>
-							<td
-								className={`${styles.md} ${
-									message.status === 'scheduled' || message.status === 'pending'
-										? styles.scheduled
-										: message.status === 'cancelled'
-										? styles.cancelled
-										: ''
-								}`}
-							>
-								{message.subject}
-							</td>
-							<td
-								className={`${styles.lrg} ${styles['content-cell']} ${
-									message.status === 'scheduled' || message.status === 'pending'
-										? styles.scheduled
-										: message.status === 'cancelled'
-										? styles.cancelled
-										: ''
-								}`}
-							>
+							<td className={styles.md}>{message.subject}</td>
+							<td className={`${styles.lrg} ${styles['content-cell']}`}>
 								<div className={styles['parsed-content']}>
 									<span className={styles['message-preview']}>
 										{parsedContent[0]}
@@ -117,31 +97,20 @@ const PendingMessagesTable = ({
 											.map((text, index) => <span key={index}>{text}</span>)}
 								</div>
 							</td>
-							<td
-								className={`${styles.sm} ${
-									message.status === 'pending'
-										? styles.pending
-										: message.status === 'cancelled'
-										? styles.cancelled
-										: ''
-								}`}
-							>
+							<td className={`${styles.sm} ${styles.important}`}>
 								{messageStatus}
 							</td>
-							<td
-								className={`${styles.sm} ${styles.right} ${
-									message.status === 'scheduled' || message.status === 'pending'
-										? styles.scheduled
-										: message.status === 'cancelled'
-										? styles.cancelled
-										: ''
-								}`}
-							>
-								{message.status === 'sent'
-									? messageDateDay.toLocaleDateString()
-									: message.status !== 'cancelled'
-									? `Scheduled for ${messageDateDay.toLocaleDateString()}`
-									: ' N/A'}
+							<td className={`${styles.sm} ${styles.right} $`}>
+								{messageDateDay.toLocaleDateString()}
+							</td>
+							<td className={styles.buttonBox}>
+								<button className={styles.button}>
+									<Edit className={styles.icon} />
+									Edit
+								</button>
+							</td>
+							<td className={styles.buttonBox}>
+								<button className={styles.button}>Approve</button>
 							</td>
 						</tr>
 					);

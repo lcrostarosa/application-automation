@@ -1,8 +1,16 @@
+.container {
+	display: flex;
+}
+
 .table {
 	width: 100%;
 	border-collapse: separate;
 	overflow: hidden;
 	border-radius: var(--border-radius);
+
+	.xs {
+		width: 6.25%;
+	}
 
 	.sm {
 		width: 12.5%;
@@ -20,16 +28,11 @@
 		tr {
 			background: var(--gradient-primary-light);
 
-			&.nested {
-				background: var(--gradient-greyscale) !important;
-			}
-
 			th {
 				vertical-align: middle;
 				cursor: pointer;
 				padding: 0.5rem 1rem;
 				text-align: left;
-				border-bottom: 2px solid var(--border-light);
 				white-space: nowrap;
 				font-weight: 600;
 
@@ -42,6 +45,10 @@
 
 				&:not(:last-child) {
 					border-right: 1.5px solid var(--border-light);
+				}
+
+				&.center {
+					text-align: center;
 				}
 			}
 		}
@@ -59,7 +66,7 @@
 			}
 
 			@media (hover: hover) {
-				&:hover {
+				&:hover:not(:has(.button:hover)) {
 					background: var(--gradient-primary-lighter);
 					cursor: pointer;
 				}
@@ -82,6 +89,13 @@
 
 				&.right {
 					text-align: right;
+				}
+
+				&.buttonBox {
+					padding: 0;
+					justify-items: center;
+					padding-top: 0.25rem;
+					vertical-align: top;
 				}
 
 				&.content-cell {
@@ -110,49 +124,46 @@
 					font-style: italic;
 				}
 
-				.na {
-					color: var(--text-muted);
-					opacity: 0.75;
-					font-style: italic;
-				}
-
-				&.pending {
+				&.important {
 					color: var(--accent-important);
 					font-weight: 600;
 				}
 
-				&.cancelled {
-					color: var(--text-muted);
-					opacity: 0.75;
-					font-style: italic;
-					font-weight: 400 !important;
-				}
+				.button {
+					width: 80%;
+					cursor: pointer;
+					display: flex;
+					gap: 0.25rem;
+					align-items: center;
+					justify-content: center;
+					color: var(--text-secondary);
+					text-decoration: none;
+					padding: 0.125rem 0.5rem;
+					transition: all 0.2s ease-in-out;
+					font-size: 1rem;
+					position: relative;
+					border-radius: var(--border-radius);
+					border: 2px solid transparent;
+					background: linear-gradient(
+								var(--background-secondary),
+								var(--background-secondary)
+							)
+							padding-box,
+						var(--gradient-primary) border-box;
+					line-height: 1.25;
 
-				&.scheduled {
-					font-style: italic;
-				}
+					@media (hover: hover) {
+						&:hover {
+							transform: scale(1.1);
+							color: var(--color-primary);
+							background: var(--gradient-accessible) padding-box,
+								var(--gradient-primary) border-box;
+						}
+					}
 
-				&.na {
-					color: var(--text-muted);
-					font-style: italic;
-				}
-
-				// The following styles are for nested spans
-				.pending {
-					color: var(--accent-important);
-					font-weight: 600;
-				}
-
-				.cancelled {
-					color: var(--text-muted);
-					opacity: 0.75;
-					font-style: italic;
-					font-weight: 400 !important;
-				}
-
-				.scheduled {
-					color: var(--color-primary);
-					font-weight: 600;
+					.icon {
+						font-size: 1rem;
+					}
 				}
 			}
 
@@ -166,23 +177,6 @@
 
 			&.selectedMessage {
 				background: var(--background-tertiary) !important;
-			}
-
-			&.nested {
-				&.selected {
-					background: var(--gradient-greyscale-lighter);
-				}
-
-				&.expanded-row {
-					background: var(--gradient-greyscale-lighter);
-				}
-
-				@media (hover: hover) {
-					&:hover {
-						background: var(--gradient-greyscale-lighter);
-						cursor: pointer;
-					}
-				}
 			}
 		}
 	}
