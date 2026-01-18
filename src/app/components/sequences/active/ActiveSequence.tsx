@@ -63,7 +63,7 @@ const ActiveSequence = ({ sequence }: { sequence: SequenceFromDB }) => {
 			</div>
 
 			<div className={styles['sequence-details']}>
-				<MessagesTable messages={sequence.messages} />
+				<MessagesTable messages={sequence.messages} tab={'active'} />
 			</div>
 		</div>
 	);

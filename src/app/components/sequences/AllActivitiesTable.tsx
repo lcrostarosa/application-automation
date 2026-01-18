@@ -82,33 +82,20 @@ const AllActivitiesTable = ({
 					return (
 						<Fragment key={index}>
 							<tr
-								className={selectedActivity === index ? styles.selected : ''}
+								className={`${
+									selectedActivity === index ? styles.selected : ''
+								} ${styles[message.status]} ${styles.all}`}
 								onClick={() => {
 									handleClick(index);
 								}}
 							>
-								<td
-									className={`${styles.sm} ${
-										message.status === 'cancelled' ? styles.cancelled : ''
-									}`}
-								>
+								<td className={`${styles.sm} ${styles.type}`}>
 									{message.sequenceId ? 'Sequence Email' : 'Stand-alone Email'}
 								</td>
-								<td className={styles.sm}>
+
+								<td className={`${styles.sm} ${styles.status}`}>
 									{message.sequenceId ? (
-										<span
-											className={`${
-												message.status === 'pending'
-													? styles.pending
-													: message.status === 'scheduled'
-													? styles.scheduled
-													: message.status === 'sent'
-													? styles.sent
-													: message.status === 'cancelled'
-													? styles.cancelled
-													: ''
-											}`}
-										>
+										<span className={`${styles[message.status]}`}>
 											{message.status === 'pending'
 												? 'Pending Approval'
 												: message.status[0].toUpperCase() +
@@ -118,31 +105,17 @@ const AllActivitiesTable = ({
 										<span className={styles.na}>N/A</span>
 									)}
 								</td>
-								<td
-									className={`${styles.md} ${styles.left} ${
-										message.status === 'cancelled' ? styles.cancelled : ''
-									}`}
-									style={{ fontWeight: '600' }}
-								>
+
+								<td className={`${styles.md} ${styles.left} ${styles.subject}`}>
 									{message.sequenceId ? message.subject : message.subject}
 								</td>
 
-								<td
-									className={`${styles.sm} ${styles.right} ${
-										message.status === 'cancelled'
-											? styles.cancelled
-											: message.status === 'scheduled' ||
-											  message.status === 'pending'
-											? styles.scheduled
-											: ''
-									}`}
-								>
+								<td className={`${styles.sm} ${styles.right} ${styles.date}`}>
 									{sendDate}
 								</td>
+
 								<td
-									className={`${styles.sm} ${styles.right} ${
-										message.status !== 'sent' ? styles.na : ''
-									}`}
+									className={`${styles.sm} ${styles.right} ${styles.replied}`}
 								>
 									{message.status === 'sent'
 										? message.hasReply
@@ -154,7 +127,11 @@ const AllActivitiesTable = ({
 							{selectedActivity === index ? (
 								<tr className={styles['expanded-row']}>
 									<td colSpan={6}>
-										<MessagesTable messages={[message]} nested={true} />
+										<MessagesTable
+											messages={[message]}
+											tab={'all'}
+											nested={true}
+										/>
 									</td>
 								</tr>
 							) : null}

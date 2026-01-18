@@ -100,60 +100,60 @@
 					}
 				}
 
-				.active {
-					color: var(--color-primary);
-					font-weight: 600;
-				}
+				// .active {
+				// 	color: var(--color-primary);
+				// 	font-weight: 600;
+				// }
 
-				.inactive {
-					color: var(--text-muted);
-					font-style: italic;
-				}
+				// .inactive {
+				// 	color: var(--text-muted);
+				// 	font-style: italic;
+				// }
 
-				.na {
-					color: var(--text-muted);
-					opacity: 0.75;
-					font-style: italic;
-				}
+				// .na {
+				// 	color: var(--text-muted);
+				// 	opacity: 0.75;
+				// 	font-style: italic;
+				// }
 
-				&.pending {
-					color: var(--accent-important);
-					font-weight: 600;
-				}
+				// &.pending {
+				// 	color: var(--accent-important);
+				// 	font-weight: 600;
+				// }
 
-				&.cancelled {
-					color: var(--text-muted);
-					opacity: 0.75;
-					font-style: italic;
-					font-weight: 400 !important;
-				}
+				// &.cancelled {
+				// 	color: var(--text-muted);
+				// 	opacity: 0.75;
+				// 	font-style: italic;
+				// 	font-weight: 400 !important;
+				// }
 
-				&.scheduled {
-					font-style: italic;
-				}
+				// &.scheduled {
+				// 	font-style: italic;
+				// }
 
-				&.na {
-					color: var(--text-muted);
-					font-style: italic;
-				}
+				// &.na {
+				// 	color: var(--text-muted);
+				// 	font-style: italic;
+				// }
 
 				// The following styles are for nested spans
-				.pending {
-					color: var(--accent-important);
-					font-weight: 600;
-				}
+				// .pending {
+				// 	color: var(--accent-important);
+				// 	font-weight: 600;
+				// }
 
-				.cancelled {
-					color: var(--text-muted);
-					opacity: 0.75;
-					font-style: italic;
-					font-weight: 400 !important;
-				}
+				// .cancelled {
+				// 	color: var(--text-muted);
+				// 	opacity: 0.75;
+				// 	font-style: italic;
+				// 	font-weight: 400 !important;
+				// }
 
-				.scheduled {
-					color: var(--color-primary);
-					font-weight: 600;
-				}
+				// .scheduled {
+				// 	color: var(--color-primary);
+				// 	font-weight: 600;
+				// }
 			}
 
 			&.expanded-row {
@@ -181,6 +181,116 @@
 					&:hover {
 						background: var(--gradient-greyscale-lighter);
 						cursor: pointer;
+					}
+				}
+			}
+
+			&.active {
+				&.pending {
+					.subject,
+					.status {
+						font-weight: 600;
+					}
+
+					.status {
+						color: var(--accent-important);
+					}
+
+					.date {
+						font-style: italic;
+					}
+				}
+
+				&.scheduled {
+					font-style: italic;
+
+					.subject,
+					.status {
+						font-weight: 600;
+					}
+
+					.status {
+						color: var(--color-primary);
+					}
+				}
+
+				&.sent {
+					.subject {
+						font-weight: 600;
+					}
+				}
+			}
+
+			&.all {
+				&.pending {
+					.subject,
+					.status {
+						font-weight: 600;
+					}
+
+					.status {
+						color: var(--accent-important);
+					}
+
+					.date {
+						font-style: italic;
+					}
+
+					.replied {
+						font-style: italic;
+						opacity: 0.75;
+					}
+				}
+
+				&.scheduled {
+					.subject,
+					.status {
+						font-weight: 600;
+					}
+
+					.status {
+						color: var(--color-primary);
+					}
+
+					.date {
+						font-style: italic;
+					}
+
+					.replied {
+						font-style: italic;
+						opacity: 0.75;
+					}
+				}
+
+				&.sent {
+					.subject {
+						font-weight: 600;
+					}
+				}
+
+				&.cancelled {
+					font-style: italic;
+					opacity: 0.75;
+				}
+
+				&.nested {
+					font-style: italic;
+
+					.subject,
+					.status {
+						font-weight: 400;
+					}
+
+					// .status {
+					// 	color: var(--text-primary);
+					// }
+				}
+			}
+
+			&.nested {
+				&.scheduled {
+					.status {
+						color: var(--text-primary);
 					}
 				}
 			}
