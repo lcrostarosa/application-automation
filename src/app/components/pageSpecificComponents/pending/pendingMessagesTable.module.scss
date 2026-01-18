@@ -111,6 +111,45 @@
 						flex-direction: column;
 						gap: 0.5rem;
 						max-width: 100%;
+
+						.input-group {
+							.input {
+								display: flex;
+								gap: 0.5rem;
+
+								input {
+									flex-grow: 1;
+									height: 1.5rem;
+									font-size: 1rem;
+									padding-left: 0.25rem;
+									border: 1px solid #ccc;
+									border-radius: 0.25rem;
+									color: var(--text-primary);
+
+									&:focus {
+										outline: none;
+										border-color: var(--color-primary);
+										box-shadow: 0 0 0 2px var(--color-primary-light);
+									}
+								}
+
+								label {
+									font-size: 1rem;
+								}
+
+								select {
+									height: 100%;
+									font-size: 1rem;
+									cursor: pointer;
+								}
+
+								.checkbox {
+									width: 1.5rem;
+									height: 1.5rem;
+									cursor: pointer;
+								}
+							}
+						}
 					}
 
 					.parsed-content {

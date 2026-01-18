@@ -22,7 +22,7 @@ export default function SideBar({
 		{ href: '/dashboard', label: 'Dashboard' },
 		{ href: '/dashboard/contacts', label: 'Contacts' },
 		{ href: '/dashboard/sequences', label: 'Sequences' },
-		{ href: '/dashboard/pending', label: 'Pending' },
+		{ href: '/dashboard/pending', label: 'Pending Emails' },
 		{ href: '/dashboard/replies', label: 'Replies' },
 		// { href: '/dashboard/in-progress', label: 'In Progress' },
 		{ href: '/dashboard/templates', label: 'Templates (Coming Soon)' },

@@ -17,14 +17,19 @@ export async function PUT(
 			);
 		}
 
-		const { contents } = await request.json();
+		const { contents, subject } = await request.json();
 
 		const { id } = await params;
 		const messageId = parseInt(id);
 
 		const message = await prisma.message.update({
 			where: { ownerId: user.id, id: messageId },
-			data: { contents: contents, status: 'scheduled', approved: true },
+			data: {
+				contents: contents,
+				subject: subject,
+				status: 'scheduled',
+				approved: true,
+			},
 		});
 
 		return NextResponse.json({ message });

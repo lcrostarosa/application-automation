@@ -34,6 +34,7 @@ const PendingMessagesTable = ({
 	const [selectedMessage, setSelectedMessage] = useState<number | null>(null);
 	const [editorContent, setEditorContent] = useState<string>('');
 	const [isEditing, setIsEditing] = useState<boolean>(false);
+	const [subjectContent, setSubjectContent] = useState<string>('');
 	const { mutateAsync: updateMessage } = useMessageUpdate();
 	const { mutateAsync: approveMessage } = useMessageApprove();
 
@@ -85,11 +86,20 @@ const PendingMessagesTable = ({
 		setSelectedMessage(null);
 	};
 
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setSubjectContent(e.target.value);
+	};
+
 	const handleSaveAndApprove = () => {
 		if (selectedMessage && isEditing) {
 			updateMessage({
 				messageId: selectedMessage,
-				contents: editorContent.trim(),
+				contents: editorContent
+					? editorContent.trim()
+					: messages.find((m) => m.id === selectedMessage)?.contents || '',
+				subject: subjectContent
+					? subjectContent.trim()
+					: messages.find((m) => m.id === selectedMessage)?.subject || '',
 			});
 		}
 		setIsEditing(false);
@@ -141,6 +151,20 @@ const PendingMessagesTable = ({
 							<td className={`${styles.lrg} ${styles['content-cell']}`}>
 								{isEditing && selectedMessage === message.id ? (
 									<div className={styles['rte-wrapper']}>
+										{/* Subject Field */}
+										<div className={styles['input-group']}>
+											<div className={styles.input}>
+												<label htmlFor='subject'>Subject:</label>
+												<input
+													type='text'
+													id='subject'
+													defaultValue={message.subject}
+													onChange={(e) => handleChange(e)}
+												/>
+											</div>
+										</div>
+
+										{/* RTE */}
 										<TinyEditor
 											height={300}
 											initialValue={message.contents}

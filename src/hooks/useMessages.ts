@@ -50,9 +50,13 @@ export const useMessageApprove = () => {
 export const useMessageUpdate = () => {
 	const queryClient = useQueryClient();
 
-	return useMutation<void, Error, { messageId: number; contents: string }>({
-		mutationFn: ({ messageId, contents }) =>
-			messageAPI.updateMessage(messageId, contents),
+	return useMutation<
+		void,
+		Error,
+		{ messageId: number; contents: string; subject: string }
+	>({
+		mutationFn: ({ messageId, contents, subject }) =>
+			messageAPI.updateMessage(messageId, contents, subject),
 		onSuccess: () => {
 			// Invalidate queries to update the data
 			queryClient.invalidateQueries({ queryKey: ['pending-messages-get-all'] });
