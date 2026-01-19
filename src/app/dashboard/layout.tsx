@@ -13,7 +13,6 @@ import styles from './dashboard.module.scss';
 // Components imports
 import TopBar from '../components/pageSpecificComponents/dashboard/TopBar';
 import SideBarClient from '../components/pageSpecificComponents/dashboard/sideBar/SideBarClient';
-import SideBar from '../components/pageSpecificComponents/dashboard/sideBar/SideBar';
 import Modal from '../components/modal/Modal';
 
 // Context

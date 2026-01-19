@@ -29,7 +29,7 @@ export default function NavigationItem({
 				aria-current={isActive ? 'page' : undefined}
 				aria-label={`Navigate to ${label} page`}
 			>
-				<span>{label}</span>
+				<span>{label === 'Pending' ? 'Pending Emails' : label}</span>
 			</Link>
 		</li>
 	);

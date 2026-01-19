@@ -24,7 +24,10 @@ export default function SideBarClient({
 
 	const { data } = useMessagesGetAllPending();
 	const messages = data?.messages || [];
-	const hasNotifications = messages.length > 0;
+	const pendingMessages = messages.filter(
+		(message) => message.status === 'pending'
+	);
+	const hasNotifications = pendingMessages.length > 0;
 
 	return <SideBar notifications={hasNotifications} />;
 }
