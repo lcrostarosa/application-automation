@@ -3,6 +3,7 @@ import OpenAI from 'openai';
 const client = new OpenAI();
 
 type PreviousEmailContentsType = {
+	contactName: string;
 	previousSubject: string;
 	previousBody: string;
 };
@@ -33,14 +34,18 @@ export const generateMessage = async (
 ): Promise<GeneratedMessage> => {
 	const model = 'gpt-5-nano';
 	// const temperature = 0.2;
-	const maxTokens = 2000;
+	const MAX_TOKENS = 5000;
+
+	const MAX_BODY_WORDS = 100;
 
 	const preserveThreadContext =
 		typeof options.preserveThreadContext === 'boolean'
 			? options.preserveThreadContext
 			: true;
 
-	const systemInstruction = `You are an assistant that drafts professional, concise follow-up emails. Return only a single JSON object with keys: subject, bodyHtml, bodyPlain. Keep HTML minimal and safe. Do not include any extraneous commentary. Do not produce chain-of-thought or internal reasoning. Do not use em dashes or anything that might suggest this is Ai-generated. Do not use <br> tags for line breaks; use proper paragraphs. Output must be valid JSON only.`;
+	// const systemInstruction = `You are an assistant that drafts professional, concise follow-up emails. Return only a single JSON object with keys: subject, bodyHtml, bodyPlain. Keep HTML minimal and safe. Do not include any extraneous commentary. Do not produce chain-of-thought or internal reasoning. Do not use em dashes or anything that might suggest this is Ai-generated. Do not use <br> tags for line breaks; use proper paragraphs. Output must be valid JSON only.`;
+
+	const systemInstruction = `You are an assistant that drafts concise follow-up emails. RETURN ONLY a single MINIFIED JSON object with keys: subject, bodyHtml, bodyPlain. bodyPlain MUST NOT exceed ${MAX_BODY_WORDS} words. ALWAYS start a new line after the greeting/introduction. ALWAYS address the contact by name: ${previousEmailContents.contactName}. If the contact's name is not available, use a generic greeting. DO NOT output any commentary, analysis, or reasoning. Output must be valid compact JSON only.`;
 
 	// const systemInstruction = `You are an assistant that drafts professional, concise follow-up emails. RETURN ONLY a single MINIFIED JSON object with these keys: subject, bodyHtml, bodyPlain. DO NOT output any commentary, labels, or analysis. DO NOT produce chain-of-thought or internal reasoning. Output must be valid compact JSON only.`;
 
@@ -70,7 +75,7 @@ export const generateMessage = async (
 				model,
 				input: promptTemplate,
 				// temperature,
-				max_output_tokens: maxTokens,
+				max_output_tokens: MAX_TOKENS,
 			});
 
 			// `response.output_text` is a convenience field; fall back to assembling from output items
@@ -106,11 +111,18 @@ export const generateMessage = async (
 			const generationMeta = {
 				model,
 				// temperature: usedTemperature ? temperature : null,
-				maxTokens,
+				maxTokens: MAX_TOKENS,
 				preserveThreadContext,
 				raw: raw.slice ? raw.slice(0, 4000) : raw,
 				attempt,
 			};
+
+			console.log('Generated message meta from messageGenerationService.ts:', {
+				subject,
+				bodyHtml,
+				bodyPlain,
+				generationMeta,
+			});
 
 			return {
 				subject,

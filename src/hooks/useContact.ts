@@ -152,6 +152,10 @@ export const useContactDelete = () => {
 		onSettled: () => {
 			// Ensure eventual consistency
 			queryClient.invalidateQueries({ queryKey: ['contacts-get-all'] });
+			queryClient.invalidateQueries({ queryKey: ['contact-get-unique'] });
+			queryClient.invalidateQueries({ queryKey: ['messages-get-by-contact'] });
+			queryClient.invalidateQueries({ queryKey: ['sequences-get-by-contact'] });
+			queryClient.invalidateQueries({ queryKey: ['messages-get-all'] });
 		},
 	});
 };

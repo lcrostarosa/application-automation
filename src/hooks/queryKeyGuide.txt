@@ -1,0 +1,56 @@
+Query Key -> Hooks it's used in -> Part of hook (where invalidated/updated)
+
+contacts-get-all
+  -> useContactsGetAll (query)
+  -> useContactCreate (onSuccess / onSettled)
+  -> useContactUpdate (onSuccess / onSettled)
+  -> useContactDelete (onSuccess)
+  -> useEmailSend (onSuccess: setQueryData + invalidate)
+
+contact-get-unique [id]
+  -> useContactGetUnique (query)
+  -> useContactUpdate (onSuccess / onSettled)
+  -> useContactDelete (onSuccess)
+  -> useEmailSend (onSuccess: setQueryData + invalidate)
+
+messages-get-by-contact [contactId]
+  -> useAllMessagesByContactId (query)
+  -> message create/update/delete hooks (onMutate / onSuccess / onSettled)
+  -> optimistic updates (where implemented)
+
+all-messages-by-contact-id [contactId]
+  -> used in alternate message listing hooks (query)
+  -> invalidated by useEmailSend (onSuccess) and message mutations (onSuccess)
+
+standalone-messages-by-contact-id [contactId]
+  -> useStandaloneMessagesByContactId (query)
+  -> standalone message create/update/delete (onSuccess / onSettled)
+
+messages-get-all
+  -> global message list queries
+  -> invalidated by admin/bulk message operations (onSuccess)
+
+pending-messages-get-all
+  -> useMessagesGetAllPending (query)
+  -> useMessageApprove (onSuccess)
+  -> useMessageUpdate (onSuccess)
+  -> pending create/reject flows (onSuccess)
+
+sequences-get-by-contact [contactId] / sequences-by-contact-id [contactId]
+  -> useSequencesByContactId (query)
+  -> sequence create/update/delete hooks (onSuccess / onSettled)
+  -> useEmailSend (onSuccess, when sequences are affected)
+
+sequences-by-user-id [userId]
+  -> useSequencesByUserId (query)
+  -> sequence create/update/delete for that user (onSuccess / onSettled)
+
+replies-get-all
+  -> useGetAllReplies (query)
+  -> useCheckNewReplies (onSuccess / background polling)
+  -> reply ingestion/sync hooks (onSuccess)
+
+Notes:
+- Prefer narrow invalidation (pass id where applicable).
+- Use setQueryData for optimistic/local updates and call invalidation helpers for consistency.
+- Update this file when you add/change query keys or hooks.

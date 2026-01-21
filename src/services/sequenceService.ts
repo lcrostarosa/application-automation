@@ -62,4 +62,9 @@ export async function deactivateSequence(sequenceId: number) {
 		where: { ownerId: user.id, id: sequenceId },
 		data: { active: false, endDate: new Date() },
 	});
+
+	await prisma.message.updateMany({
+		where: { sequenceId: sequenceId, status: { in: ['pending', 'scheduled'] } },
+		data: { status: 'cancelled' },
+	});
 }
