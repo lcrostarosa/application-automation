@@ -66,6 +66,13 @@ const ContactsTable = ({
 		return 0;
 	});
 
+	if (!contacts.length)
+		return (
+			<div className={styles.activity}>
+				<p>No contacts found</p>
+			</div>
+		);
+
 	return (
 		<table className={styles['contacts-table']}>
 			<thead>
@@ -101,7 +108,7 @@ const ContactsTable = ({
 					{columns.linkedIn && <th className={styles.md}>LinkedIn</th>}
 					{columns.lastActivity && (
 						<th
-							className={styles.sm}
+							className={styles.md}
 							onClick={() => handleSort('lastActivity')}
 						>
 							<span className={styles.sort}>
@@ -129,7 +136,7 @@ const ContactsTable = ({
 					>
 						<td className={styles.sm}>{contact.firstName}</td>
 						<td className={styles.sm}>{contact.lastName}</td>
-						<td className={styles.md}>{contact.company}</td>
+						<td className={styles.lrg}>{contact.company}</td>
 						<td className={styles.md}>{contact.title}</td>
 						{columns.importance && (
 							<td className={`${styles.sm} ${styles.right}`}>
@@ -137,7 +144,7 @@ const ContactsTable = ({
 							</td>
 						)}
 						{columns.phone && (
-							<td className={`${styles.sm} ${styles.right}`}>
+							<td className={`${styles.md} ${styles.right}`}>
 								{contact.phone}
 							</td>
 						)}
@@ -146,7 +153,7 @@ const ContactsTable = ({
 							<td className={styles.md}>{contact.linkedIn}</td>
 						)}
 						{columns.lastActivity && (
-							<td className={`${styles.sm} ${styles.right}`}>
+							<td className={`${styles.md} ${styles.right}`}>
 								{contact.lastActivity
 									? new Date(contact.lastActivity).toLocaleDateString()
 									: ''}

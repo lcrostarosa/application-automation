@@ -11,7 +11,7 @@ import styles from './contacts.module.scss';
 // MUI imports
 
 // Components imports
-import SearchBar from '@/app/components/contacts/searchBar/SearchBar';
+import SearchBar from '@/app/components/searchBar/SearchBar';
 import NewContactButton from '@/app/components/buttons/NewContactButton';
 import ContactsClient from './ContactsClient';
 

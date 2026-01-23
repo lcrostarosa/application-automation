@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useContactsGetAll } from '@/hooks/useContact';
-import ContactsTable from '@/app/components/contacts/ContactsTable';
+import ContactsTable from '@/app/components/pageSpecificComponents/dashboard/contacts/ContactsTable';
 import type { ContactFromDB, ContactsResponse } from '@/types/contactTypes';
 import { redirect } from 'next/navigation';
 

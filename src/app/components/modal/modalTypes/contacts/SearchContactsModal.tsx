@@ -12,8 +12,8 @@ import styles from './searchContactsModal.module.scss';
 import { Refresh } from '@mui/icons-material';
 
 // Components imports
-import SearchBar from '@/app/components/contacts/searchBar/SearchBar';
-import ContactsTable from '@/app/components/contacts/ContactsTable';
+import SearchBar from '@/app/components/searchBar/SearchBar';
+import ContactsTable from '@/app/components/pageSpecificComponents/dashboard/contacts/ContactsTable';
 
 // Context imports
 import { useAppContext } from '@/app/context/AppContext';
