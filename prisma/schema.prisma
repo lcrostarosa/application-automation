@@ -84,6 +84,8 @@ model Message {
   sendAttempts              Int           @default(0)
   sentAt                    DateTime?     
   lastError                 String?
+  needsFollowUp             Boolean       @default(false)
+  nextMessageGenerated      Boolean       @default(false)
 
   @@index([status, scheduledAt])
 }

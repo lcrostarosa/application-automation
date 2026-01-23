@@ -21,6 +21,8 @@ export interface MessageFromDB {
 	subject: string;
 	templateId: number | null;
 	threadId: string | null;
+	needsFollowUp: boolean;
+	nextMessageGenerated: boolean;
 }
 
 export interface MessagesResponse {

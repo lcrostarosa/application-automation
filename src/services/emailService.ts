@@ -171,6 +171,7 @@ export async function storeSentEmail({
 						? new Date(Date.now() + sendDelay * 60 * 1000)
 						: null,
 				sentAt: new Date(),
+				needsFollowUp: true,
 			},
 		}),
 
@@ -180,6 +181,8 @@ export async function storeSentEmail({
 			data: { lastActivity: new Date(), active: true },
 		}),
 	]);
+
+	console.log(storedMessage);
 
 	return { storedMessage, updatedContact };
 }

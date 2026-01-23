@@ -63,7 +63,7 @@ export async function PUT(
 				ownerId: user.id,
 				status: { in: ['pending', 'scheduled'] },
 			},
-			data: { status: 'cancelled' },
+			data: { status: 'cancelled', needsFollowUp: false },
 		});
 		const updatedContact = await prisma.contact.update({
 			where: { id: updatedSequence.contactId },
