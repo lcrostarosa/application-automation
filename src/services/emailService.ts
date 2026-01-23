@@ -7,9 +7,7 @@ import { SequenceFromDB } from '@/types/sequenceTypes';
 import { ContactFromDB } from '@/types/contactTypes';
 
 // Services imports
-import { generateMessage } from './messageGenerationService';
 import { sendMessage } from './messageService';
-import { sendGmail } from '@/lib/gmail';
 
 // Helpers imports
 import { parseSequenceData } from '@/lib/helperFunctions';
@@ -50,8 +48,8 @@ export async function storeSentEmail({
 	subject,
 	contents,
 	cadenceType,
-	reviewBeforeSending,
-	sendWithoutReviewAfter,
+	autoSend,
+	autoSendDelay,
 	cadenceDuration,
 	messageId,
 	threadId,
@@ -81,12 +79,10 @@ export async function storeSentEmail({
 
 	// Helper to determine sendDelay in days
 	const sendDelay =
-		sendWithoutReviewAfter === 'never' ||
-		sendWithoutReviewAfter === '' ||
-		!reviewBeforeSending
+		autoSendDelay === 'never' || autoSendDelay === '' || !autoSend
 			? null
-			: sendWithoutReviewAfter
-			? parseInt(sendWithoutReviewAfter)
+			: autoSendDelay
+			? parseInt(autoSendDelay)
 			: null;
 
 	// Helper to simplify sequenceDuration calculation
@@ -144,7 +140,7 @@ export async function storeSentEmail({
 			contactId: contact.id,
 			ownerId,
 			sequenceType: cadenceType,
-			autoSend: reviewBeforeSending ? false : true,
+			autoSend: autoSend ? false : true,
 			autoSendDelay: sendDelay,
 			sequenceDuration: cadenceDurationMapping[cadenceDuration],
 			nextStepDue: nextStepDueDate,
@@ -168,10 +164,10 @@ export async function storeSentEmail({
 				messageId,
 				threadId,
 				createdAt: new Date(),
-				needsApproval: reviewBeforeSending,
+				needsApproval: autoSend,
 				status: 'sent',
 				approvalDeadline:
-					reviewBeforeSending && sendDelay
+					autoSend && sendDelay
 						? new Date(Date.now() + sendDelay * 60 * 1000)
 						: null,
 				sentAt: new Date(),
@@ -184,16 +180,6 @@ export async function storeSentEmail({
 			data: { lastActivity: new Date(), active: true },
 		}),
 	]);
-
-	// console.log(
-	// 	'Subject, contents, keepSubject, and preserveThreadContext from emailService.ts:',
-	// 	{
-	// 		subject,
-	// 		contents,
-	// 		keepSubject: alterSubjectLine !== true,
-	// 		preserveThreadContext: referencePreviousEmail !== false,
-	// 	}
-	// );
 
 	return { storedMessage, updatedContact };
 }

@@ -18,9 +18,9 @@ export async function POST(req: NextRequest) {
 		const {
 			to,
 			subject,
-			reviewBeforeSending,
+			autoSend,
 			cadenceType,
-			sendWithoutReviewAfter,
+			autoSendDelay,
 			cadenceDuration,
 			body,
 			override,
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
 			!to ||
 			!subject ||
 			!body ||
-			(reviewBeforeSending === true && !sendWithoutReviewAfter) ||
+			(autoSend === true && !autoSendDelay) ||
 			!cadenceType
 		) {
 			return NextResponse.json(
@@ -54,8 +54,8 @@ export async function POST(req: NextRequest) {
 					subject,
 					contents: body,
 					cadenceType,
-					reviewBeforeSending,
-					sendWithoutReviewAfter,
+					autoSend,
+					autoSendDelay,
 					cadenceDuration,
 					messageId: result.messageId,
 					threadId: result.threadId,
@@ -77,8 +77,6 @@ export async function POST(req: NextRequest) {
 				{ status: 500 }
 			);
 		};
-
-		// Helper: create and store next message in existing sequence
 
 		// Handle override: true logic
 		if (override) {
@@ -116,9 +114,9 @@ export async function POST(req: NextRequest) {
 					emailData: {
 						to,
 						subject,
-						reviewBeforeSending,
+						autoSend,
 						cadenceType,
-						sendWithoutReviewAfter,
+						autoSendDelay,
 						cadenceDuration,
 						body,
 						referencePreviousEmail,

@@ -40,7 +40,7 @@ export interface MessageCreationData {
 	messageId: string | null;
 	threadId: string | null;
 	inReplyTo?: string | null;
-	reviewBeforeSending: boolean;
+	autoSend: boolean;
 	scheduledAt?: Date | null;
 	sendDelay?: number | null;
 	referencePreviousEmail?: boolean | null;

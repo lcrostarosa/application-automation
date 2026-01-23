@@ -11,8 +11,8 @@ interface NewMessageData {
 	to: string;
 	subject: string;
 	cadenceType: string;
-	reviewBeforeSending: boolean;
-	sendWithoutReviewAfter?: string;
+	autoSend: boolean;
+	autoSendDelay?: string;
 	cadenceDuration: string;
 	body: string;
 	override?: boolean;

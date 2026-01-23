@@ -21,8 +21,8 @@ interface EmailFormData {
 	to: string;
 	subject: string;
 	followUpCadence: string;
-	reviewBeforeSending: boolean;
-	sendWithoutReviewAfter: string;
+	autoSend: boolean;
+	autoSendDelay: string;
 	cadenceDuration: string;
 	referencePreviousEmail?: boolean;
 	alterSubjectLine?: boolean;
@@ -45,8 +45,8 @@ const NewEmailForm = ({ contactEmail }: { contactEmail?: string }) => {
 				to: contactEmail || '',
 				subject: '',
 				followUpCadence: '3day',
-				reviewBeforeSending: false,
-				sendWithoutReviewAfter: '',
+				autoSend: false,
+				autoSendDelay: '',
 				cadenceDuration: '30',
 				referencePreviousEmail: true,
 				alterSubjectLine: false,
@@ -59,7 +59,7 @@ const NewEmailForm = ({ contactEmail }: { contactEmail?: string }) => {
 			.filter(Boolean) as string[];
 	};
 
-	const reviewBeforeSendingChecked = watch('reviewBeforeSending');
+	const autoSendChecked = watch('autoSend');
 	const followingUp =
 		watch('followUpCadence') !== 'none' && watch('followUpCadence') !== '';
 
@@ -103,8 +103,8 @@ const NewEmailForm = ({ contactEmail }: { contactEmail?: string }) => {
 				to: contactEmail ? contactEmail : data.to,
 				subject: data.subject || 'Email from Application',
 				cadenceType: data.followUpCadence,
-				reviewBeforeSending: data.reviewBeforeSending,
-				sendWithoutReviewAfter: data.sendWithoutReviewAfter,
+				autoSend: data.autoSend,
+				autoSendDelay: data.autoSendDelay,
 				cadenceDuration: data.cadenceDuration,
 				referencePreviousEmail: referencePrevious,
 				body: editorContent,
@@ -260,31 +260,31 @@ const NewEmailForm = ({ contactEmail }: { contactEmail?: string }) => {
 								{/* Review Before Sending */}
 								<div className={styles['input-group']}>
 									<div className={styles.input}>
-										<label htmlFor='reviewBeforeSending'>
+										<label htmlFor='autoSend'>
 											Review Before Sending Follow-up Emails:
 										</label>
 										<input
 											className={styles.checkbox}
 											type='checkbox'
-											id='reviewBeforeSending'
-											{...register('reviewBeforeSending')}
+											id='autoSend'
+											{...register('autoSend')}
 										/>
 									</div>
 								</div>
 
 								{/* Send without Review after */}
-								{reviewBeforeSendingChecked && (
+								{autoSendChecked && (
 									<div className={styles['input-group']}>
 										<div className={styles.input}>
-											<label htmlFor='sendWithoutReviewAfter'>
+											<label htmlFor='autoSendDelay'>
 												Send without Review after:
 											</label>
 											<select
 												className={styles.select}
-												id='sendWithoutReviewAfter'
-												{...register('sendWithoutReviewAfter', {
+												id='autoSendDelay'
+												{...register('autoSendDelay', {
 													validate: (value) =>
-														!reviewBeforeSendingChecked || value !== ''
+														!autoSendChecked || value !== ''
 															? true
 															: 'Please select a review time frame',
 												})}

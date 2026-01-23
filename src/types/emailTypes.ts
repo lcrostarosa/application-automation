@@ -4,8 +4,8 @@ export interface StoredEmailData {
 	subject: string;
 	contents: string;
 	cadenceType: string;
-	reviewBeforeSending: boolean;
-	sendWithoutReviewAfter?: string;
+	autoSend: boolean;
+	autoSendDelay?: string;
 	cadenceDuration: string;
 	messageId: string;
 	threadId: string;
@@ -18,9 +18,9 @@ export interface StoredEmailData {
 export interface SentEmailData {
 	to: string;
 	subject: string;
-	reviewBeforeSending: boolean;
+	autoSend: boolean;
 	cadenceType: string;
-	sendWithoutReviewAfter?: string;
+	autoSendDelay?: string;
 	cadenceDuration: string;
 	body: string;
 	override?: boolean;
@@ -32,8 +32,8 @@ export interface PendingEmailData {
 	to: string;
 	subject: string;
 	cadenceType: string;
-	reviewBeforeSending: boolean;
-	sendWithoutReviewAfter?: string;
+	autoSend: boolean;
+	autoSendDelay?: string;
 	cadenceDuration: string;
 	body: string;
 	override?: boolean;
