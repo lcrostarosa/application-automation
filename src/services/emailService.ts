@@ -9,6 +9,7 @@ import { ContactFromDB } from '@/types/contactTypes';
 // Services imports
 import { generateMessage } from './messageGenerationService';
 import { sendMessage } from './messageService';
+import { sendGmail } from '@/lib/gmail';
 
 // Helpers imports
 import { parseSequenceData } from '@/lib/helperFunctions';
@@ -43,7 +44,7 @@ export async function findOrCreateContact(email: string, ownerId: number) {
 }
 
 // Main function to store sent email in the db and handle/update sequences
-export async function storeNewMessage({
+export async function storeSentEmail({
 	email,
 	ownerId,
 	subject,
@@ -184,56 +185,17 @@ export async function storeNewMessage({
 		}),
 	]);
 
-	console.log(
-		'Subject, contents, keepSubject, and preserveThreadContext from emailService.ts:',
-		{
-			subject,
-			contents,
-			keepSubject: alterSubjectLine !== true,
-			preserveThreadContext: referencePreviousEmail !== false,
-		}
-	);
-	// Generate and return the follow-up message
-	const { subject: newSubject, bodyHtml } = await generateMessage(
-		{
-			contactName: contact.firstName || '',
-			previousSubject: subject,
-			previousBody: contents,
-		},
-		{
-			keepSubject: alterSubjectLine !== true,
-			preserveThreadContext: referencePreviousEmail !== false,
-		}
-	);
+	// console.log(
+	// 	'Subject, contents, keepSubject, and preserveThreadContext from emailService.ts:',
+	// 	{
+	// 		subject,
+	// 		contents,
+	// 		keepSubject: alterSubjectLine !== true,
+	// 		preserveThreadContext: referencePreviousEmail !== false,
+	// 	}
+	// );
 
-	console.log('Generated follow-up subject and body from emailService.ts:', {
-		newSubject,
-		bodyHtml,
-	});
-
-	const createdFollowUpMessage = await prisma.message.create({
-		data: {
-			contactId: contact.id,
-			ownerId,
-			sequenceId: sequence.id,
-			inReplyTo: messageId,
-			subject: newSubject,
-			contents: bodyHtml,
-			direction: 'outbound',
-			threadId,
-			createdAt: new Date(),
-			needsApproval: reviewBeforeSending,
-			approved: reviewBeforeSending ? false : null,
-			status: reviewBeforeSending ? 'pending' : 'scheduled',
-			approvalDeadline:
-				reviewBeforeSending && sendDelay
-					? new Date(Date.now() + sendDelay * 60 * 1000)
-					: null,
-			scheduledAt: nextStepDueDate,
-		},
-	});
-
-	return { storedMessage, createdFollowUpMessage, updatedContact };
+	return { storedMessage, updatedContact };
 }
 
 export async function updateExistingSequenceMessage(message: MessageFromDB) {

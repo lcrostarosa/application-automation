@@ -3,7 +3,7 @@ import OpenAI from 'openai';
 const client = new OpenAI();
 
 type PreviousEmailContentsType = {
-	contactName: string;
+	contactName: string | null;
 	previousSubject: string;
 	previousBody: string;
 };
@@ -45,20 +45,38 @@ export const generateMessage = async (
 
 	// const systemInstruction = `You are an assistant that drafts professional, concise follow-up emails. Return only a single JSON object with keys: subject, bodyHtml, bodyPlain. Keep HTML minimal and safe. Do not include any extraneous commentary. Do not produce chain-of-thought or internal reasoning. Do not use em dashes or anything that might suggest this is Ai-generated. Do not use <br> tags for line breaks; use proper paragraphs. Output must be valid JSON only.`;
 
-	const systemInstruction = `You are an assistant that drafts concise follow-up emails. RETURN ONLY a single MINIFIED JSON object with keys: subject, bodyHtml, bodyPlain. bodyPlain MUST NOT exceed ${MAX_BODY_WORDS} words. ALWAYS start a new line after the greeting/introduction. ALWAYS address the contact by name: ${previousEmailContents.contactName}. If the contact's name is not available, use a generic greeting. DO NOT output any commentary, analysis, or reasoning. Output must be valid compact JSON only.`;
+	// const systemInstruction = `You are an assistant that drafts concise follow-up emails. RETURN ONLY a single MINIFIED JSON object with keys: subject, bodyHtml, bodyPlain. bodyPlain MUST NOT exceed ${MAX_BODY_WORDS} words. ALWAYS start a new line after the greeting/introduction. ALWAYS address the contact by name: ${previousEmailContents.contactName}. If the contact's name is not available, use a generic greeting. DO NOT output any commentary, analysis, or reasoning. Output must be valid compact JSON only.`;
 
 	// const systemInstruction = `You are an assistant that drafts professional, concise follow-up emails. RETURN ONLY a single MINIFIED JSON object with these keys: subject, bodyHtml, bodyPlain. DO NOT output any commentary, labels, or analysis. DO NOT produce chain-of-thought or internal reasoning. Output must be valid compact JSON only.`;
 
+	// const systemInstruction = `You are drafting a short follow-up (reply-all) email FROM the original sender. DO NOT simulate or role-play a reply from the recipient or hiring team. Return ONLY a single MINIFIED JSON object with keys: subject, bodyHtml, bodyPlain. bodyPlain MUST be <= ${MAX_BODY_WORDS} words. Tone: polite, concise, "checking in". No reasoning, no extra commentary.`;
+
+	const systemInstruction = `You are drafting a short follow-up (reply-all) email FROM the original sender. RETURN ONLY one MINIFIED JSON object with keys: subject, bodyHtml, bodyPlain. bodyPlain MUST be <= ${MAX_BODY_WORDS} words. NO commentary, analysis, chain-of-thought, or role-play as any recipient. Use proper paragraphs (no <br>). Tone: polite, concise, "checking in".`;
+
 	const keepSubjectNote =
 		options.keepSubject && previousEmailContents.previousSubject
-			? `If appropriate, keep the existing subject exactly as provided: "Re: ${previousEmailContents.previousSubject}".`
+			? `Keep the existing subject exactly as provided.`
 			: 'You may rewrite the subject if it will improve response rate.';
 
 	const threadContextNote = preserveThreadContext
 		? 'This is a reply-all — preserve thread context. Include a very brief excerpt (1-2 sentences) and keep key topic nouns so recipients recognize the thread.'
 		: 'Do NOT include the original message body. Summarize key facts in one sentence and feel free to rewrite the subject more freely.';
 
-	const userPrompt = `Context: this is a reply-all follow-up to the previous thread. ${keepSubjectNote} ${threadContextNote}\n\nPrevious message contents:\n${previousEmailContents.previousBody}\n\nProduce the JSON object now.`;
+	const contactNameNote = previousEmailContents.contactName
+		? `Address the contact by name like "Hi ${previousEmailContents.contactName},".`
+		: 'No contact name was provided, so use a generic greeting like "Hi," or "Hello,".';
+
+	// const userPrompt = `Context: this is a reply-all follow-up to the previous thread. ${keepSubjectNote} ${threadContextNote}\n\nPrevious message contents:\n${previousEmailContents.previousBody}\n\nProduce the JSON object now.`;
+
+	// const userPrompt = `Instruction: Draft a brief reply-all follow-up from the original sender. ${contactNameNote} Include a 1-sentence contextual excerpt (1-2 lines) so recipients recognize the thread, then one short check-in sentence with a clear CTA (e.g. "Are you available for a 15-minute call next week?"). Avoid using words like "just" or "kindly". Do NOT change the sender or pretend the recipient already replied. ${keepSubjectNote} ${threadContextNote} NEVER use <br>. Always use proper paragraphs.\n\nPrevious message contents:\n${previousEmailContents.previousBody}\n\nProduce the JSON object now.`;
+
+	const userPrompt = `Context: This is a reply-all follow-up email. ${keepSubjectNote} ${
+		preserveThreadContext
+			? 'Preserve thread context and include a very brief excerpt (1-2 sentences) and keep key topic nouns so recipients recognize the thread.'
+			: 'Do NOT include the full original body; summarize key facts in one sentence and feel free to rewrite the body a little more freely.'
+	} ${contactNameNote} Include one short check-in CTA (e.g., "Are you available for a 15-minute call next week?"). Previous message:\n${
+		previousEmailContents.previousBody
+	}\n\nProduce the compact JSON object now.`;
 
 	const promptTemplate = `${systemInstruction}\n\n${userPrompt}`;
 
@@ -117,12 +135,12 @@ export const generateMessage = async (
 				attempt,
 			};
 
-			console.log('Generated message meta from messageGenerationService.ts:', {
-				subject,
-				bodyHtml,
-				bodyPlain,
-				generationMeta,
-			});
+			// console.log('Generated message meta from messageGenerationService.ts:', {
+			// 	subject,
+			// 	bodyHtml,
+			// 	bodyPlain,
+			// 	generationMeta,
+			// });
 
 			return {
 				subject,

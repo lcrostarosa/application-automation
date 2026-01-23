@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendGmail } from '@/lib/gmail';
-import { storeNewMessage } from '@/services/emailService';
+import { storeSentEmail } from '@/services/emailService';
 import { getApiUser } from '@/services/getUserService';
 import { prisma } from '@/lib/prisma';
+import { deactivateSequence } from '@/services/sequenceService';
 
 export async function POST(req: NextRequest) {
 	try {
@@ -26,6 +27,7 @@ export async function POST(req: NextRequest) {
 			sequenceId,
 			referencePreviousEmail,
 			alterSubjectLine,
+			activeSequenceId,
 		} = await req.json();
 
 		if (
@@ -41,26 +43,12 @@ export async function POST(req: NextRequest) {
 			);
 		}
 
-		// Helper: deactivate sequence
-		const deactivateSequence = async () => {
-			const existingSequence = await prisma.sequence.findFirst({
-				where: { contact: { email: to }, ownerId: user.id, active: true },
-			});
-
-			if (existingSequence) {
-				await prisma.sequence.update({
-					where: { id: existingSequence.id },
-					data: { active: false, endDate: new Date() },
-				});
-			}
-		};
-
 		// Helper: send email and update contact
 		const sendAndStoreEmail = async () => {
 			const result = await sendGmail({ to, subject, html: body });
 
 			if (user && result.messageId && result.threadId) {
-				const { updatedContact } = await storeNewMessage({
+				const { updatedContact } = await storeSentEmail({
 					email: to,
 					ownerId: user.id,
 					subject,
@@ -94,7 +82,7 @@ export async function POST(req: NextRequest) {
 
 		// Handle override: true logic
 		if (override) {
-			await deactivateSequence();
+			await deactivateSequence(activeSequenceId);
 			return await sendAndStoreEmail();
 		}
 
@@ -135,6 +123,7 @@ export async function POST(req: NextRequest) {
 						body,
 						referencePreviousEmail,
 						alterSubjectLine,
+						activeSequenceId: existingSequence.id,
 					},
 					message: 'Contact already part of an active sequence.',
 				},

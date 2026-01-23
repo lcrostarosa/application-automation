@@ -14,7 +14,6 @@ import { useEmailContext } from '@/app/context/EmailContext';
 import { useAppContext } from '@/app/context/AppContext';
 
 // Type imports
-import { SentEmailData } from '@/types/emailTypes';
 
 const OverrideModal = () => {
 	const { mutateAsync: sendEmail, isPending: sending } = useEmailSend();

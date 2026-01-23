@@ -25,6 +25,7 @@ export interface SentEmailData {
 	body: string;
 	override?: boolean;
 	sequenceId?: number;
+	activeSequenceId?: number;
 }
 
 export interface PendingEmailData {
@@ -38,4 +39,5 @@ export interface PendingEmailData {
 	override?: boolean;
 	referencePreviousEmail?: boolean | null;
 	alterSubjectLine?: boolean | null;
+	activeSequenceId: number;
 }

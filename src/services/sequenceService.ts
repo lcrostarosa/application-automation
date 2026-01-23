@@ -67,4 +67,6 @@ export async function deactivateSequence(sequenceId: number) {
 		where: { sequenceId: sequenceId, status: { in: ['pending', 'scheduled'] } },
 		data: { status: 'cancelled' },
 	});
+
+	return;
 }

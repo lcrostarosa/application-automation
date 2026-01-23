@@ -231,6 +231,7 @@ export async function generateAndCreateNewMessage({
 	// Generate and return the follow-up message
 	const { subject: newSubject, bodyHtml } = await generateMessage(
 		{
+			contactName: contact.firstName || null,
 			previousSubject: subject,
 			previousBody: contents,
 		},
@@ -239,6 +240,11 @@ export async function generateAndCreateNewMessage({
 			preserveThreadContext: referencePreviousEmail !== false,
 		}
 	);
+
+	// console.log('Generated follow-up subject and body from emailService.ts:', {
+	// 	newSubject,
+	// 	bodyHtml,
+	// });
 
 	const createdFollowUpMessage = await prisma.message.create({
 		data: {
