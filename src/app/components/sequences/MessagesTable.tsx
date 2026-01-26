@@ -75,7 +75,10 @@ const MessagesTable = ({
 						: new Date(message.scheduledAt!);
 					const parsedContent = parseEmailContent(message.contents);
 					const messageStatus =
-						message.status === 'pending'
+						message.status === 'pending' ||
+						(message.status === 'scheduled' &&
+							message.needsApproval &&
+							!message.approved)
 							? 'Pending Approval'
 							: message.status[0].toUpperCase() + message.status.slice(1);
 
@@ -85,7 +88,13 @@ const MessagesTable = ({
 							onClick={() => handleClick(message.id)}
 							className={`${nested ? styles.nested : ''} ${
 								selectedMessage === message.id ? styles.selectedMessage : ''
-							} ${styles[message.status]} ${tab ? styles[tab] : ''}`}
+							} ${
+								message.status === 'scheduled' &&
+								message.needsApproval &&
+								!message.approved
+									? styles.pending
+									: styles[message.status]
+							} ${tab ? styles[tab] : ''}`}
 						>
 							<td className={`${styles.md} ${styles.subject}`}>
 								{message.subject}

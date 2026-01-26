@@ -151,7 +151,11 @@ export async function GET(request: NextRequest) {
 
 					await prisma.message.update({
 						where: { id: message.id },
-						data: { nextMessageGenerated: true, needsFollowUp: false },
+						data: {
+							nextMessageGenerated: true,
+							needsFollowUp: false,
+							status: 'sent',
+						},
 					});
 
 					console.log(`Follow-up message created for message ${message.id}`);

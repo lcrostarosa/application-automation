@@ -21,7 +21,6 @@ import { MessageFromDB } from '@/types/messageTypes';
 
 // Components imports
 import TinyEditor from '../../editor/TinyEditor';
-import { set } from 'react-hook-form';
 
 const PendingMessagesTable = ({
 	messages,
@@ -132,12 +131,23 @@ const PendingMessagesTable = ({
 			</thead>
 			<tbody>
 				{sortedMessages.map((message) => {
-					const messageDateDay = message.sentAt
-						? new Date(message.sentAt)
-						: new Date(message.scheduledAt!);
+					const messageDateDay =
+						message.scheduledAt && new Date(message.scheduledAt);
+					const passedScheduledAt = messageDateDay
+						? new Date() >= messageDateDay
+						: false;
 					const parsedContent = parseEmailContent(message.contents);
 					const messageStatus =
-						message.status === 'pending' ? 'Pending Approval' : 'Scheduled';
+						message.status === 'pending' ||
+						(message.status === 'scheduled' &&
+							message.needsApproval &&
+							!message.approved)
+							? 'Pending Approval'
+							: 'Scheduled';
+					const messageNeedsApproval =
+						(message.needsApproval && !message.approved) ||
+						message.status === 'pending' ||
+						(message.status === 'scheduled' && !message.approved);
 
 					return (
 						<tr
@@ -197,7 +207,10 @@ const PendingMessagesTable = ({
 							</td>
 							<td
 								className={`${styles.sm} ${
-									message.status === 'pending'
+									message.status === 'pending' ||
+									(message.status === 'scheduled' &&
+										message.needsApproval &&
+										!message.approved)
 										? styles.important
 										: message.status === 'scheduled'
 										? styles.approved
@@ -206,8 +219,12 @@ const PendingMessagesTable = ({
 							>
 								{messageStatus}
 							</td>
-							<td className={`${styles.sm} ${styles.right} $`}>
-								{messageDateDay.toLocaleDateString()}
+							<td
+								className={`${styles.sm} ${styles.right} ${
+									passedScheduledAt ? styles.important : ''
+								}`}
+							>
+								{messageDateDay!.toLocaleDateString()}
 							</td>
 							<td
 								colSpan={2}
@@ -236,11 +253,9 @@ const PendingMessagesTable = ({
 									</button>
 									<button
 										className={`${styles.action} ${
-											isEditing || message.status === 'scheduled'
-												? styles.disabled
-												: ''
+											isEditing || !messageNeedsApproval ? styles.disabled : ''
 										}`}
-										disabled={isEditing || message.status === 'scheduled'}
+										disabled={isEditing || !messageNeedsApproval}
 										onClick={() => handleApprove(message.id)}
 									>
 										Approve

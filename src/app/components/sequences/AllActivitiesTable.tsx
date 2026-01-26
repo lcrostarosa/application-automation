@@ -86,7 +86,13 @@ const AllActivitiesTable = ({
 							<tr
 								className={`${
 									selectedActivity === index ? styles.selected : ''
-								} ${styles[message.status]} ${styles.all}`}
+								} ${
+									message.status === 'scheduled' &&
+									message.needsApproval &&
+									!message.approved
+										? styles.pending
+										: styles[message.status]
+								} ${styles.all}`}
 								onClick={() => {
 									handleClick(index);
 								}}
@@ -97,8 +103,19 @@ const AllActivitiesTable = ({
 
 								<td className={`${styles.sm} ${styles.status}`}>
 									{message.sequenceId ? (
-										<span className={`${styles[message.status]}`}>
-											{message.status === 'pending'
+										<span
+											className={
+												message.status === 'scheduled' &&
+												message.needsApproval &&
+												!message.approved
+													? styles.pending
+													: styles[message.status]
+											}
+										>
+											{message.status === 'pending' ||
+											(message.status === 'scheduled' &&
+												message.needsApproval &&
+												!message.approved)
 												? 'Pending Approval'
 												: message.status[0].toUpperCase() +
 												  message.status.slice(1)}
