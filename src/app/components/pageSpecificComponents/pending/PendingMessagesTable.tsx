@@ -185,7 +185,9 @@ const PendingMessagesTable = ({
 												className={styles.button}
 												onClick={handleSaveAndApprove}
 											>
-												Save and Approve
+												{messageNeedsApproval
+													? 'Save and Approve'
+													: 'Save Changes'}
 											</button>
 											<button className={styles.button} onClick={handleCancel}>
 												Cancel
