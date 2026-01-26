@@ -49,6 +49,7 @@ const SearchContactsModal = () => {
 			</div>
 			{error && <p style={{ color: 'red' }}>Error: {error.message}</p>}
 			<ContactsTable
+				inModal={true}
 				contacts={contacts}
 				onRowClick={onRowClick}
 				columns={{

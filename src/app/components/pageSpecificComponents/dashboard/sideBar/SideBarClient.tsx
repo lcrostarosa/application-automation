@@ -23,9 +23,23 @@ export default function SideBarClient({
 	}, [initialMessages, queryClient]);
 
 	const { data } = useMessagesGetAllPending();
+
+	useEffect(() => {
+		if (data?.messages) {
+			queryClient.setQueryData<MessagesResponse>(
+				['pending-messages-get-all'],
+				data
+			);
+		} else if (initialMessages?.length) {
+			queryClient.setQueryData<MessagesResponse>(['pending-messages-get-all'], {
+				messages: initialMessages,
+			});
+		}
+	}, [data, initialMessages, queryClient]);
+
 	const messages = data?.messages || [];
 	const pendingMessages = messages.filter(
-		(message) => message.status === 'pending'
+		(message) => message.status === 'pending' || !message.approved
 	);
 	const hasNotifications = pendingMessages.length > 0;
 

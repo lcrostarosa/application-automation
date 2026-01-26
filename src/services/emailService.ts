@@ -182,8 +182,6 @@ export async function storeSentEmail({
 		}),
 	]);
 
-	console.log(storedMessage);
-
 	return { storedMessage, updatedContact };
 }
 

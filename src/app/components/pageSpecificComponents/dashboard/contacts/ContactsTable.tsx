@@ -16,10 +16,12 @@ import { useAppContext } from '@/app/context/AppContext';
 import { ContactFromDB } from '@/types/contactTypes';
 
 const ContactsTable = ({
+	inModal,
 	contacts,
 	onRowClick,
 	columns,
 }: {
+	inModal?: boolean;
 	contacts: ContactFromDB[];
 	onRowClick?: (contactId: number) => void;
 	columns: {
@@ -74,7 +76,9 @@ const ContactsTable = ({
 		);
 
 	return (
-		<table className={styles['contacts-table']}>
+		<table
+			className={`${styles['contacts-table']} ${inModal ? styles.inModal : ''}`}
+		>
 			<thead>
 				<tr>
 					<th className={styles.sm} onClick={() => handleSort('firstName')}>

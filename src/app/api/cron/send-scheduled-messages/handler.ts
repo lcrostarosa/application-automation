@@ -13,6 +13,7 @@ export async function runSendScheduledMessages({ limit }: { limit: number }) {
 	const candidates = await prisma.message.findMany({
 		where: {
 			scheduledAt: { lte: new Date() },
+			approvalDeadline: { lte: new Date() },
 			status: 'scheduled',
 			sequence: {
 				is: {
