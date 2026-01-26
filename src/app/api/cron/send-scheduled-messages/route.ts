@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendGmail } from '@/lib/gmail';
 import { prisma } from '@/lib/prisma';
+import { parseSequenceData } from '@/lib/helperFunctions';
 
 export async function GET(request: NextRequest) {
 	try {
@@ -13,6 +14,7 @@ export async function GET(request: NextRequest) {
 			`[${new Date().toISOString()}] Cron: send-scheduled-messages started`
 		);
 
+		// Fetching all messages that are scheduled to be sent where scheduledAt is right now or in the past
 		const messagesToSend = await prisma.message.findMany({
 			where: {
 				scheduledAt: { lte: new Date() },
@@ -53,9 +55,27 @@ export async function GET(request: NextRequest) {
 					sequence.endDate &&
 					sequence.nextStepDue &&
 					sequence.nextStepDue > sequence.endDate;
-				const passedScheduledAt = new Date() > message.scheduledAt!;
 				const passedApprovalDeadline =
 					message.approvalDeadline && new Date() > message.approvalDeadline;
+				const newCurrentStep = sequence.currentStep + 1;
+				const { nextStepDueDate } = parseSequenceData(
+					sequence.sequenceType,
+					newCurrentStep,
+					sequence.endDate
+				);
+
+				// If scheduled but not yet approved, and approval deadline not yet passed, skip sending
+				if (
+					message.status === 'scheduled' &&
+					!message.approved &&
+					!passedApprovalDeadline
+				) {
+					return {
+						success: false,
+						messageId: message.id,
+						error: 'Approval pending',
+					};
+				}
 
 				try {
 					const result = await sendGmail({
@@ -64,12 +84,69 @@ export async function GET(request: NextRequest) {
 						html: endOfSequence ? 'Did I lose you?' : message.contents,
 					});
 
-					await prisma.message.update({
-						where: { id: message.id },
-						data: { status: 'sent', messageId: result.messageId || null },
-					});
-				} catch (error) {}
+					await prisma.$transaction([
+						prisma.message.update({
+							where: { id: message.id },
+							data: {
+								status: 'sent',
+								messageId: result.messageId || null,
+								needsFollowUp: !endOfSequence,
+								nextMessageGenerated: false,
+								sentAt: new Date(),
+							},
+						}),
+
+						prisma.sequence.update({
+							where: { id: sequence.id },
+							data: {
+								updatedAt: new Date(),
+								nextStepDue: endOfSequence ? null : nextStepDueDate,
+								currentStep: endOfSequence
+									? sequence.currentStep
+									: newCurrentStep,
+								active: endOfSequence ? false : true,
+							},
+						}),
+
+						prisma.contact.update({
+							where: { id: contact.id },
+							data: { lastActivity: new Date() },
+						}),
+					]);
+
+					return { success: true, messageId: message.id };
+				} catch (error) {
+					console.error(`Error sending message ${message.id}:`, error);
+					return {
+						success: false,
+						messageId: message.id,
+						error: (error as Error).message,
+					};
+				}
 			})
 		);
-	} catch (error) {}
+
+		const succeeded = results.filter(
+			(res) => res.status === 'fulfilled' && res.value.success
+		).length;
+		const failed = results.length - succeeded;
+
+		console.log(
+			`[${new Date().toISOString()}] Cron: generate-next-messages completed. Succeeded: ${succeeded}, Failed: ${failed}`
+		);
+
+		return NextResponse.json({
+			success: true,
+			processed: results.length,
+			succeeded,
+			failed,
+			timestamp: new Date().toISOString(),
+		});
+	} catch (error) {
+		console.error('Error in send-scheduled-messages cron:', error);
+		return NextResponse.json(
+			{ error: 'Internal Server Error', details: (error as Error).message },
+			{ status: 500 }
+		);
+	}
 }

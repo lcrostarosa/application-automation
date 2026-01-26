@@ -229,7 +229,11 @@ export async function updateExistingSequenceMessage(message: MessageFromDB) {
 		where: { id: message.contactId },
 	})) as ContactFromDB;
 	const { email } = contact;
-	const { nextStepDueDate } = parseSequenceData(sequence);
+	const { nextStepDueDate } = parseSequenceData(
+		sequence.sequenceType,
+		sequence.currentStep,
+		sequence.endDate
+	);
 	const endOfSequence = endDate && nextStepDueDate && nextStepDueDate > endDate;
 	const passedScheduledAt = new Date() > scheduledAt!;
 	const passedApprovalDeadline =

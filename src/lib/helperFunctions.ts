@@ -50,7 +50,11 @@ export const parseEmailContent = (htmlString: string): string[] => {
 	return textArray;
 };
 
-export const parseSequenceData = (sequence: SequenceFromDB) => {
+export const parseSequenceData = (
+	sequenceType: string,
+	currentStep: number,
+	endDate: Date | null
+) => {
 	const cadenceTypeMapping: { [key: string]: number } = {
 		'1day': 1,
 		'3day': 3,
@@ -60,8 +64,6 @@ export const parseSequenceData = (sequence: SequenceFromDB) => {
 		monthly: 28,
 		none: 0,
 	};
-
-	const { sequenceType, currentStep, endDate } = sequence;
 
 	const nextStepDueDateHelper = (
 		sequenceType: string,
