@@ -17,7 +17,8 @@ import styles from './newContactModal.module.scss';
 import { useAppContext } from '@/app/context/AppContext';
 
 const NewContactModal = () => {
-	const { setModalType, setDuplicateContact } = useAppContext();
+	const { setModalType, setDuplicateContact, setLoading, setLoadingMessage } =
+		useAppContext();
 	const { mutateAsync: createContact, isPending: saving } = useContactCreate();
 	const { mutateAsync: updateContact, isPending: updating } =
 		useContactUpdate();
@@ -53,6 +54,8 @@ const NewContactModal = () => {
 	const onSubmit: SubmitHandler<ContactFormData> = async (data) => {
 		if (isUpdateMode) {
 			try {
+				setLoading(true);
+				setLoadingMessage('Saving');
 				// Ensure contactId exists
 				if (!contactId) {
 					console.error('Contact ID is missing');
@@ -78,13 +81,19 @@ const NewContactModal = () => {
 				reset();
 				setModalType(null);
 				clearDuplicateState();
+				setLoading(false);
+				setLoadingMessage(null);
 			} catch (error) {
 				// Error handling is done in the hook
+				setLoading(false);
+				setLoadingMessage(null);
 			}
 			return;
 		}
 
 		try {
+			setLoading(true);
+			setLoadingMessage('Saving');
 			const response = await createContact(data);
 
 			// Handle duplicate contact scenario
@@ -97,8 +106,12 @@ const NewContactModal = () => {
 			reset();
 			setModalType(null);
 			clearDuplicateState();
+			setLoading(false);
+			setLoadingMessage(null);
 		} catch (error) {
 			// Error handling is done in the hook
+			setLoading(false);
+			setLoadingMessage(null);
 		}
 	};
 

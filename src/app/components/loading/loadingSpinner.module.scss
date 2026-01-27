@@ -1,0 +1,94 @@
+.loadingcontainer {
+	width: 100dvw;
+	height: 100dvh;
+
+	position: fixed;
+	top: 0;
+	left: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	z-index: 2000;
+	background-color: hsla(0, 0%, 0%, 0.1);
+
+	.container {
+		width: 15rem;
+		height: 10rem;
+
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 1rem;
+		background-color: var(--background-secondary);
+		border-radius: 0.5rem;
+		box-shadow: var(--shadow-lg);
+
+		h2 {
+			position: relative;
+			font-size: 2rem;
+			color: var(--text-muted);
+			transform: translateX(-0.5rem);
+
+			.elipses {
+				position: absolute;
+				top: 0;
+				right: 0;
+				transform: translateX(100%);
+			}
+		}
+	}
+}
+
+.spinner {
+	position: relative;
+	align-self: center;
+	display: grid;
+
+	.loading-spinner {
+		place-self: center;
+		display: grid;
+		padding: 1.5rem;
+		border-radius: 50%;
+		transform: rotate(calc(var(--p) * 1turn));
+		background: conic-gradient(
+			transparent calc(var(--p) * 100%),
+			#22d3ee 0%,
+			#6ee7b7 calc(var(--q) * 100%),
+			transparent 0%
+		);
+		--mask: radial-gradient(
+			closest-side,
+			transparent calc(100% - 0.625rem),
+			#6ee7b7 calc(100% - 0.625rem + 1px)
+		);
+		-webkit-mask: var(--mask);
+		animation: a 1.5s infinite;
+		animation-name: p, q;
+		animation-timing-function: ease-in, ease-out;
+	}
+}
+
+@property --p {
+	syntax: '<number>';
+	initial-value: 0;
+	inherits: true;
+}
+
+@property --q {
+	syntax: '<number>';
+	initial-value: 0;
+	inherits: true;
+}
+
+@keyframes p {
+	to {
+		--p: 1;
+	}
+}
+@keyframes q {
+	to {
+		--q: 1;
+	}
+}

@@ -29,6 +29,8 @@ const EditContactModal = ({
 		setSelectedContact,
 		duplicateContact,
 		setDuplicateContact,
+		setLoading,
+		setLoadingMessage,
 	} = useAppContext();
 	const { mutateAsync: updateContact, isPending: updating } =
 		useContactUpdate();
@@ -58,12 +60,19 @@ const EditContactModal = ({
 
 	const onSubmit: SubmitHandler<ContactFormData> = async (data) => {
 		try {
+			setLoading(true);
+			setLoadingMessage('Saving');
 			await updateContact({ id: selectedContact.id, ...data });
 			// Handle success
 			reset();
 			setModalType(null);
+			setSelectedContact(null);
+			setLoading(false);
+			setLoadingMessage(null);
 		} catch (error) {
 			// Error handling is done in the hook
+			setLoading(false);
+			setLoadingMessage(null);
 		}
 	};
 

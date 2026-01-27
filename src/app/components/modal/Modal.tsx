@@ -8,7 +8,6 @@ import CloseButton from '../buttons/CloseButton';
 
 // Context ipmorts
 import { useAppContext } from '@/app/context/AppContext';
-import { useEmailContext } from '@/app/context/EmailContext';
 
 // Modals
 import AuthModal from './modalTypes/auth/AuthModal';

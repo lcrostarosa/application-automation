@@ -2,12 +2,6 @@ import { prisma } from '@/lib/prisma';
 
 // Services imports
 import { getApiUser } from './getUserService';
-import { generateMessage } from './messageGenerationService';
-import { sendGmail } from '@/lib/gmail';
-
-// Types imports
-import { ContactFromDB } from '@/types/contactTypes';
-import { SequenceFromDB } from '@/types/sequenceTypes';
 
 export async function getAllMessagesByUserId() {
 	const { user, error } = await getApiUser();

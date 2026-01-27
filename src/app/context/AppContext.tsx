@@ -37,6 +37,10 @@ interface AppContextType {
 	clearErrors: () => void;
 	alertMessage: string | null;
 	setAlertMessage: (message: string | null) => void;
+	loading: boolean;
+	setLoading: (loading: boolean) => void;
+	loadingMessage: string | null;
+	setLoadingMessage: (message: string | null) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -58,7 +62,8 @@ export const ContextProvider = ({ children }: ContextProviderProps) => {
 	);
 	const [errors, setErrors] = useState<string[]>([]);
 	const [alertMessage, setAlertMessage] = useState<string | null>(null);
-
+	const [loading, setLoading] = useState<boolean>(false);
+	const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
 	const clearErrors = () => {
 		setErrors([]);
 		setModalType(null);
@@ -96,6 +101,10 @@ export const ContextProvider = ({ children }: ContextProviderProps) => {
 		clearErrors: () => {},
 		alertMessage: null,
 		setAlertMessage: () => {},
+		loading: false,
+		setLoading: () => {},
+		loadingMessage: null,
+		setLoadingMessage: () => {},
 	};
 
 	// Client-side checks only after hydration
@@ -159,6 +168,10 @@ export const ContextProvider = ({ children }: ContextProviderProps) => {
 				clearErrors,
 				alertMessage,
 				setAlertMessage,
+				loading,
+				setLoading,
+				loadingMessage,
+				setLoadingMessage,
 		  }
 		: fallback;
 

@@ -45,7 +45,12 @@ export default function ContactDetailsClient({
 }) {
 	const queryClient = useQueryClient();
 
-	const { setSelectedContact, setModalType } = useAppContext();
+	const { setSelectedContact, setModalType, setLoading, setLoadingMessage } =
+		useAppContext();
+
+	const contactQuery = useContactGetUnique(initialContact.id);
+	const sequencesQuery = useSequencesByContactId(initialContact.id);
+	const allMessagesQuery = useAllMessagesByContactId(initialContact.id);
 
 	useEffect(() => {
 		if (!initialContact.firstName) {
@@ -56,6 +61,9 @@ export default function ContactDetailsClient({
 
 	// hydrate server data into the cache
 	useEffect(() => {
+		setLoading(true);
+		setLoadingMessage('Loading');
+
 		if (initialContact) {
 			queryClient.setQueryData<ContactFromDB>(
 				['contact-get-unique', initialContact.id],
@@ -78,13 +86,35 @@ export default function ContactDetailsClient({
 		}
 	}, []);
 
-	const { data } = useContactGetUnique(initialContact.id);
+	// watch queries and clear loading when they finish
+	useEffect(() => {
+		const isLoading =
+			contactQuery.isLoading ||
+			contactQuery.isFetching ||
+			sequencesQuery.isLoading ||
+			sequencesQuery.isFetching ||
+			allMessagesQuery.isLoading ||
+			allMessagesQuery.isFetching;
+
+		setLoading(isLoading);
+		setLoadingMessage(isLoading ? 'Loading' : null);
+	}, [
+		contactQuery.isLoading,
+		contactQuery.isFetching,
+		sequencesQuery.isLoading,
+		sequencesQuery.isFetching,
+		allMessagesQuery.isLoading,
+		allMessagesQuery.isFetching,
+		setLoading,
+		setLoadingMessage,
+		queryClient,
+	]);
+
+	const { data } = contactQuery;
 	const contact = data || initialContact;
-	const { data: sequencesData } = useSequencesByContactId(initialContact.id);
+	const { data: sequencesData } = sequencesQuery;
 	const sequences = sequencesData || initialSequences;
-	const { data: allMessagesData } = useAllMessagesByContactId(
-		initialContact.id
-	);
+	const { data: allMessagesData } = allMessagesQuery;
 
 	const { messages } = allMessagesData || {};
 

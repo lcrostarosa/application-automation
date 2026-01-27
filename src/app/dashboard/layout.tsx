@@ -14,6 +14,7 @@ import styles from './dashboard.module.scss';
 import TopBar from '../components/pageSpecificComponents/dashboard/TopBar';
 import SideBarClient from '../components/pageSpecificComponents/dashboard/sideBar/SideBarClient';
 import Modal from '../components/modal/Modal';
+import LoadingSpinner from '../components/loading/LoadingSpinner';
 
 // Context
 import { EmailContextProvider } from '../context/EmailContext';
@@ -59,6 +60,7 @@ export default async function DashboardLayout({
 				</div>
 			</div>
 			<Modal />
+			<LoadingSpinner message='Loading' />
 		</EmailContextProvider>
 	);
 }

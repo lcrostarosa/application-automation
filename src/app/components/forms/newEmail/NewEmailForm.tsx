@@ -35,6 +35,8 @@ const NewEmailForm = ({ contactEmail }: { contactEmail?: string }) => {
 		selectedContact,
 		setSelectedContact,
 		setErrors,
+		setLoading,
+		setLoadingMessage,
 	} = useAppContext();
 	const { resetForm, setResetForm } = useEmailContext();
 
@@ -104,6 +106,8 @@ const NewEmailForm = ({ contactEmail }: { contactEmail?: string }) => {
 		const alterSubject = !data.followUpCadence ? null : !!data.alterSubjectLine;
 
 		try {
+			setLoading(true);
+			setLoadingMessage('Sending');
 			const result = await sendEmail({
 				to: contactEmail ? contactEmail : data.to,
 				subject: data.subject || 'Email from Application',
@@ -116,6 +120,8 @@ const NewEmailForm = ({ contactEmail }: { contactEmail?: string }) => {
 				alterSubjectLine: alterSubject,
 			});
 
+			setLoading(false);
+			setLoadingMessage(null);
 			setEditorContent('');
 			setSelectedContact(null);
 			reset(); // Reset form fields
@@ -127,6 +133,8 @@ const NewEmailForm = ({ contactEmail }: { contactEmail?: string }) => {
 			}
 		} catch (error) {
 			// Error handling is done in the hook
+			setLoading(false);
+			setLoadingMessage(null);
 		}
 	};
 
