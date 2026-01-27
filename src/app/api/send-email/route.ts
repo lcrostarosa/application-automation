@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 			const result = await sendGmail({ to, subject, html: body });
 
 			if (user && result.messageId && result.threadId) {
-				const { updatedContact } = await storeSentEmail({
+				const { createdMessage, updatedContact } = await storeSentEmail({
 					email: to,
 					ownerId: user.id,
 					subject,
@@ -69,6 +69,7 @@ export async function POST(req: NextRequest) {
 					messageId: result.messageId,
 					threadId: result.threadId,
 					contact: updatedContact,
+					message: createdMessage,
 				});
 			}
 

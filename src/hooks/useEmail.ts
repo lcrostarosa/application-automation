@@ -25,16 +25,21 @@ interface NewMessageResponse {
 	messageId: string;
 	threadId: string;
 	contact?: any;
+	message?: any;
 }
 
 export const useEmailSend = () => {
-	const { setModalType, setAlertMessage } = useAppContext();
-	const { setPendingEmail } = useEmailContext();
+	const { setModalType, setAlertMessage, setErrors } = useAppContext();
+	const { setPendingEmail, setEmailSentId } = useEmailContext();
 	const queryClient = useQueryClient();
 
 	return useMutation({
 		mutationFn: emailAPI.send,
 		onSuccess: (response: NewMessageResponse, emailData: NewMessageData) => {
+			if (response?.message?.id && emailData.cadenceType !== 'none') {
+				setEmailSentId(Number(response.message.id));
+			}
+
 			if (response.contact) {
 				queryClient.setQueryData(
 					['contact-get-unique', response.contact.id],
@@ -78,7 +83,8 @@ export const useEmailSend = () => {
 			} else {
 				console.error('Error sending email:', error);
 
-				alert(`Failed to send email: ${error.message}`);
+				setErrors([`Failed to send email: ${error.message}`]);
+				setModalType('error');
 			}
 		},
 	});

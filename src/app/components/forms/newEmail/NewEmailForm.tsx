@@ -2,7 +2,7 @@
 
 // Library imports
 import { useState, useEffect } from 'react';
-import { useForm, SubmitHandler, FieldErrors } from 'react-hook-form';
+import { useForm, SubmitHandler, FieldErrors, set } from 'react-hook-form';
 
 // Hooks imports
 import { useEmailSend } from '@/hooks/useEmail';
@@ -31,7 +31,7 @@ interface EmailFormData {
 const NewEmailForm = ({ contactEmail }: { contactEmail?: string }) => {
 	const { setModalType, selectedContact, setSelectedContact, setErrors } =
 		useAppContext();
-	const { resetForm, setResetForm } = useEmailContext();
+	const { resetForm, setResetForm, setEmailSentId } = useEmailContext();
 
 	const { mutateAsync: sendEmail, isPending: sending } = useEmailSend();
 

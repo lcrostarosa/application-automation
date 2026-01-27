@@ -79,8 +79,6 @@ const AllActivitiesTable = ({
 				{sortedMessages.map((message, index) => {
 					const sendDate = getSendDate(message);
 
-					console.log('message', message);
-
 					return (
 						<Fragment key={index}>
 							<tr
@@ -134,13 +132,19 @@ const AllActivitiesTable = ({
 								</td>
 
 								<td
-									className={`${styles.sm} ${styles.right} ${styles.replied}`}
+									className={`${styles.sm} ${styles.right} ${styles.replied} ${
+										message.status !== 'sent' ? styles.na : ''
+									}`}
 								>
-									{message.status === 'sent'
-										? message.hasReply
-											? 'Yes'
-											: 'No'
-										: 'N/A'}
+									{message.status === 'sent' ? (
+										message.hasReply ? (
+											'Yes'
+										) : (
+											'No'
+										)
+									) : (
+										<span className={styles.na}>N/A</span>
+									)}
 								</td>
 							</tr>
 							{selectedActivity === index ? (

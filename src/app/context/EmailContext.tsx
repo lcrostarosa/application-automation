@@ -1,6 +1,14 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+// Libraries imports
+import React, {
+	createContext,
+	useContext,
+	useEffect,
+	useState,
+	ReactNode,
+} from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 // Types for email sending and override
 import { PendingEmailData } from '@/types/emailTypes';
@@ -15,11 +23,14 @@ interface EmailContextType {
 	setResetForm: (callback: boolean) => void;
 	selectedSequenceId: number | null;
 	setSelectedSequenceId: (sequenceId: number | null) => void;
+	emailSentId: number | null;
+	setEmailSentId: (id: number | null) => void;
 }
 
 const EmailContext = createContext<EmailContextType | undefined>(undefined);
 
 export const EmailContextProvider = ({ children }: { children: ReactNode }) => {
+	const queryClient = useQueryClient();
 	const [pendingEmail, setPendingEmail] = useState<PendingEmailData | null>(
 		null
 	);
@@ -28,6 +39,62 @@ export const EmailContextProvider = ({ children }: { children: ReactNode }) => {
 	const [selectedSequenceId, setSelectedSequenceId] = useState<number | null>(
 		null
 	);
+	const [emailSentId, setEmailSentId] = useState<number | null>(null);
+
+	useEffect(() => {
+		if (emailSentId === null) return;
+
+		console.log('emailSentId has changed. New ID:', emailSentId);
+
+		(async () => {
+			try {
+				const result = await fetch(`/api/messages/${emailSentId}/generate`, {
+					method: 'PUT',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ id: emailSentId }),
+				});
+
+				if (!result.ok) {
+					console.error(
+						'Failed to trigger follow-up generation:',
+						await result.text()
+					);
+					return;
+				}
+
+				const body = await result.json();
+
+				const {
+					result: { contactId },
+				} = body;
+
+				if (!contactId) {
+					console.log(
+						'No contactId returned from follow-up generation. Nothing to invalidate.'
+					);
+					return;
+				}
+
+				// Invalidate contact data to refresh any changes
+				queryClient.invalidateQueries({
+					queryKey: ['contact-get-unique', contactId],
+				});
+				queryClient.invalidateQueries({ queryKey: ['contacts-get-all'] });
+				queryClient.invalidateQueries({
+					queryKey: ['sequences-by-contact-id', contactId],
+				});
+				queryClient.invalidateQueries({
+					queryKey: ['all-messages-by-contact-id', contactId],
+				});
+				queryClient.invalidateQueries({
+					queryKey: ['pending-messages-get-all'],
+				});
+			} catch (error) {
+				console.error('Error triggering follow-up generation:', error);
+			}
+		})();
+		setEmailSentId(null);
+	}, [emailSentId]);
 
 	const clearEmailContext = () => {
 		setPendingEmail(null);
@@ -47,6 +114,8 @@ export const EmailContextProvider = ({ children }: { children: ReactNode }) => {
 				setResetForm,
 				selectedSequenceId,
 				setSelectedSequenceId,
+				emailSentId,
+				setEmailSentId,
 			}}
 		>
 			{children}

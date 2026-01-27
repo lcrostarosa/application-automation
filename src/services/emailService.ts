@@ -151,7 +151,7 @@ export async function storeSentEmail({
 	});
 
 	// Transaction safety: create message and update contact in transaction
-	const [storedMessage, updatedContact] = await prisma.$transaction([
+	const [createdMessage, updatedContact] = await prisma.$transaction([
 		// Create the message associated with the new sequence (this is technically the first message in the sequence)
 		prisma.message.create({
 			data: {
@@ -177,7 +177,11 @@ export async function storeSentEmail({
 		}),
 	]);
 
-	return { storedMessage, updatedContact };
+	console.log(
+		`Stored sent message ${createdMessage.id} and created sequence ${sequence.id} for contact ${contact.id}`
+	);
+
+	return { createdMessage, updatedContact };
 }
 
 export async function updateExistingSequenceMessage(message: MessageFromDB) {

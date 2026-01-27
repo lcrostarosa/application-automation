@@ -232,6 +232,7 @@
 						color: var(--accent-important);
 
 						.na {
+							color: var(--text-muted);
 							opacity: 0.75;
 							font-style: italic;
 						}
@@ -264,6 +265,12 @@
 					.replied {
 						font-style: italic;
 						opacity: 0.75;
+
+						.na {
+							color: var(--text-muted);
+							opacity: 0.75;
+							font-style: italic;
+						}
 					}
 				}
 
@@ -274,6 +281,7 @@
 
 					.status {
 						.na {
+							color: var(--text-muted);
 							opacity: 0.75;
 							font-style: italic;
 						}
