@@ -207,7 +207,7 @@ export default function ContactDetailsClient({
 					<div className={styles['application-details']}>
 						{contact.reasonForEmail && (
 							<div className={styles['info-row']}>
-								<span className={styles.label}>Reason for Reaching Out:</span>
+								<span className={styles.label}>Reason for Contacting:</span>
 								<span className={styles.value} style={{ fontWeight: '600' }}>
 									{contact?.reasonForEmail || 'N/A'}
 								</span>
