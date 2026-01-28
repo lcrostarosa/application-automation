@@ -95,7 +95,11 @@ const PreviousSequencesTable = ({
 									{sequenceDuration}
 								</td>
 								<td className={`${styles.sm} ${styles.right}`}>
-									{sequence.messages.length}
+									{
+										sequence.messages.filter(
+											(message) => message.status === 'sent'
+										).length
+									}
 								</td>
 								<td className={`${styles.sm} ${styles.right}`}>
 									{sequenceCompletionDate.toLocaleDateString()}

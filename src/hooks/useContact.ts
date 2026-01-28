@@ -160,6 +160,7 @@ export const useContactDelete = () => {
 			queryClient.invalidateQueries({ queryKey: ['messages-get-by-contact'] });
 			queryClient.invalidateQueries({ queryKey: ['sequences-get-by-contact'] });
 			queryClient.invalidateQueries({ queryKey: ['messages-get-all'] });
+			queryClient.invalidateQueries({ queryKey: ['pending-messages-get-all'] });
 		},
 	});
 };

@@ -204,7 +204,7 @@ const NewEmailForm = ({ contactEmail }: { contactEmail?: string }) => {
 						{/* Follow-up Cadence */}
 						<div className={styles['input-group']}>
 							<div className={styles.input}>
-								<label htmlFor='followUpCadence'>*Follow-up Cadence:</label>
+								<label htmlFor='followUpCadence'>Follow-up Cadence:</label>
 								<select
 									className={styles.select}
 									id='followUpCadence'
