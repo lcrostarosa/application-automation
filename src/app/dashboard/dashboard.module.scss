@@ -23,7 +23,7 @@
 				min-height: 100%;
 				margin: 0 auto;
 				padding: 0 2rem;
-				gap: 1.5rem;
+				gap: 2rem;
 
 				.welcomeSection {
 					text-align: center;
@@ -36,6 +36,7 @@
 						-webkit-text-fill-color: transparent;
 						background-clip: text;
 						margin-bottom: 0.5rem;
+						line-height: 1.5;
 					}
 
 					.welcomeSubtitle {
@@ -53,7 +54,7 @@
 				.previewTiles {
 					display: grid;
 					grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-					gap: 1.5rem;
+					gap: 2rem;
 				}
 
 				.recentActivity {

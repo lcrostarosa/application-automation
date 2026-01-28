@@ -49,6 +49,9 @@ export const useMessageApprove = () => {
 			queryClient.invalidateQueries({
 				queryKey: ['standalone-messages-by-contact-id'],
 			});
+			queryClient.invalidateQueries({ queryKey: ['messages-get-by-contact'] });
+			queryClient.invalidateQueries({ queryKey: ['sequences-get-by-contact'] });
+			queryClient.invalidateQueries({ queryKey: ['messages-get-all'] });
 		},
 	});
 };

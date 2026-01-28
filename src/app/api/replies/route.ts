@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
 			},
 		});
 
-		return NextResponse.json(replies);
+		return NextResponse.json({ replies });
 	} catch (error: any) {
 		console.error('Error fetching replies:', error);
 		return NextResponse.json({ error: error.message }, { status: 500 });

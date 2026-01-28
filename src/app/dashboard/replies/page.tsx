@@ -1,60 +1,35 @@
-'use client';
+// Services imports
+import { getAllRepliesByUserId } from '@/services/repliesService';
 
-import { useGetAllReplies, useCheckNewReplies } from '@/hooks/useReplies';
+// Hooks imports
+
+// Styles imports
 import styles from './repliesPage.module.scss';
 
-export default function RepliesPage() {
-	const { data: replies = [], isPending, refetch } = useGetAllReplies();
-	const { mutateAsync: checkForNewReplies, isPending: checking } =
-		useCheckNewReplies();
+// Components imports
+import RepliesClient from './RepliesClient';
 
-	const handleCheckReplies = async () => {
-		try {
-			await checkForNewReplies(undefined);
-			refetch(); // Refresh replies after checking
-		} catch (error) {
-			// Error handling is done in the hook
-		}
-	};
+// Context imports
+
+const Page = async () => {
+	const { replies } = await getAllRepliesByUserId();
 
 	return (
-		<div className={styles.repliesPage}>
-			<div className={styles.header}>
-				<h1>Email Replies</h1>
-				<button
-					onClick={handleCheckReplies}
-					disabled={checking}
-					className={styles.checkButton}
-				>
-					{checking ? 'Checking...' : 'Check for New Replies'}
-				</button>
-			</div>
+		<div className={styles['page-wrapper']}>
+			<section className={styles['header-section']}>
+				<h1 className={styles.welcomeTitle} id='replies-title'>
+					Replies
+				</h1>
+				<p className={styles.welcomeSubtitle} aria-describedby='replies-title'>
+					Replies from email sequences.
+				</p>
+			</section>
 
-			{!replies || replies.length === 0 ? (
-				<div className={styles.emptyState}>
-					<p>No replies yet. Send some emails and check back!</p>
-				</div>
-			) : (
-				<div className={styles.repliesGrid}>
-					{replies.map((reply) => (
-						<div key={reply.id} className={styles.replyCard}>
-							<div className={styles.replyHeader}>
-								<h3>{reply.contact.firstName || reply.contact.email}</h3>
-								<span className={styles.date}>
-									{new Date(reply.date).toLocaleDateString()}
-								</span>
-							</div>
-							<div className={styles.subject}>{reply.replySubject}</div>
-							<div
-								className={styles.content}
-								style={{ whiteSpace: 'pre-wrap' }}
-							>
-								{reply.replyContent}
-							</div>
-						</div>
-					))}
-				</div>
-			)}
+			<section className={styles['replies-table']}>
+				<RepliesClient initialReplies={replies} />
+			</section>
 		</div>
 	);
-}
+};
+
+export default Page;
