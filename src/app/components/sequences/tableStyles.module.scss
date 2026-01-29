@@ -100,60 +100,21 @@
 					}
 				}
 
-				// .active {
-				// 	color: var(--color-primary);
-				// 	font-weight: 600;
-				// }
+				.link {
+					font-weight: 600;
+					font-style: italic;
+					text-decoration: underline;
+				}
+			}
 
-				// .inactive {
-				// 	color: var(--text-muted);
-				// 	font-style: italic;
-				// }
+			&.unread {
+				font-weight: 600;
+			}
 
-				// .na {
-				// 	color: var(--text-muted);
-				// 	opacity: 0.75;
-				// 	font-style: italic;
-				// }
-
-				// &.pending {
-				// 	color: var(--accent-important);
-				// 	font-weight: 600;
-				// }
-
-				// &.cancelled {
-				// 	color: var(--text-muted);
-				// 	opacity: 0.75;
-				// 	font-style: italic;
-				// 	font-weight: 400 !important;
-				// }
-
-				// &.scheduled {
-				// 	font-style: italic;
-				// }
-
-				// &.na {
-				// 	color: var(--text-muted);
-				// 	font-style: italic;
-				// }
-
-				// The following styles are for nested spans
-				// .pending {
-				// 	color: var(--accent-important);
-				// 	font-weight: 600;
-				// }
-
-				// .cancelled {
-				// 	color: var(--text-muted);
-				// 	opacity: 0.75;
-				// 	font-style: italic;
-				// 	font-weight: 400 !important;
-				// }
-
-				// .scheduled {
-				// 	color: var(--color-primary);
-				// 	font-weight: 600;
-				// }
+			&.replies {
+				.subject {
+					font-weight: 600;
+				}
 			}
 
 			&.expanded-row {

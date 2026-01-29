@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getApiUser } from '@/services/getUserService';
 
-export async function GET(
+export async function PUT(
 	request: NextRequest,
 	{ params }: { params: Promise<{ id: string }> }
 ) {
@@ -26,9 +26,9 @@ export async function GET(
 
 		return NextResponse.json({ reply });
 	} catch (error: any) {
-		console.error('Error fetching sequences for contact:', error);
+		console.error('Error updating reply:', error);
 		return NextResponse.json(
-			{ error: error.message || 'Failed to fetch sequences' },
+			{ error: error.message || 'Failed to update reply' },
 			{ status: 500 }
 		);
 	}

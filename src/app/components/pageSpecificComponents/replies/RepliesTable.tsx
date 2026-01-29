@@ -1,4 +1,5 @@
 // Library imports
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 
 // Services imports
@@ -10,20 +11,13 @@ import { useReplyUpdate } from '@/hooks/useReplies';
 import styles from '../../sequences/tableStyles.module.scss';
 
 // MUI imports
-import { Edit, SwapVert } from '@mui/icons-material';
+import { SwapVert } from '@mui/icons-material';
 
 // Types imports
 import { RepliesFromDB } from '@/types/repliesTypes';
 
-// Components imports
-
-// Context imports
-
 // Helper functions imports
 import { parseReplyContent } from '@/lib/helperFunctions';
-
-// Library imports
-import { useState } from 'react';
 
 const RepliesTable = ({ replies }: { replies: RepliesFromDB[] }) => {
 	console.log('All replies:', replies);
@@ -32,20 +26,37 @@ const RepliesTable = ({ replies }: { replies: RepliesFromDB[] }) => {
 	const [selectedReply, setSelectedReply] = useState<number | null>(null);
 	const { mutateAsync: updateReply } = useReplyUpdate();
 
-	const handleSort = () => {
-		setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-	};
+	const clickedRepliesRef = useRef<Set<number>>(new Set());
+	const clickedReplies = clickedRepliesRef.current;
+
+	useEffect(() => {
+		for (let reply of replies) {
+			if (reply.processed) {
+				clickedReplies.add(reply.id);
+			}
+		}
+	}, [replies]);
 
 	const handleClick = (replyId: number) => {
 		if (selectedReply === replyId) {
 			setSelectedReply(null);
-		} else {
-			setSelectedReply(replyId);
+			return;
+		}
+
+		setSelectedReply(replyId);
+
+		if (!clickedReplies.has(replyId)) {
+			handleUpdate(replyId);
+			clickedReplies.add(replyId);
 		}
 	};
 
 	const handleUpdate = (replyId: number) => {
 		updateReply(replyId);
+	};
+
+	const handleSort = () => {
+		setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
 	};
 
 	const sortedReplies = [...replies].sort((a, b) => {
@@ -85,7 +96,8 @@ const RepliesTable = ({ replies }: { replies: RepliesFromDB[] }) => {
 				{sortedReplies.map((reply) => {
 					const replyDateDay = new Date(reply.createdAt);
 					const parsedContent = parseReplyContent(reply.replyContent);
-					const replyStatus = reply.processed ? 'Read' : 'Unread';
+					const replyStatus =
+						reply.processed || clickedReplies.has(reply.id) ? 'Read' : 'Unread';
 					const contactName = reply.contact?.firstName
 						? reply.contact.firstName + ' ' + reply.contact?.lastName
 						: 'Unknown';
@@ -94,9 +106,13 @@ const RepliesTable = ({ replies }: { replies: RepliesFromDB[] }) => {
 						<tr
 							key={reply.id}
 							onClick={() => handleClick(reply.id)}
-							className={
+							className={`${
 								selectedReply === reply.id ? styles.selectedMessage : ''
-							}
+							} ${
+								!reply.processed && !clickedReplies.has(reply.id)
+									? styles.unread
+									: ''
+							} ${styles.replies}`}
 						>
 							<td className={`${styles.sm} ${styles.name}`}>{contactName}</td>
 							<td className={`${styles.md} ${styles.subject}`}>
@@ -124,8 +140,11 @@ const RepliesTable = ({ replies }: { replies: RepliesFromDB[] }) => {
 								{replyDateDay.toLocaleDateString()}
 							</td>
 							<td className={`${styles.sm} ${styles.right}`}>
-								<Link href={`/dashboard/contacts/${reply.contactId}`}>
-									View
+								<Link
+									href={`/dashboard/contacts/${reply.contactId}`}
+									className={styles.link}
+								>
+									Go to Sequence
 								</Link>
 							</td>
 						</tr>

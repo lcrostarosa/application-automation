@@ -19,8 +19,6 @@ export const useCheckNewReplies = () => {
 	return useMutation({
 		mutationFn: () => repliesAPI.checkForNew(),
 		onSuccess: () => {
-			alert('Checked for replies successfully!');
-
 			queryClient.invalidateQueries({
 				predicate: (query) =>
 					['replies-get-all', 'all-messages-by-contact-id'].includes(
@@ -30,7 +28,6 @@ export const useCheckNewReplies = () => {
 		},
 		onError: (error: Error) => {
 			console.error('Error checking for replies:', error);
-			alert(`Error checking for replies: ${error.message}`);
 		},
 	});
 };
@@ -41,18 +38,15 @@ export const useReplyUpdate = () => {
 	return useMutation({
 		mutationFn: (replyId: number) => repliesAPI.markAsReviewed(replyId),
 		onSuccess: () => {
-			alert('Reply marked as reviewed successfully!');
-
-			queryClient.invalidateQueries({
-				predicate: (query) =>
-					['replies-get-all', 'all-messages-by-contact-id'].includes(
-						query.queryKey[0] as string
-					),
-			});
+			// queryClient.invalidateQueries({
+			// 	predicate: (query) =>
+			// 		['replies-get-all', 'all-messages-by-contact-id'].includes(
+			// 			query.queryKey[0] as string
+			// 		),
+			// });
 		},
 		onError: (error: Error) => {
 			console.error('Error marking reply as reviewed:', error);
-			alert(`Error marking reply as reviewed: ${error.message}`);
 		},
 	});
 };

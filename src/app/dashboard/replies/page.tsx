@@ -14,6 +14,8 @@ import RepliesClient from './RepliesClient';
 const Page = async () => {
 	const { replies } = await getAllRepliesByUserId();
 
+	console.log('replies:', replies);
+
 	return (
 		<div className={styles['page-wrapper']}>
 			<section className={styles['header-section']}>
