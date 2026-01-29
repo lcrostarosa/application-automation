@@ -94,18 +94,14 @@ export const useContactUpdate = () => {
 						};
 					}
 				);
-				// Invalidate both the contacts list and the unique contact query
-				queryClient.invalidateQueries({ queryKey: ['contacts-get-all'] });
-				queryClient.invalidateQueries({
-					queryKey: ['contact-get-unique', updateData.id],
-				});
 			} else {
-				// If server only returns contact id or similar, simply invalidate to refetch authoritative data
+				// If server does not return updated contact, invalidate to refetch authoritative data
 				queryClient.invalidateQueries({ queryKey: ['contacts-get-all'] });
-				queryClient.invalidateQueries({
-					queryKey: ['contact-get-unique', updateData.id],
-				});
 			}
+			// makes sure unique contact query is up to date
+			queryClient.invalidateQueries({
+				queryKey: ['contact-get-unique', updateData.id],
+			});
 		},
 
 		onError: (error: Error) => {
@@ -154,13 +150,8 @@ export const useContactDelete = () => {
 		},
 
 		onSettled: () => {
-			// Ensure eventual consistency
-			queryClient.invalidateQueries({ queryKey: ['contacts-get-all'] });
-			queryClient.invalidateQueries({ queryKey: ['contact-get-unique'] });
-			queryClient.invalidateQueries({ queryKey: ['messages-get-by-contact'] });
-			queryClient.invalidateQueries({ queryKey: ['sequences-get-by-contact'] });
-			queryClient.invalidateQueries({ queryKey: ['messages-get-all'] });
-			queryClient.invalidateQueries({ queryKey: ['pending-messages-get-all'] });
+			// Can blanket invalidate all query keys because contact deletion is rare and touches literally everything
+			queryClient.invalidateQueries();
 		},
 	});
 };

@@ -20,13 +20,12 @@ export const useCheckNewReplies = () => {
 		mutationFn: () => repliesAPI.checkForNew(),
 		onSuccess: () => {
 			alert('Checked for replies successfully!');
-			queryClient.invalidateQueries({ queryKey: ['replies-get-all'] });
-			queryClient.invalidateQueries({ queryKey: ['messages-get-all'] });
+
 			queryClient.invalidateQueries({
-				queryKey: ['all-messages-by-contact-id'],
-			});
-			queryClient.invalidateQueries({
-				queryKey: ['standalone-messages-by-contact-id'],
+				predicate: (query) =>
+					['replies-get-all', 'all-messages-by-contact-id'].includes(
+						query.queryKey[0] as string
+					),
 			});
 		},
 		onError: (error: Error) => {
@@ -43,13 +42,12 @@ export const useReplyUpdate = () => {
 		mutationFn: (replyId: number) => repliesAPI.markAsReviewed(replyId),
 		onSuccess: () => {
 			alert('Reply marked as reviewed successfully!');
-			queryClient.invalidateQueries({ queryKey: ['replies-get-all'] });
-			queryClient.invalidateQueries({ queryKey: ['messages-get-all'] });
+
 			queryClient.invalidateQueries({
-				queryKey: ['all-messages-by-contact-id'],
-			});
-			queryClient.invalidateQueries({
-				queryKey: ['standalone-messages-by-contact-id'],
+				predicate: (query) =>
+					['replies-get-all', 'all-messages-by-contact-id'].includes(
+						query.queryKey[0] as string
+					),
 			});
 		},
 		onError: (error: Error) => {

@@ -27,13 +27,16 @@ export const useSequenceDeactivate = (sequenceId: number) => {
 	return useMutation<void, Error, number>({
 		mutationFn: () => sequenceAPI.deactivate(sequenceId),
 		onSuccess: () => {
-			// Invalidate relevant queries to refetch updated data
-			queryClient.invalidateQueries({ queryKey: ['sequences-by-contact-id'] });
-			queryClient.invalidateQueries({ queryKey: ['sequences-by-user-id'] });
-			queryClient.invalidateQueries({ queryKey: ['contact-get-unique'] });
-			queryClient.invalidateQueries({ queryKey: ['contacts-get-all'] });
 			queryClient.invalidateQueries({
-				queryKey: ['all-messages-by-contact-id'],
+				predicate: (query) =>
+					[
+						'sequences-by-contact-id',
+						'sequences-by-user-id',
+						'contact-get-unique',
+						'contacts-get-all',
+						'all-messages-by-contact-id',
+						'pending-messages-get-all',
+					].includes(query.queryKey[0] as string),
 			});
 		},
 	});

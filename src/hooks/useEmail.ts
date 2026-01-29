@@ -62,16 +62,14 @@ export const useEmailSend = () => {
 					return { ...oldData, contacts: updatedContacts };
 				});
 
-				// Invalidate contact query to refresh data
 				queryClient.invalidateQueries({
-					queryKey: ['contact-get-unique', response.contact.id],
-				});
-				queryClient.invalidateQueries({ queryKey: ['contacts-get-all'] });
-				queryClient.invalidateQueries({
-					queryKey: ['sequences-by-contact-id'],
-				});
-				queryClient.invalidateQueries({
-					queryKey: ['all-messages-by-contact-id'],
+					predicate: (query) =>
+						[
+							'contacts-get-all',
+							'contact-get-unique',
+							'sequences-by-contact-id',
+							'all-messages-by-contact-id',
+						].includes(query.queryKey[0] as string),
 				});
 			}
 			setModalType('alert');

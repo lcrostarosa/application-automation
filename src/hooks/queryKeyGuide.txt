@@ -22,10 +22,6 @@ all-messages-by-contact-id [contactId]
   -> used in alternate message listing hooks (query)
   -> invalidated by useEmailSend (onSuccess) and message mutations (onSuccess)
 
-standalone-messages-by-contact-id [contactId]
-  -> useStandaloneMessagesByContactId (query)
-  -> standalone message create/update/delete (onSuccess / onSettled)
-
 messages-get-all
   -> global message list queries
   -> invalidated by admin/bulk message operations (onSuccess)
