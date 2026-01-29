@@ -33,8 +33,10 @@ export const emailAPI = {
 
 // Replies API functions
 export const repliesAPI = {
-	getAll: () => apiCall('/api/replies'),
+	getAll: () => apiCall('/api/replies', { method: 'GET' }),
 	checkForNew: () => apiCall('/api/check-replies', { method: 'POST' }),
+	markAsReviewed: (replyId: number) =>
+		apiCall(`/api/replies/${replyId}`, { method: 'PUT' }),
 };
 
 // Contact API functions

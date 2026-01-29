@@ -21,7 +21,7 @@ const Page = async () => {
 					Replies
 				</h1>
 				<p className={styles.welcomeSubtitle} aria-describedby='replies-title'>
-					Replies from email sequences.
+					Replies to emails sent from the platform.
 				</p>
 			</section>
 

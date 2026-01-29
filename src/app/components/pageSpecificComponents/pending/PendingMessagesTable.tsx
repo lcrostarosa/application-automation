@@ -100,6 +100,7 @@ const PendingMessagesTable = ({
 					? subjectContent.trim()
 					: messages.find((m) => m.id === selectedMessage)?.subject || '',
 			});
+			approveMessage(selectedMessage);
 		}
 		setIsEditing(false);
 		setSelectedMessage(null);

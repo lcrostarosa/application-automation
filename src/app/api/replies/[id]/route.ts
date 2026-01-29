@@ -9,22 +9,22 @@ export async function GET(
 	try {
 		// 1. Check authentication
 		const { user, error } = await getApiUser();
-
 		if (error) {
 			return NextResponse.json(
 				{ error: error.error },
 				{ status: error.status }
 			);
 		}
-
 		const { id } = await params;
-		const contactId = parseInt(id);
-		const messages = await prisma.message.findMany({
-			where: { ownerId: user.id, contactId: contactId },
-			orderBy: { createdAt: 'desc' },
+		const replyId = parseInt(id);
+		const reply = await prisma.emailReply.update({
+			where: { ownerId: user.id, id: replyId },
+			data: {
+				processed: true,
+			},
 		});
 
-		return NextResponse.json({ messages });
+		return NextResponse.json({ reply });
 	} catch (error: any) {
 		console.error('Error fetching sequences for contact:', error);
 		return NextResponse.json(

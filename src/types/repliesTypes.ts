@@ -1,3 +1,5 @@
+import { ContactFromDB } from './contactTypes';
+
 export interface RepliesFromDB {
 	id: number;
 	ownerId: number;
@@ -13,6 +15,7 @@ export interface RepliesFromDB {
 	isAutomated: boolean;
 	processed: boolean;
 	createdAt: Date;
+	contact?: ContactFromDB;
 }
 
 export interface RepliesResponse {

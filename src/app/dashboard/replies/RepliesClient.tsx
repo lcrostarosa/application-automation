@@ -1,11 +1,11 @@
 'use client';
 
 // Library imports
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 // Hooks imports
-import { useGetAllReplies } from '@/hooks/useReplies';
+import { useGetAllReplies, useCheckNewReplies } from '@/hooks/useReplies';
 
 // Styles imports
 
@@ -25,16 +25,27 @@ const RepliesClient = ({
 	initialReplies: RepliesFromDB[];
 }) => {
 	const queryClient = useQueryClient();
+	const { mutate: checkNewReplies } = useCheckNewReplies();
 
 	useEffect(() => {
-		if (initialReplies) {
-			queryClient.setQueryData<RepliesResponse>(['replies-get-all'], {
-				replies: initialReplies,
-			});
+		if (initialReplies && initialReplies.length > 0) {
+			queryClient.setQueryData<RepliesFromDB[]>(
+				['replies-get-all'],
+				initialReplies
+			);
 		}
 	}, [initialReplies, queryClient]);
 
-	return <RepliesTable />;
+	const { data: repliesData } = useGetAllReplies();
+
+	const replies = repliesData?.replies || [];
+
+	return (
+		<div>
+			<button onClick={() => checkNewReplies()}>Check for Replies</button>
+			<RepliesTable replies={replies} />
+		</div>
+	);
 };
 
 export default RepliesClient;
