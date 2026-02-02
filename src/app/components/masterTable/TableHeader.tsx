@@ -28,9 +28,9 @@ const TableHeader = ({
 				{columnHeaders.map((header, index) => (
 					<th
 						key={index}
-						className={`${styles[header.size]} ${
-							header.sortable ? styles.sort : ''
-						}`}
+						className={`
+							${styles[header.size]} 
+							${header.sortable ? styles.sort : ''}`}
 						onClick={() => {
 							if (header.sortable) {
 								handleSort(header.label);

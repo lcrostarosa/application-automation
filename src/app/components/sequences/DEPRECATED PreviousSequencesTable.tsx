@@ -14,7 +14,7 @@ import { SwapVert } from '@mui/icons-material';
 import { SequenceFromDB } from '@/types/sequenceTypes';
 
 // Components
-import MessagesTable from './MessagesTable';
+import MessagesTable from './DEPRECATED MessagesTable';
 import PreviousSequence from './PreviousSequences';
 
 const PreviousSequencesTable = ({
