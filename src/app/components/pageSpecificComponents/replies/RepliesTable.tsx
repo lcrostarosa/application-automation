@@ -76,7 +76,7 @@ const RepliesTable = ({ replies }: { replies: RepliesFromDB[] }) => {
 			<thead className={styles.tableHeader}>
 				<tr>
 					<th className={styles.sm}>Contact Name</th>
-					<th className={styles.lrg}>Message</th>
+					<th className={styles.lrg}>Email</th>
 					<th className={styles.sm} onClick={() => handleSort()}>
 						<span className={styles.sort}>
 							Reply Date

@@ -69,10 +69,6 @@
 				&:hover:not(:has(.action:hover, .rte-wrapper)) {
 					background: var(--gradient-primary-lighter);
 					cursor: pointer;
-
-					// &.editing {
-					// 	cursor: default;
-					// }
 				}
 			}
 
@@ -90,10 +86,6 @@
 					width: 0;
 					height: 0;
 					background: transparent;
-				}
-
-				&:first-child {
-					font-weight: 600;
 				}
 
 				&.right {
@@ -160,21 +152,12 @@
 						gap: 1rem;
 
 						.message-preview {
+							font-weight: 600;
 							white-space: nowrap;
 							overflow: hidden;
 							text-overflow: ellipsis;
 						}
 					}
-				}
-
-				.active {
-					color: var(--color-primary);
-					font-weight: 600;
-				}
-
-				.inactive {
-					color: var(--text-muted);
-					font-style: italic;
 				}
 
 				&.important {
@@ -288,14 +271,6 @@
 						}
 					}
 				}
-			}
-
-			&.expanded-row {
-				background: var(--gradient-primary-lighter);
-			}
-
-			&.selected {
-				background: var(--gradient-primary-lighter);
 			}
 
 			&.selectedMessage {

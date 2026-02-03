@@ -2,7 +2,10 @@
 import { messageAPI } from '@/services/api';
 
 // Types imports
-import { MessagesResponse } from '@/types/messageTypes';
+import {
+	MessagesResponse,
+	MessagesWithContactResponse,
+} from '@/types/messageTypes';
 
 // Tanstack React Query
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -17,7 +20,7 @@ export const useAllMessagesByContactId = (contactId: number) => {
 };
 
 export const useMessagesGetAllPending = () => {
-	return useQuery<MessagesResponse>({
+	return useQuery<MessagesWithContactResponse>({
 		queryKey: ['pending-messages-get-all'],
 		queryFn: () => messageAPI.getAllPending(),
 		refetchOnWindowFocus: true,
