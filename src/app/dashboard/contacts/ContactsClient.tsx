@@ -1,11 +1,23 @@
 'use client';
 
+// Library imports
 import { useEffect } from 'react';
+import { redirect } from 'next/navigation';
+
+// Hooks imports
 import { useQueryClient } from '@tanstack/react-query';
 import { useContactsGetAll } from '@/hooks/useContact';
-import ContactsTable from '@/app/components/pageSpecificComponents/dashboard/contacts/ContactsTable';
+
+// Types imports
 import type { ContactFromDB, ContactsResponse } from '@/types/contactTypes';
-import { redirect } from 'next/navigation';
+
+// Styles imports
+import styles from './contactsClient.module.scss';
+
+// Components imports
+import SearchBar from '@/app/components/searchBar/SearchBar';
+import NewContactButton from '@/app/components/buttons/NewContactButton';
+import ContactsTable from '@/app/components/pageSpecificComponents/dashboard/contacts/ContactsTable';
 
 export default function ContactsClient({
 	initialContacts,
@@ -31,17 +43,30 @@ export default function ContactsClient({
 	};
 
 	return (
-		<ContactsTable
-			contacts={contacts}
-			onRowClick={(contactId) => handleRowClick(contactId)}
-			columns={{
-				reasonForEmail: true,
-				importance: true,
-				lastActivity: true,
-				linkedIn: true,
-				phone: true,
-				replied: true,
-			}}
-		/>
+		<div className={styles.client}>
+			<div className={styles['client-actions']}>
+				<SearchBar
+					placeholder='Search contacts...'
+					className={styles['search-bar']}
+				/>
+
+				<NewContactButton />
+			</div>
+
+			<div className={styles['contacts-table']}>
+				<ContactsTable
+					contacts={contacts}
+					onRowClick={(contactId) => handleRowClick(contactId)}
+					columns={{
+						reasonForEmail: true,
+						importance: true,
+						lastActivity: true,
+						linkedIn: true,
+						phone: true,
+						replied: true,
+					}}
+				/>
+			</div>
+		</div>
 	);
 }
