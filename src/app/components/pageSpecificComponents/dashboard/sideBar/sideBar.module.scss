@@ -1,5 +1,5 @@
 .sideBar {
-	width: 16.25rem;
+	min-width: 16.25rem;
 	background: var(--background-secondary);
 	box-shadow: var(--shadow-sm);
 	overflow-y: auto;
@@ -23,6 +23,10 @@
 
 			li {
 				margin: 0.25rem 0;
+
+				.icon {
+					font-size: 1.75rem;
+				}
 			}
 		}
 	}

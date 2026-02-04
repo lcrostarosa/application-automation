@@ -56,7 +56,10 @@
 		animation: blinking 1.5s infinite;
 	}
 
-	span {
+	.linkInner {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 		transition: transform 0.2s ease-in-out;
 		will-change: transform;
 	}
@@ -69,13 +72,16 @@
 		transform-origin: right center;
 
 		&.notification {
-			background: hsla(0, 92%, 61%, 0.25);
-			border-left-color: hsla(0, 92%, 61%, 0.5);
+			background: var(--gradient-danger-accessible) padding-box,
+				var(--gradient-danger) border-box;
+			border-left-color: var(--accent-important);
+			// background: hsla(0, 92%, 61%, 0.25);
+			// border-left-color: hsla(0, 92%, 61%, 0.5);
 			color: var(--accent-important);
 			animation: none;
 		}
 
-		span {
+		.linkInner {
 			transform: scale(1.1);
 		}
 	}

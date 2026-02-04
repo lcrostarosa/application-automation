@@ -8,27 +8,26 @@ import { Close } from '@mui/icons-material';
 
 // Context imports
 import { useAppContext } from '@/app/context/AppContext';
-import { useEmailContext } from '@/app/context/EmailContext';
 
-const DeactivateSequenceButton = ({ sequenceId }: { sequenceId: number }) => {
+// Types imports
+
+const DeactivateAllSequencesButton = () => {
 	const { setModalType } = useAppContext();
-	const { setSelectedSequenceId } = useEmailContext();
 
 	const handleClick = () => {
-		setSelectedSequenceId(sequenceId);
-		setModalType('deactivateSequence');
+		setModalType('deactivateAllSequences');
 	};
 
 	return (
 		<button
 			type='button'
-			className={styles['edit-contact-button']}
+			className={styles['deactivate-all-sequences-button']}
 			onClick={handleClick}
 		>
 			<Close />
-			<span>Deactivate Sequence</span>
+			<span>Deactivate All Sequences</span>
 		</button>
 	);
 };
 
-export default DeactivateSequenceButton;
+export default DeactivateAllSequencesButton;

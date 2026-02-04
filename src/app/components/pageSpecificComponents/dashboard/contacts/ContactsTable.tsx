@@ -25,6 +25,7 @@ const ContactsTable = ({
 	contacts: ContactFromDB[];
 	onRowClick?: (contactId: number) => void;
 	columns: {
+		active?: boolean;
 		reasonForEmail: boolean;
 		importance: boolean;
 		lastActivity: boolean;
@@ -35,6 +36,7 @@ const ContactsTable = ({
 }) => {
 	const { setSelectedContact } = useAppContext();
 	type SortableContactColumn =
+		| 'active'
 		| 'firstName'
 		| 'lastName'
 		| 'company'
@@ -81,6 +83,14 @@ const ContactsTable = ({
 		>
 			<thead>
 				<tr>
+					{columns.active && (
+						<th className={styles.sm} onClick={() => handleSort('active')}>
+							<span className={styles.sort}>
+								Active
+								<SwapVert fontSize='small' />
+							</span>
+						</th>
+					)}
 					<th className={styles.sm} onClick={() => handleSort('firstName')}>
 						<span className={styles.sort}>
 							First
@@ -133,62 +143,71 @@ const ContactsTable = ({
 				</tr>
 			</thead>
 			<tbody>
-				{sortedContacts.map((contact) => (
-					<tr
-						key={contact.id ?? contact.email}
-						onClick={() => handleClick(contact)}
-					>
-						<td className={styles.sm}>
-							{contact.firstName ? contact.firstName : '-'}
-						</td>
-						<td className={styles.sm}>
-							{contact.lastName ? contact.lastName : '-'}
-						</td>
-						<td className={styles.lrg}>
-							{contact.company ? contact.company : '-'}
-						</td>
-						<td className={styles.md}>{contact.title ? contact.title : '-'}</td>
-						{columns.importance && (
-							<td
-								className={`${styles.sm} ${
-									contact.importance ? styles.right : ''
-								}`}
-							>
-								{contact.importance ? contact.importance : '-'}
+				{sortedContacts.map((contact) => {
+					return (
+						<tr
+							key={contact.id ?? contact.email}
+							onClick={() => handleClick(contact)}
+						>
+							{columns.active && (
+								<td className={styles.sm}>{contact.active ? 'Yes' : 'No'}</td>
+							)}
+							<td className={styles.sm}>
+								{contact.firstName ? contact.firstName : '-'}
 							</td>
-						)}
-						{columns.phone && (
-							<td
-								className={`${styles.md} ${contact.phone ? styles.right : ''}`}
-							>
-								{contact.phone ? contact.phone : '-'}
+							<td className={styles.sm}>
+								{contact.lastName ? contact.lastName : '-'}
 							</td>
-						)}
-						<td className={styles.lrg}>{contact.email}</td>
-						{columns.linkedIn && (
-							<td className={styles.md}>
-								{contact.linkedIn ? contact.linkedIn : '-'}
-							</td>
-						)}
-						{columns.lastActivity && (
-							<td className={`${styles.md} ${styles.right}`}>
-								{contact.lastActivity
-									? new Date(contact.lastActivity).toLocaleDateString()
-									: ''}
-							</td>
-						)}
-						{columns.replied && (
-							<td className={`${styles.sm} ${styles.right}`}>
-								{contact.replied ? 'Yes' : 'No'}
-							</td>
-						)}
-						{columns.reasonForEmail && (
 							<td className={styles.lrg}>
-								{contact.reasonForEmail ? contact.reasonForEmail : '-'}
+								{contact.company ? contact.company : '-'}
 							</td>
-						)}
-					</tr>
-				))}
+							<td className={styles.md}>
+								{contact.title ? contact.title : '-'}
+							</td>
+							{columns.importance && (
+								<td
+									className={`${styles.sm} ${
+										contact.importance ? styles.right : ''
+									}`}
+								>
+									{contact.importance ? contact.importance : '-'}
+								</td>
+							)}
+							{columns.phone && (
+								<td
+									className={`${styles.md} ${
+										contact.phone ? styles.right : ''
+									}`}
+								>
+									{contact.phone ? contact.phone : '-'}
+								</td>
+							)}
+							<td className={styles.lrg}>{contact.email}</td>
+							{columns.linkedIn && (
+								<td className={styles.md}>
+									{contact.linkedIn ? contact.linkedIn : '-'}
+								</td>
+							)}
+							{columns.lastActivity && (
+								<td className={`${styles.md} ${styles.right}`}>
+									{contact.lastActivity
+										? new Date(contact.lastActivity).toLocaleDateString()
+										: ''}
+								</td>
+							)}
+							{columns.replied && (
+								<td className={`${styles.sm} ${styles.right}`}>
+									{contact.replied ? 'Yes' : 'No'}
+								</td>
+							)}
+							{columns.reasonForEmail && (
+								<td className={styles.lrg}>
+									{contact.reasonForEmail ? contact.reasonForEmail : '-'}
+								</td>
+							)}
+						</tr>
+					);
+				})}
 			</tbody>
 		</table>
 	);
