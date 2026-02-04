@@ -3,6 +3,10 @@ import { getApiUser } from '@/services/getUserService';
 import { setupGmailNotificationsForUser } from '@/lib/setupGmailNotifications';
 import { GmailCredentialError } from '@/lib/gmailClientFactory';
 
+/**
+ * POST /api/gmail/setup-watch
+ * Sets up Gmail push notifications for the authenticated user
+ */
 export async function POST(_req: NextRequest) {
 	try {
 		const { user, error } = await getApiUser();
@@ -11,9 +15,14 @@ export async function POST(_req: NextRequest) {
 		}
 
 		const result = await setupGmailNotificationsForUser(user.id);
-		return NextResponse.json({ success: true, data: result });
-	} catch (error: unknown) {
-		console.error('Setup error:', error);
+
+		return NextResponse.json({
+			success: true,
+			historyId: result.historyId,
+			expiration: result.expiration,
+		});
+	} catch (error) {
+		console.error('Error setting up Gmail watch:', error);
 
 		if (error instanceof GmailCredentialError) {
 			return NextResponse.json(

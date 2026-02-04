@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sendGmail } from '@/lib/gmail';
+import { sendGmail, GmailCredentialError } from '@/lib/gmail';
 import { storeSentEmail } from '@/services/emailService';
 import { getApiUser } from '@/services/getUserService';
 import { prisma } from '@/lib/prisma';
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
 
 		// Helper: send email and update contact
 		const sendAndStoreEmail = async () => {
-			const result = await sendGmail({ to, subject, html: body });
+			const result = await sendGmail({ userId: user.id, to, subject, html: body });
 
 			if (user && result.messageId && result.threadId) {
 				const { createdMessage, updatedContact, newContact } =
@@ -188,6 +188,19 @@ export async function POST(req: NextRequest) {
 		return await sendAndStoreEmail();
 	} catch (error) {
 		console.error('Email send error:', error);
+
+		// Handle Gmail credential errors specifically
+		if (error instanceof GmailCredentialError) {
+			return NextResponse.json(
+				{
+					error: error.message,
+					code: error.code,
+					needsGmailSetup: error.code === 'NO_CREDENTIALS',
+				},
+				{ status: 400 }
+			);
+		}
+
 		const message = getErrorMessage(error);
 		const statusCode = isAppError(error) ? error.statusCode : 500;
 		return NextResponse.json({ error: message }, { status: statusCode });

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sendGmail } from '@/lib/gmail';
+import { sendGmail, GmailCredentialError } from '@/lib/gmail';
 import { prisma } from '@/lib/prisma';
 import { parseSequenceData } from '@/lib/helperFunctions';
+import { getGmailCredentialStatus } from '@/lib/gmailClientFactory';
 
 export async function GET(request: NextRequest) {
 	try {
@@ -32,23 +33,6 @@ export async function GET(request: NextRequest) {
 			take: 50,
 		});
 
-		// const messagesToSend = await prisma.message.findMany({
-		// 	where: {
-		// 		scheduledAt: { lte: new Date() },
-		// 		status: 'scheduled',
-		// 		sequence: {
-		// 			is: {
-		// 				active: true,
-		// 			},
-		// 		},
-		// 	},
-		// 	include: {
-		// 		contact: true,
-		// 		sequence: true,
-		// 	},
-		// 	take: 50,
-		// });
-
 		if (!candidates.length) {
 			console.log('No messages to send');
 			return NextResponse.json(
@@ -57,22 +41,12 @@ export async function GET(request: NextRequest) {
 			);
 		}
 
-		// if (!messagesToSend.length) {
-		// 	console.log('No messages to send');
-		// 	return NextResponse.json(
-		// 		{ message: 'No messages to send' },
-		// 		{ status: 200 }
-		// 	);
-		// }
-
-		const candidateIds = candidates.map((c) => c.id);
+		const candidateIds = candidates.map((c: { id: number }) => c.id);
 		console.log(`Found ${candidates.length} messages to send`);
-
-		// console.log(`Found ${messagesToSend.length} messages to send`);
 
 		const claimResult = await prisma.message.updateMany({
 			where: { id: { in: candidateIds }, status: 'scheduled' },
-			data: { status: 'processing' }, // assumes 'processing' is a valid status value
+			data: { status: 'processing' },
 		});
 
 		if (!claimResult.count) {
@@ -89,7 +63,7 @@ export async function GET(request: NextRequest) {
 		});
 
 		const results = await Promise.allSettled(
-			messagesToSend.map(async (message) => {
+			messagesToSend.map(async (message: typeof messagesToSend[0]) => {
 				const contact = message.contact;
 				const sequence = message.sequence;
 
@@ -102,6 +76,44 @@ export async function GET(request: NextRequest) {
 						success: false,
 						messageId: message.id,
 						error: 'Sequence not found',
+					};
+				}
+
+				// Pre-check: Verify user has valid Gmail credentials
+				const credentialStatus = await getGmailCredentialStatus(message.ownerId);
+				if (!credentialStatus) {
+					console.error(
+						`No Gmail credentials for user ${message.ownerId}, marking message as failed`
+					);
+					await prisma.message.update({
+						where: { id: message.id },
+						data: {
+							status: 'failed',
+							lastError: 'Gmail credentials not configured',
+						},
+					});
+					return {
+						success: false,
+						messageId: message.id,
+						error: 'Gmail credentials not configured',
+					};
+				}
+
+				if (!credentialStatus.isValid) {
+					console.error(
+						`Invalid Gmail credentials for user ${message.ownerId}, marking message as failed`
+					);
+					await prisma.message.update({
+						where: { id: message.id },
+						data: {
+							status: 'failed',
+							lastError: `Gmail credentials invalid: ${credentialStatus.lastError}`,
+						},
+					});
+					return {
+						success: false,
+						messageId: message.id,
+						error: `Gmail credentials invalid: ${credentialStatus.lastError}`,
 					};
 				}
 
@@ -133,6 +145,7 @@ export async function GET(request: NextRequest) {
 
 				try {
 					const result = await sendGmail({
+						userId: message.ownerId,
 						to: contact.email,
 						subject: message.subject,
 						html: endOfSequence ? 'Did I lose you?' : message.contents,
@@ -147,6 +160,7 @@ export async function GET(request: NextRequest) {
 								needsFollowUp: !endOfSequence,
 								nextMessageGenerated: false,
 								sentAt: new Date(),
+								lastError: null,
 							},
 						}),
 
@@ -171,10 +185,31 @@ export async function GET(request: NextRequest) {
 					return { success: true, messageId: message.id };
 				} catch (error) {
 					console.error(`Error sending message ${message.id}:`, error);
+
+					// Handle credential errors - mark as failed instead of retrying
+					if (error instanceof GmailCredentialError) {
+						await prisma.message.update({
+							where: { id: message.id },
+							data: {
+								status: 'failed',
+								lastError: error.message,
+							},
+						});
+						return {
+							success: false,
+							messageId: message.id,
+							error: error.message,
+						};
+					}
+
 					// restore to scheduled so it can be retried later
 					await prisma.message.update({
 						where: { id: message.id },
-						data: { status: 'scheduled' },
+						data: {
+							status: 'scheduled',
+							sendAttempts: { increment: 1 },
+							lastError: (error as Error).message,
+						},
 					});
 					return {
 						success: false,
@@ -186,12 +221,13 @@ export async function GET(request: NextRequest) {
 		);
 
 		const succeeded = results.filter(
-			(res) => res.status === 'fulfilled' && res.value.success
+			(res: PromiseSettledResult<{ success: boolean; messageId: number; error?: string }>) =>
+				res.status === 'fulfilled' && res.value.success
 		).length;
 		const failed = results.length - succeeded;
 
 		console.log(
-			`[${new Date().toISOString()}] Cron: generate-next-messages completed. Succeeded: ${succeeded}, Failed: ${failed}`
+			`[${new Date().toISOString()}] Cron: send-scheduled-messages completed. Succeeded: ${succeeded}, Failed: ${failed}`
 		);
 
 		return NextResponse.json({

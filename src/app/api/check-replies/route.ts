@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { google, gmail_v1 } from 'googleapis';
+import { gmail_v1 } from 'googleapis';
 import { prisma } from '@/lib/prisma';
-
-const CLIENT_ID = process.env.GOOGLE_CLIENT_ID!;
-const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET!;
-const REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI!;
-const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN!;
+import { getApiUser } from '@/services/getUserService';
+import {
+	getGmailClientForUser,
+	GmailCredentialError,
+} from '@/lib/gmailClientFactory';
 
 interface GmailHeader {
 	name: string;
@@ -14,19 +14,34 @@ interface GmailHeader {
 
 export async function POST(_req: NextRequest) {
 	try {
-		console.log('Checking for new email replies...');
+		const { user, error } = await getApiUser();
+		if (error) {
+			return NextResponse.json({ error: error.error }, { status: error.status });
+		}
 
-		const oAuth2Client = new google.auth.OAuth2(
-			CLIENT_ID,
-			CLIENT_SECRET,
-			REDIRECT_URI
-		);
-		oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
-		const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
+		console.log(`Checking for new email replies for user ${user.id}...`);
+
+		let gmail: gmail_v1.Gmail;
+		try {
+			const clientResult = await getGmailClientForUser(user.id);
+			gmail = clientResult.gmail;
+		} catch (err) {
+			if (err instanceof GmailCredentialError) {
+				return NextResponse.json(
+					{
+						error: err.message,
+						code: err.code,
+						needsGmailSetup: err.code === 'NO_CREDENTIALS',
+					},
+					{ status: 400 }
+				);
+			}
+			throw err;
+		}
 
 		console.log('Gmail client initialized, checking for replies...');
 
-		await checkForReplies(gmail);
+		await checkForReplies(gmail, user.id);
 
 		return NextResponse.json({
 			success: true,
@@ -40,7 +55,7 @@ export async function POST(_req: NextRequest) {
 }
 
 // Reuse existing processMessage function logic
-async function checkForReplies(gmail: gmail_v1.Gmail) {
+async function checkForReplies(gmail: gmail_v1.Gmail, userId: number) {
 	console.log('Fetching recent messages from Gmail...');
 
 	const response = await gmail.users.messages.list({
@@ -54,12 +69,16 @@ async function checkForReplies(gmail: gmail_v1.Gmail) {
 			`Found ${response.data.messages.length} recent messages to check`
 		);
 		for (const message of response.data.messages) {
-			await processMessage(gmail, message.id!);
+			await processMessage(gmail, message.id!, userId);
 		}
 	}
 }
 
-async function processMessage(gmail: gmail_v1.Gmail, messageId: string) {
+async function processMessage(
+	gmail: gmail_v1.Gmail,
+	messageId: string,
+	userId: number
+) {
 	try {
 		const message = await gmail.users.messages.get({
 			userId: 'me',
@@ -80,6 +99,7 @@ async function processMessage(gmail: gmail_v1.Gmail, messageId: string) {
 			where: {
 				threadId: threadId,
 				direction: 'outbound',
+				ownerId: userId,
 			},
 			include: {
 				contact: true,
