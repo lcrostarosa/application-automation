@@ -133,6 +133,7 @@ export async function GET(request: NextRequest) {
 
 				try {
 					const result = await sendGmail({
+						userId: message.ownerId,
 						to: contact.email,
 						subject: message.subject,
 						html: endOfSequence ? 'Did I lose you?' : message.contents,

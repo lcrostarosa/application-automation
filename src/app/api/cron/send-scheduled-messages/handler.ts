@@ -125,6 +125,7 @@ export async function runSendScheduledMessages({ limit }: { limit: number }) {
 
 			try {
 				const result = await sendGmail({
+					userId: message.ownerId,
 					to: contact.email,
 					subject: message.subject,
 					html: endOfSequence ? 'Did I lose you?' : message.contents,

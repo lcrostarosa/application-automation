@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
 
 		// Helper: send email and update contact
 		const sendAndStoreEmail = async () => {
-			const result = await sendGmail({ to, subject, html: body });
+			const result = await sendGmail({ userId: user.id, to, subject, html: body });
 
 			if (user && result.messageId && result.threadId) {
 				const { createdMessage, updatedContact, newContact } =
