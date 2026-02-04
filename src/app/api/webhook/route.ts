@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 	const clientIp = getClientIp(req);
 
 	// Check rate limit (100 requests per minute per IP)
-	const rateLimit = checkRateLimit(clientIp, 'webhook');
+	const rateLimit = await checkRateLimit(clientIp, 'webhook');
 	if (!rateLimit.allowed) {
 		await auditWebhook(
 			req,

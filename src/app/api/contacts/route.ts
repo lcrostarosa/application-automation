@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		// 2. Check rate limit (60 requests per minute per user)
-		const rateLimit = checkRateLimit(String(user.id), 'api');
+		const rateLimit = await checkRateLimit(String(user.id), 'api');
 		if (!rateLimit.allowed) {
 			await auditUserAction(
 				req,
