@@ -17,13 +17,26 @@ export const useDuplicateContactHandler = () => {
 	const [contactId, setContactId] = useState<number | null>(null);
 
 	// Step 2: Move your utility functions here
-	const normalizeValue = (value: any) => {
+	const normalizeValue = (value: string | number | null | undefined) => {
 		if (value === null || value === undefined) return '';
 		return String(value).trim().toLowerCase();
 	};
 
+	interface ApiContact {
+		id: number;
+		firstName?: string | null;
+		lastName?: string | null;
+		company?: string | null;
+		title?: string | null;
+		email?: string | null;
+		phone?: string | null;
+		linkedIn?: string | null;
+		importance?: number | null;
+		reasonForEmail?: string | null;
+	}
+
 	// Step 3: Create processDuplicate function
-	const processDuplicate = (formData: ContactFormData, apiContact: any) => {
+	const processDuplicate = (formData: ContactFormData, apiContact: ApiContact) => {
 		// Store what user originally submitted
 		setSubmittedData(formData);
 

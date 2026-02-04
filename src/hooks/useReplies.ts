@@ -1,7 +1,7 @@
 import { repliesAPI } from '@/services/api';
 
 // Tanstack React Query
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 
 interface Reply {
 	id: number;

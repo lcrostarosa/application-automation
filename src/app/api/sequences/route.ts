@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getApiUser } from '@/services/getUserService';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
 	try {
 		// 1. Check authentication
 		const { user, error } = await getApiUser();
@@ -28,10 +28,11 @@ export async function GET(req: NextRequest) {
 
 		// 3. Return sequences
 		return NextResponse.json({ sequences });
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error('Error fetching sequences:', error);
+		const message = error instanceof Error ? error.message : 'Failed to fetch sequences';
 		return NextResponse.json(
-			{ error: error.message || 'Failed to fetch sequences' },
+			{ error: message },
 			{ status: 500 }
 		);
 	}

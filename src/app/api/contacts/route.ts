@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { checkRateLimit } from '@/lib/rate-limiter';
 import { auditUserAction, AUDIT_ACTIONS } from '@/lib/audit';
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
 	try {
 		// 1. Check authentication
 		const { user, error } = await getApiUser();
@@ -22,10 +22,11 @@ export async function GET(req: NextRequest) {
 
 		// 4. Return contacts
 		return NextResponse.json({ contacts });
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error('Error fetching contacts:', error);
+		const message = error instanceof Error ? error.message : 'Failed to fetch contacts';
 		return NextResponse.json(
-			{ error: error.message || 'Failed to fetch contacts' },
+			{ error: message },
 			{ status: 500 }
 		);
 	}
@@ -194,10 +195,11 @@ export async function POST(req: NextRequest) {
 			},
 			{ headers: rateLimit.headers }
 		);
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error('Contact creation error:', error);
+		const message = error instanceof Error ? error.message : 'Failed to create contact';
 		return NextResponse.json(
-			{ error: error.message || 'Failed to create contact' },
+			{ error: message },
 			{ status: 500 }
 		);
 	}

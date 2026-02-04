@@ -10,9 +10,6 @@ import { Close } from '@mui/icons-material';
 import { useAppContext } from '@/app/context/AppContext';
 import { useEmailContext } from '@/app/context/EmailContext';
 
-// Types imports
-import { ContactFromDB } from '@/types/contactTypes';
-
 const DeactivateSequenceButton = ({ sequenceId }: { sequenceId: number }) => {
 	const { setModalType } = useAppContext();
 	const { setSelectedSequenceId } = useEmailContext();

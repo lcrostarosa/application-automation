@@ -30,7 +30,7 @@ const TinyEditor = ({
 		}
 	};
 
-	const handleBeforeAddUndo = (evt: any, editor: TinyMCEEditor) => {
+	const handleBeforeAddUndo = (evt: { preventDefault: () => void }, editor: TinyMCEEditor) => {
 		const length = editor.getContent({ format: 'text' }).length;
 		if (length > sizeLimit) {
 			evt.preventDefault();

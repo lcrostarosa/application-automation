@@ -20,12 +20,21 @@ interface NewMessageData {
 	alterSubjectLine?: boolean | null;
 }
 
+interface ContactInfo {
+	id: number;
+	active: boolean;
+}
+
+interface MessageInfo {
+	id: number;
+}
+
 interface NewMessageResponse {
 	success: boolean;
 	messageId: string;
 	threadId: string;
-	contact?: any;
-	message?: any;
+	contact?: ContactInfo;
+	message?: MessageInfo;
 	newContact?: boolean;
 }
 
@@ -42,21 +51,23 @@ export const useEmailSend = () => {
 			}
 
 			if (response.contact) {
+				const contactId = response.contact.id;
+				const contactActive = response.contact.active;
 				queryClient.setQueryData(
-					['contact-get-unique', response.contact.id],
-					(oldData: any) => {
+					['contact-get-unique', contactId],
+					(oldData: Record<string, unknown> | undefined) => {
 						return {
 							...oldData,
-							active: response.contact.active,
+							active: contactActive,
 						};
 					}
 				);
 
-				queryClient.setQueryData(['contacts-get-all'], (oldData: any) => {
+				queryClient.setQueryData(['contacts-get-all'], (oldData: { contacts: Array<{ id: number; active: boolean }> } | undefined) => {
 					if (!oldData) return oldData;
-					const updatedContacts = oldData.contacts.map((contact: any) =>
-						contact.id === response.contact.id
-							? { ...contact, active: response.contact.active }
+					const updatedContacts = oldData.contacts.map((contact) =>
+						contact.id === contactId
+							? { ...contact, active: contactActive }
 							: contact
 					);
 					return { ...oldData, contacts: updatedContacts };
@@ -77,9 +88,9 @@ export const useEmailSend = () => {
 			setModalType('alert');
 			setAlertMessage('Email sent successfully!');
 		},
-		onError: (error: any, emailData: NewMessageData) => {
+		onError: (error: Error & { status?: number; responseData?: { sequenceExists?: boolean; emailData?: NewMessageData } }) => {
 			if (error.status === 409 && error.responseData?.sequenceExists) {
-				setPendingEmail({ ...error.responseData.emailData, override: true });
+				setPendingEmail({ ...error.responseData.emailData!, override: true });
 				setModalType('override');
 			} else {
 				console.error('Error sending email:', error);

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { google } from 'googleapis';
+import { google, gmail_v1 } from 'googleapis';
 import { prisma } from '@/lib/prisma';
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID!;
@@ -7,7 +7,12 @@ const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET!;
 const REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI!;
 const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN!;
 
-export async function POST(req: NextRequest) {
+interface GmailHeader {
+	name: string;
+	value: string;
+}
+
+export async function POST(_req: NextRequest) {
 	try {
 		console.log('Checking for new email replies...');
 
@@ -27,14 +32,15 @@ export async function POST(req: NextRequest) {
 			success: true,
 			message: 'Checked for replies successfully',
 		});
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error('Error checking for replies:', error);
-		return NextResponse.json({ error: error.message }, { status: 500 });
+		const message = error instanceof Error ? error.message : 'Unknown error';
+		return NextResponse.json({ error: message }, { status: 500 });
 	}
 }
 
 // Reuse existing processMessage function logic
-async function checkForReplies(gmail: any) {
+async function checkForReplies(gmail: gmail_v1.Gmail) {
 	console.log('Fetching recent messages from Gmail...');
 
 	const response = await gmail.users.messages.list({
@@ -53,18 +59,20 @@ async function checkForReplies(gmail: any) {
 	}
 }
 
-async function processMessage(gmail: any, messageId: string) {
+async function processMessage(gmail: gmail_v1.Gmail, messageId: string) {
 	try {
 		const message = await gmail.users.messages.get({
 			userId: 'me',
 			id: messageId,
 		});
 
-		const headers = message.data.payload.headers;
+		const headers = message.data.payload?.headers as GmailHeader[] | undefined;
 		const threadId = message.data.threadId;
 
+		if (!headers) return;
+
 		// Extract sender email and use it for validation
-		const from = headers.find((h: any) => h.name === 'From')?.value;
+		const from = headers.find((h: GmailHeader) => h.name === 'From')?.value;
 		const senderEmail = extractEmailFromHeader(from);
 
 		// Check if this is a reply to one of user's sent emails
@@ -91,33 +99,36 @@ async function processMessage(gmail: any, messageId: string) {
 			});
 
 			if (existingReply) {
-				console.log(
-					'Message:',
-					Buffer.from(
-						message.data.payload.parts.find(
-							(part: any) => part.mimeType === 'text/plain'
-						).body.data,
-						'base64'
-					).toString()
-				);
+				const parts = message.data.payload?.parts;
+				if (parts) {
+					const textPart = parts.find(
+						(part: gmail_v1.Schema$MessagePart) => part.mimeType === 'text/plain'
+					);
+					if (textPart?.body?.data) {
+						console.log(
+							'Message:',
+							Buffer.from(textPart.body.data, 'base64').toString()
+						);
+					}
+				}
 
 				//Reply already processed, SKIP
 				return;
 			}
 
 			// Rest of processing...
-			const subject = headers.find((h: any) => h.name === 'Subject')?.value;
+			const subject = headers.find((h: GmailHeader) => h.name === 'Subject')?.value;
 
 			// Extract email body (simplified)
 			let bodyContent = '';
-			if (message.data.payload.parts) {
+			if (message.data.payload?.parts) {
 				const textPart = message.data.payload.parts.find(
-					(part: any) => part.mimeType === 'text/plain'
+					(part: gmail_v1.Schema$MessagePart) => part.mimeType === 'text/plain'
 				);
 				if (textPart?.body?.data) {
 					bodyContent = Buffer.from(textPart.body.data, 'base64').toString();
 				}
-			} else if (message.data.payload.body?.data) {
+			} else if (message.data.payload?.body?.data) {
 				bodyContent = Buffer.from(
 					message.data.payload.body.data,
 					'base64'
@@ -147,7 +158,7 @@ async function processMessage(gmail: any, messageId: string) {
 					replySubject: subject || 'Reply',
 					replyContent: parsedEmail.reply || parsedEmail.raw,
 					replyHistory: parsedEmail.history || '',
-					replyDate: new Date(parseInt(message.data.internalDate)),
+					replyDate: new Date(parseInt(message.data.internalDate!)),
 					isAutomated: isAutoReply,
 				},
 			});
@@ -187,29 +198,30 @@ async function processMessage(gmail: any, messageId: string) {
 }
 
 // Helper function to extract email from "Name <email@domain.com>" format
-function extractEmailFromHeader(fromHeader: string): string {
-	const emailMatch = fromHeader?.match(/<(.+?)>/);
+function extractEmailFromHeader(fromHeader: string | undefined): string {
+	if (!fromHeader) return '';
+	const emailMatch = fromHeader.match(/<(.+?)>/);
 	return emailMatch ? emailMatch[1] : fromHeader;
 }
 
 // Check if reply is an automated/out-of-office response
 function isAutomatedReply(
-	headers: any[],
+	headers: GmailHeader[],
 	subject: string,
 	body: string
 ): boolean {
 	// Check headers for automation indicators
 	const autoSubmitted = headers.find(
-		(h: any) => h.name.toLowerCase() === 'auto-submitted'
+		(h: GmailHeader) => h.name.toLowerCase() === 'auto-submitted'
 	)?.value;
 	const xAutorespond = headers.find(
-		(h: any) => h.name.toLowerCase() === 'x-autorespond'
+		(h: GmailHeader) => h.name.toLowerCase() === 'x-autorespond'
 	)?.value;
 	const xAutoReply = headers.find(
-		(h: any) => h.name.toLowerCase() === 'x-autoreply'
+		(h: GmailHeader) => h.name.toLowerCase() === 'x-autoreply'
 	)?.value;
 	const precedence = headers.find(
-		(h: any) => h.name.toLowerCase() === 'precedence'
+		(h: GmailHeader) => h.name.toLowerCase() === 'precedence'
 	)?.value;
 
 	// Standard auto-reply headers
@@ -271,9 +283,9 @@ interface ParsedEmail {
 function parseEmailContent(bodyContent: string): ParsedEmail {
 	const lines = bodyContent.split(/\r?\n/);
 
-	let headerLines: string[] = [];
-	let replyLines: string[] = [];
-	let historyLines: string[] = [];
+	const headerLines: string[] = [];
+	const replyLines: string[] = [];
+	const historyLines: string[] = [];
 
 	let currentSection: 'headers' | 'reply' | 'history' = 'headers';
 

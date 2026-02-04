@@ -42,10 +42,11 @@ export async function PUT(
 		);
 
 		return NextResponse.json({ message });
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error('Error approving message:', error);
+		const message = error instanceof Error ? error.message : 'Failed to approve message';
 		return NextResponse.json(
-			{ error: error.message || 'Failed to approve message' },
+			{ error: message },
 			{ status: 500 }
 		);
 	}

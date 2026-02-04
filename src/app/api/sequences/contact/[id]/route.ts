@@ -29,10 +29,11 @@ export async function GET(
 			},
 		});
 		return NextResponse.json({ sequences });
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error('Error fetching sequences for contact:', error);
+		const message = error instanceof Error ? error.message : 'Failed to fetch sequences';
 		return NextResponse.json(
-			{ error: error.message || 'Failed to fetch sequences' },
+			{ error: message },
 			{ status: 500 }
 		);
 	}

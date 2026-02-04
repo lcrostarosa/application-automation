@@ -17,7 +17,7 @@ type GeneratedMessage = {
 	subject: string;
 	bodyHtml: string;
 	bodyPlain: string;
-	generationMeta: Record<string, any>;
+	generationMeta: Record<string, unknown>;
 };
 
 function extractJsonObject(text: string): string | null {
@@ -65,7 +65,7 @@ export const generateMessage = async (
 	console.log('GPT Prompt Template:', promptTemplate);
 
 	let attempt = 0;
-	let lastError: any = null;
+	let lastError: unknown = null;
 
 	while (attempt < 2) {
 		attempt += 1;
@@ -91,21 +91,22 @@ export const generateMessage = async (
 			}
 
 			// `response.output_text` is a convenience field; fall back to assembling from output items
+			const responseWithOutput = response as { output_text?: string; output?: Array<{ content?: Array<{ text?: string }> }> };
 			const raw =
-				(response as any).output_text ||
-				((response as any).output &&
-					(response as any).output
-						.map((o: any) => o.content?.map((c: any) => c.text).join(''))
+				responseWithOutput.output_text ||
+				(responseWithOutput.output &&
+					responseWithOutput.output
+						.map((o) => o.content?.map((c) => c.text).join(''))
 						.join('\n')) ||
 				JSON.stringify(response);
 
 			const jsonText = extractJsonObject(raw);
 			if (!jsonText) throw new Error('LLM did not return a JSON object');
 
-			let parsed: any;
+			let parsed: { subject?: string; subject_line?: string; bodyHtml?: string; body_html?: string; html?: string; body?: string; bodyPlain?: string; body_plain?: string; text?: string };
 			try {
 				parsed = JSON.parse(jsonText);
-			} catch (err) {
+			} catch {
 				throw new Error('Failed to parse JSON from LLM response');
 			}
 
@@ -153,6 +154,6 @@ export const generateMessage = async (
 	}
 
 	throw new Error(
-		`Message generation failed: ${lastError?.message || lastError}`
+		`Message generation failed: ${lastError instanceof Error ? lastError.message : String(lastError)}`
 	);
 };

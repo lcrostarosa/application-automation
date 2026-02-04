@@ -1,6 +1,3 @@
-// Types imports
-import { SequenceFromDB } from '@/types/sequenceTypes';
-
 export const sequenceType = (type: string, startDate: Date) => {
 	const sequenceTypes: { [key: string]: string } = {
 		'3day': 'Every 3 days',

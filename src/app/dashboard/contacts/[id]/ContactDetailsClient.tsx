@@ -45,7 +45,7 @@ export default function ContactDetailsClient({
 }) {
 	const queryClient = useQueryClient();
 
-	const { setSelectedContact, setModalType, setLoading, setLoadingMessage } =
+	const { setSelectedContact, setModalType } =
 		useAppContext();
 
 	const contactQuery = useContactGetUnique(initialContact.id);
@@ -57,6 +57,8 @@ export default function ContactDetailsClient({
 			setSelectedContact(initialContact);
 			setModalType('newContactFromNewEmail');
 		}
+		// Only run on mount
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	// hydrate server data into the cache
@@ -84,6 +86,8 @@ export default function ContactDetailsClient({
 				initialAllMessages
 			);
 		}
+		// Only run on mount to hydrate server data
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	// watch queries and clear loading when they finish

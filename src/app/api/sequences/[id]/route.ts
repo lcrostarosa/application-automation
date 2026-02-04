@@ -31,10 +31,11 @@ export async function GET(
 			},
 		});
 		return NextResponse.json({ sequence });
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error('Error fetching sequences for contact:', error);
+		const message = error instanceof Error ? error.message : 'Failed to fetch sequences';
 		return NextResponse.json(
-			{ error: error.message || 'Failed to fetch sequences' },
+			{ error: message },
 			{ status: 500 }
 		);
 	}
@@ -114,10 +115,11 @@ export async function PUT(
 			},
 			{ headers: rateLimit.headers }
 		);
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error('Error updating sequence:', error);
+		const message = error instanceof Error ? error.message : 'Failed to update sequence';
 		return NextResponse.json(
-			{ error: error.message || 'Failed to update sequence' },
+			{ error: message },
 			{ status: 500 }
 		);
 	}

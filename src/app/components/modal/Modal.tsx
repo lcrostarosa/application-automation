@@ -46,11 +46,13 @@ const Modal = ({ backupModalType }: { backupModalType?: string }) => {
 	const handleClose = () => {
 		setIsModalOpen(false);
 		setModalType(modalType === 'login' ? 'auth' : null);
-		modalType === 'editContact' && setSelectedContact(null);
-		modalType === 'editContact' && setDuplicateContact(false);
-		modalType === 'deleteContact' && setSelectedContact(null);
-		modalType === 'error' && clearErrors();
-		modalType === 'alert' && setAlertMessage(null);
+		if (modalType === 'editContact') {
+			setSelectedContact(null);
+			setDuplicateContact(false);
+		}
+		if (modalType === 'deleteContact') setSelectedContact(null);
+		if (modalType === 'error') clearErrors();
+		if (modalType === 'alert') setAlertMessage(null);
 	};
 
 	interface ModalContent {

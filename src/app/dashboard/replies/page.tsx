@@ -4,15 +4,15 @@ import { useGetAllReplies, useCheckNewReplies } from '@/hooks/useReplies';
 import styles from './repliesPage.module.scss';
 
 export default function RepliesPage() {
-	const { data: replies = [], isPending, refetch } = useGetAllReplies();
-	const { mutateAsync: checkForNewReplies, isPending: checking } =
+	const { data: replies = [], isPending: _isPending, refetch } = useGetAllReplies();
+	const { mutateAsync: checkForNewReplies, isPending: checking, error: _error } =
 		useCheckNewReplies();
 
 	const handleCheckReplies = async () => {
 		try {
 			await checkForNewReplies(undefined);
 			refetch(); // Refresh replies after checking
-		} catch (error) {
+		} catch {
 			// Error handling is done in the hook
 		}
 	};

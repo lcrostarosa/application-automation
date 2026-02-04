@@ -23,10 +23,11 @@ export async function GET(
 			orderBy: { createdAt: 'desc' },
 		});
 		return NextResponse.json({ messages });
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error('Error fetching sequences for contact:', error);
+		const message = error instanceof Error ? error.message : 'Failed to fetch sequences';
 		return NextResponse.json(
-			{ error: error.message || 'Failed to fetch sequences' },
+			{ error: message },
 			{ status: 500 }
 		);
 	}

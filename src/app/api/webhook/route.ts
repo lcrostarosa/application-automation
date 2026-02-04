@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { google } from 'googleapis';
+import { google, gmail_v1 } from 'googleapis';
 import { prisma } from '@/lib/prisma';
 import { verifyPubSubToken } from '@/lib/pubsub-auth';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limiter';
@@ -9,6 +9,11 @@ const CLIENT_ID = process.env.GOOGLE_CLIENT_ID!;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET!;
 const REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI!;
 const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN!;
+
+interface GmailHeader {
+	name: string;
+	value: string;
+}
 
 export async function POST(req: NextRequest) {
 	const clientIp = getClientIp(req);
@@ -70,17 +75,18 @@ export async function POST(req: NextRequest) {
 		await checkForNewEmails(message.historyId);
 
 		return NextResponse.json({ success: true }, { headers: rateLimit.headers });
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error('Webhook error:', error);
+		const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 		await auditWebhook(
 			req,
 			AUDIT_ACTIONS.WEBHOOK_RECEIVED,
 			{ ip: clientIp },
 			'failure',
-			error.message
+			errorMessage
 		);
 		return NextResponse.json(
-			{ error: error.message },
+			{ error: errorMessage },
 			{ status: 500, headers: rateLimit.headers }
 		);
 	}
@@ -120,7 +126,7 @@ async function checkForNewEmails(historyId: string) {
 }
 
 // Fallback method (your original approach)
-async function fallbackToRecentMessages(gmail: any) {
+async function fallbackToRecentMessages(gmail: gmail_v1.Gmail) {
 	const response = await gmail.users.messages.list({
 		userId: 'me',
 		q: 'in:inbox',
@@ -134,18 +140,20 @@ async function fallbackToRecentMessages(gmail: any) {
 	}
 }
 
-async function processMessage(gmail: any, messageId: string) {
+async function processMessage(gmail: gmail_v1.Gmail, messageId: string) {
 	try {
 		const message = await gmail.users.messages.get({
 			userId: 'me',
 			id: messageId,
 		});
 
-		const headers = message.data.payload.headers;
+		const headers = message.data.payload?.headers as GmailHeader[] | undefined;
 		const threadId = message.data.threadId;
 
+		if (!headers) return;
+
 		// Extract sender email and USE it for validation
-		const from = headers.find((h: any) => h.name === 'From')?.value;
+		const from = headers.find((h: GmailHeader) => h.name === 'From')?.value;
 		const senderEmail = extractEmailFromHeader(from);
 
 		// Check if this is a reply to one of our sent emails
@@ -169,18 +177,18 @@ async function processMessage(gmail: any, messageId: string) {
 			}
 
 			// Rest of processing...
-			const subject = headers.find((h: any) => h.name === 'Subject')?.value;
+			const subject = headers.find((h: GmailHeader) => h.name === 'Subject')?.value;
 
 			// Extract email body (simplified)
 			let bodyContent = '';
-			if (message.data.payload.parts) {
+			if (message.data.payload?.parts) {
 				const textPart = message.data.payload.parts.find(
-					(part: any) => part.mimeType === 'text/plain'
+					(part: gmail_v1.Schema$MessagePart) => part.mimeType === 'text/plain'
 				);
 				if (textPart?.body?.data) {
 					bodyContent = Buffer.from(textPart.body.data, 'base64').toString();
 				}
-			} else if (message.data.payload.body?.data) {
+			} else if (message.data.payload?.body?.data) {
 				bodyContent = Buffer.from(
 					message.data.payload.body.data,
 					'base64'
@@ -197,7 +205,7 @@ async function processMessage(gmail: any, messageId: string) {
 					direction: 'inbound',
 					messageId: messageId,
 					threadId: threadId,
-					createdAt: new Date(parseInt(message.data.internalDate)),
+					createdAt: new Date(parseInt(message.data.internalDate!)),
 				},
 			});
 
@@ -229,7 +237,8 @@ async function processMessage(gmail: any, messageId: string) {
 }
 
 // Helper function to extract email from "Name <email@domain.com>" format
-function extractEmailFromHeader(fromHeader: string): string {
-	const emailMatch = fromHeader?.match(/<(.+?)>/);
+function extractEmailFromHeader(fromHeader: string | undefined): string {
+	if (!fromHeader) return '';
+	const emailMatch = fromHeader.match(/<(.+?)>/);
 	return emailMatch ? emailMatch[1] : fromHeader;
 }
