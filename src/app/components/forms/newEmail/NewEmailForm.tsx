@@ -247,7 +247,7 @@ const NewEmailForm = ({ contactEmail }: { contactEmail?: string }) => {
 								<div className={styles['input-group']}>
 									<div className={styles.input}>
 										<label htmlFor='referencePreviousEmail'>
-											Reference Previous Emails in Follow-up:
+											Reference previous emails in follow-up:
 										</label>
 										<input
 											className={styles.checkbox}
@@ -279,7 +279,7 @@ const NewEmailForm = ({ contactEmail }: { contactEmail?: string }) => {
 								<div className={styles['input-group']}>
 									<div className={styles.input}>
 										<label htmlFor='autoSend'>
-											Review Before Sending Follow-up Emails:
+											Review before sending follow-up emails:
 										</label>
 										<input
 											className={styles.checkbox}
@@ -295,7 +295,7 @@ const NewEmailForm = ({ contactEmail }: { contactEmail?: string }) => {
 									<div className={styles['input-group']}>
 										<div className={styles.input}>
 											<label htmlFor='autoSendDelay'>
-												Send without Review after:
+												Send email without review after:
 											</label>
 											<select
 												className={styles.select}

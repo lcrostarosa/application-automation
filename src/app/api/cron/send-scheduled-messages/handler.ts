@@ -1,6 +1,7 @@
-import { sendGmail } from '@/lib/gmail';
+import { sendGmail, GmailCredentialError } from '@/lib/gmail';
 import { prisma } from '@/lib/prisma';
 import { parseSequenceData } from '@/lib/helperFunctions';
+import { getGmailCredentialStatus } from '@/lib/gmailClientFactory';
 
 export async function runSendScheduledMessages({ limit }: { limit: number }) {
 	const limitValue = limit || 50;
@@ -36,7 +37,7 @@ export async function runSendScheduledMessages({ limit }: { limit: number }) {
 		};
 	}
 
-	const candidateIds = candidates.map((c) => c.id);
+	const candidateIds = candidates.map((c: { id: number }) => c.id);
 
 	console.log(`Found ${candidates.length} messages to send`);
 
@@ -60,7 +61,7 @@ export async function runSendScheduledMessages({ limit }: { limit: number }) {
 	});
 
 	const results = await Promise.allSettled(
-		messagesToSend.map(async (message) => {
+		messagesToSend.map(async (message: typeof messagesToSend[0]) => {
 			const now = new Date();
 
 			// If message requires approval and is not approved, skip if there's no deadline (wait indefinitely) or if there's a future approvalDeadline
@@ -97,6 +98,44 @@ export async function runSendScheduledMessages({ limit }: { limit: number }) {
 				};
 			}
 
+			// Pre-check: Verify user has valid Gmail credentials
+			const credentialStatus = await getGmailCredentialStatus(message.ownerId);
+			if (!credentialStatus) {
+				console.error(
+					`No Gmail credentials for user ${message.ownerId}, marking message as failed`
+				);
+				await prisma.message.update({
+					where: { id: message.id },
+					data: {
+						status: 'failed',
+						lastError: 'Gmail credentials not configured',
+					},
+				});
+				return {
+					success: false,
+					messageId: message.id,
+					error: 'Gmail credentials not configured',
+				};
+			}
+
+			if (!credentialStatus.isValid) {
+				console.error(
+					`Invalid Gmail credentials for user ${message.ownerId}, marking message as failed`
+				);
+				await prisma.message.update({
+					where: { id: message.id },
+					data: {
+						status: 'failed',
+						lastError: `Gmail credentials invalid: ${credentialStatus.lastError}`,
+					},
+				});
+				return {
+					success: false,
+					messageId: message.id,
+					error: `Gmail credentials invalid: ${credentialStatus.lastError}`,
+				};
+			}
+
 			const endOfSequence =
 				sequence.endDate &&
 				sequence.nextStepDue &&
@@ -125,6 +164,7 @@ export async function runSendScheduledMessages({ limit }: { limit: number }) {
 
 			try {
 				const result = await sendGmail({
+					userId: message.ownerId,
 					to: contact.email,
 					subject: message.subject,
 					html: endOfSequence ? 'Did I lose you?' : message.contents,
@@ -139,6 +179,7 @@ export async function runSendScheduledMessages({ limit }: { limit: number }) {
 							needsFollowUp: !endOfSequence,
 							nextMessageGenerated: false,
 							sentAt: new Date(),
+							lastError: null,
 						},
 					}),
 
@@ -163,10 +204,31 @@ export async function runSendScheduledMessages({ limit }: { limit: number }) {
 				return { success: true, messageId: message.id };
 			} catch (error) {
 				console.error(`Error sending message ${message.id}:`, error);
-				// restore to scheduled so it can be retried later
+
+				// Handle credential errors - mark as failed instead of retrying
+				if (error instanceof GmailCredentialError) {
+					await prisma.message.update({
+						where: { id: message.id },
+						data: {
+							status: 'failed',
+							lastError: error.message,
+						},
+					});
+					return {
+						success: false,
+						messageId: message.id,
+						error: error.message,
+					};
+				}
+
+				// For other errors, restore to scheduled so it can be retried later
 				await prisma.message.update({
 					where: { id: message.id },
-					data: { status: 'scheduled' },
+					data: {
+						status: 'scheduled',
+						sendAttempts: { increment: 1 },
+						lastError: (error as Error).message,
+					},
 				});
 				return {
 					success: false,
@@ -178,7 +240,8 @@ export async function runSendScheduledMessages({ limit }: { limit: number }) {
 	);
 
 	const succeeded = results.filter(
-		(res) => res.status === 'fulfilled' && res.value.success
+		(res: PromiseSettledResult<{ success: boolean; messageId: number; error?: string }>) =>
+			res.status === 'fulfilled' && res.value.success
 	).length;
 	const failed = results.length - succeeded;
 

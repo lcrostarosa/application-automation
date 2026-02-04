@@ -9,24 +9,27 @@ export async function GET(
 	try {
 		// 1. Check authentication
 		const { user, error } = await getApiUser();
+
 		if (error) {
 			return NextResponse.json(
 				{ error: error.error },
 				{ status: error.status }
 			);
 		}
+
 		const { id } = await params;
 		const contactId = parseInt(id);
 		const messages = await prisma.message.findMany({
 			where: { ownerId: user.id, contactId: contactId },
-
 			orderBy: { createdAt: 'desc' },
 		});
+
 		return NextResponse.json({ messages });
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error('Error fetching sequences for contact:', error);
+		const message = error instanceof Error ? error.message : 'Failed to fetch sequences';
 		return NextResponse.json(
-			{ error: error.message || 'Failed to fetch sequences' },
+			{ error: message },
 			{ status: 500 }
 		);
 	}

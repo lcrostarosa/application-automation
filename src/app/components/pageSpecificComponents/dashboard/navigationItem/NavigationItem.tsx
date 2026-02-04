@@ -9,6 +9,7 @@ interface NavigationItemProps {
 	label: string;
 	isActive?: boolean;
 	notifications?: boolean;
+	icon?: React.ReactNode;
 }
 
 export default function NavigationItem({
@@ -16,6 +17,7 @@ export default function NavigationItem({
 	label,
 	isActive = false,
 	notifications = false,
+	icon,
 }: NavigationItemProps) {
 	return (
 		<li role='none'>
@@ -29,7 +31,10 @@ export default function NavigationItem({
 				aria-current={isActive ? 'page' : undefined}
 				aria-label={`Navigate to ${label} page`}
 			>
-				<span>{label === 'Pending' ? 'Pending Emails' : label}</span>
+				<div className={styles.linkInner}>
+					{icon}
+					{label === 'Pending' ? 'Pending Emails' : label}
+				</div>
 			</Link>
 		</li>
 	);

@@ -1,5 +1,8 @@
 // Hooks imports
-import { useSequenceDeactivate } from '@/hooks/useSequence';
+import {
+	useSequenceDeactivate,
+	useSequenceDeactivateAll,
+} from '@/hooks/useSequence';
 
 // Styles imports
 import styles from './deactivateSequenceModal.module.scss';
@@ -13,13 +16,30 @@ import { useEmailContext } from '@/app/context/EmailContext';
 
 // Types imports
 
-const DeactivateSequenceModal = () => {
+const DeactivateSequenceModal = ({
+	allSequences,
+}: {
+	allSequences?: boolean;
+}) => {
 	const { setModalType } = useAppContext();
 	const { setSelectedSequenceId, selectedSequenceId } = useEmailContext();
 	const { mutateAsync: deactivateSequence, isPending: deactivating } =
 		useSequenceDeactivate(selectedSequenceId!);
+	const { mutateAsync: deactivateAllSequences, isPending: deactivatingAll } =
+		useSequenceDeactivateAll();
 
 	const handleDelete = async () => {
+		if (allSequences) {
+			try {
+				await deactivateAllSequences();
+				setModalType(null);
+				return;
+			} catch (error) {
+				console.error('Error deactivating all sequences:', error);
+				return;
+			}
+		}
+
 		try {
 			await deactivateSequence(selectedSequenceId!);
 			setModalType(null);
@@ -31,13 +51,17 @@ const DeactivateSequenceModal = () => {
 
 	return (
 		<div className={styles['deletecontactmodal-wrapper']}>
-			<p className={styles.message}>Permanently deactivate this sequence?</p>
+			<p className={styles.message}>
+				{allSequences ?
+					'Permanently deactivate all sequences?'
+				:	'Permanently deactivate this sequence?'}
+			</p>
 			<div className={styles.buttons}>
 				<button
 					type='button'
 					className={'button delete'}
 					onClick={handleDelete}
-					disabled={deactivating}
+					disabled={deactivating || deactivatingAll}
 				>
 					Deactivate
 				</button>

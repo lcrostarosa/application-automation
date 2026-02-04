@@ -1,146 +1,115 @@
-/**
- * In-memory sliding window rate limiter.
- * Suitable for single-instance deployments. For multi-instance,
- * consider Redis-backed solution.
- */
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis as UpstashRedis } from '@upstash/redis';
+import IORedis from 'ioredis';
+import { RedisError } from './errors';
 
-interface RateLimitEntry {
-	timestamps: number[];
-}
+// ============================================
+// Configuration from environment variables
+// ============================================
+const isEnabled = process.env.RATE_LIMIT_ENABLED !== 'false';
 
-interface RateLimitConfig {
-	windowMs: number; // Time window in milliseconds
-	maxRequests: number; // Maximum requests allowed in window
-}
-
-// Preset rate limit configurations
-export const RATE_LIMITS = {
-	webhook: { windowMs: 60 * 1000, maxRequests: 100 }, // 100/min
-	api: { windowMs: 60 * 1000, maxRequests: 60 }, // 60/min
-	sendEmail: { windowMs: 60 * 60 * 1000, maxRequests: 100 }, // 100/hour
+const config = {
+	webhook: {
+		maxRequests: parseInt(process.env.RATE_LIMIT_WEBHOOK_MAX || '100'),
+		windowSec: parseInt(process.env.RATE_LIMIT_WEBHOOK_WINDOW || '60'),
+	},
+	api: {
+		maxRequests: parseInt(process.env.RATE_LIMIT_API_MAX || '60'),
+		windowSec: parseInt(process.env.RATE_LIMIT_API_WINDOW || '60'),
+	},
+	sendEmail: {
+		maxRequests: parseInt(process.env.RATE_LIMIT_EMAIL_MAX || '100'),
+		windowSec: parseInt(process.env.RATE_LIMIT_EMAIL_WINDOW || '3600'),
+	},
 } as const;
 
-export type RateLimitType = keyof typeof RATE_LIMITS;
+export const RATE_LIMITS = config;
+export type RateLimitType = keyof typeof config;
 
-class SlidingWindowRateLimiter {
-	private entries: Map<string, RateLimitEntry> = new Map();
-	private cleanupInterval: ReturnType<typeof setInterval> | null = null;
+// ============================================
+// Redis client factory
+// ============================================
+type RedisClient = UpstashRedis | IORedis;
+let redisClient: RedisClient | null = null;
 
-	constructor() {
-		// Clean up old entries every minute to prevent memory leaks
-		this.cleanupInterval = setInterval(() => this.cleanup(), 60 * 1000);
+function getRedisClient(): RedisClient {
+	if (redisClient) return redisClient;
+
+	// Option 1: Standard Redis (local/docker) - takes precedence
+	if (process.env.REDIS_URL) {
+		redisClient = new IORedis(process.env.REDIS_URL);
+		return redisClient;
 	}
 
-	/**
-	 * Check if a request should be rate limited.
-	 * Returns rate limit info including whether the request is allowed.
-	 */
-	check(
-		identifier: string,
-		config: RateLimitConfig
-	): {
-		allowed: boolean;
-		limit: number;
-		remaining: number;
-		resetAt: number;
-	} {
-		const now = Date.now();
-		const windowStart = now - config.windowMs;
-		const key = identifier;
-
-		// Get or create entry
-		let entry = this.entries.get(key);
-		if (!entry) {
-			entry = { timestamps: [] };
-			this.entries.set(key, entry);
-		}
-
-		// Remove timestamps outside the window
-		entry.timestamps = entry.timestamps.filter((ts) => ts > windowStart);
-
-		// Calculate remaining requests
-		const requestCount = entry.timestamps.length;
-		const remaining = Math.max(0, config.maxRequests - requestCount);
-		const allowed = requestCount < config.maxRequests;
-
-		// Calculate reset time (when the oldest request in window expires)
-		const resetAt =
-			entry.timestamps.length > 0
-				? entry.timestamps[0] + config.windowMs
-				: now + config.windowMs;
-
-		if (allowed) {
-			// Record this request
-			entry.timestamps.push(now);
-		}
-
-		return {
-			allowed,
-			limit: config.maxRequests,
-			remaining: allowed ? remaining - 1 : 0,
-			resetAt,
-		};
+	// Option 2: Upstash Redis (serverless/production)
+	if (process.env.UPSTASH_REDIS_REST_URL) {
+		redisClient = new UpstashRedis({
+			url: process.env.UPSTASH_REDIS_REST_URL,
+			token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+		});
+		return redisClient;
 	}
 
-	/**
-	 * Clean up old entries to prevent memory leaks.
-	 */
-	private cleanup(): void {
-		const now = Date.now();
-		// Use the longest window for cleanup (1 hour)
-		const maxWindow = 60 * 60 * 1000;
-
-		for (const [key, entry] of this.entries) {
-			// Remove timestamps older than max window
-			entry.timestamps = entry.timestamps.filter(
-				(ts) => ts > now - maxWindow
-			);
-
-			// Remove entry if no timestamps remain
-			if (entry.timestamps.length === 0) {
-				this.entries.delete(key);
-			}
-		}
-	}
-
-	/**
-	 * Stop the cleanup interval (for testing/shutdown).
-	 */
-	destroy(): void {
-		if (this.cleanupInterval) {
-			clearInterval(this.cleanupInterval);
-			this.cleanupInterval = null;
-		}
-	}
+	throw new RedisError(
+		'Not configured. Set either REDIS_URL (for local/docker) or UPSTASH_REDIS_REST_URL (for serverless).'
+	);
 }
 
-// Singleton instance
-const rateLimiter = new SlidingWindowRateLimiter();
+// ============================================
+// Rate limiters (lazy initialization)
+// ============================================
+const rateLimiters: Partial<Record<RateLimitType, Ratelimit>> = {};
 
-/**
- * Check rate limit for a given identifier and limit type.
- * Returns rate limit headers and whether the request is allowed.
- */
-export function checkRateLimit(
+function getRateLimiter(type: RateLimitType): Ratelimit {
+	if (!rateLimiters[type]) {
+		const cfg = config[type];
+		const redis = getRedisClient();
+
+		rateLimiters[type] = new Ratelimit({
+			redis: redis as Parameters<typeof Ratelimit>[0]['redis'],
+			limiter: Ratelimit.slidingWindow(cfg.maxRequests, `${cfg.windowSec} s`),
+			prefix: `ratelimit:${type}`,
+		});
+	}
+	return rateLimiters[type]!;
+}
+
+// ============================================
+// Main API
+// ============================================
+export async function checkRateLimit(
 	identifier: string,
 	limitType: RateLimitType
-): {
+): Promise<{
 	allowed: boolean;
 	headers: {
 		'X-RateLimit-Limit': string;
 		'X-RateLimit-Remaining': string;
 		'X-RateLimit-Reset': string;
 	};
-} {
-	const config = RATE_LIMITS[limitType];
-	const result = rateLimiter.check(`${limitType}:${identifier}`, config);
+}> {
+	// If disabled, always allow
+	if (!isEnabled) {
+		const cfg = config[limitType];
+		return {
+			allowed: true,
+			headers: {
+				'X-RateLimit-Limit': String(cfg.maxRequests),
+				'X-RateLimit-Remaining': String(cfg.maxRequests),
+				'X-RateLimit-Reset': String(Math.ceil(Date.now() / 1000) + cfg.windowSec),
+			},
+		};
+	}
+
+	const limiter = getRateLimiter(limitType);
+	const { success, limit, remaining, reset } = await limiter.limit(identifier);
 
 	return {
-		allowed: result.allowed,
+		allowed: success,
 		headers: {
-			'X-RateLimit-Limit': String(result.limit),
-			'X-RateLimit-Remaining': String(result.remaining),
-			'X-RateLimit-Reset': String(Math.ceil(result.resetAt / 1000)),
+			'X-RateLimit-Limit': String(limit),
+			'X-RateLimit-Remaining': String(remaining),
+			'X-RateLimit-Reset': String(Math.ceil(reset / 1000)),
 		},
 	};
 }

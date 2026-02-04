@@ -2,6 +2,13 @@
 import { ContactData, ContactUpdateData } from '@/types/contactTypes';
 import { SentEmailData } from '@/types/emailTypes';
 
+// Custom error type with additional API properties
+interface ApiError extends Error {
+	duplicate: boolean;
+	status: number;
+	responseData: Record<string, unknown>;
+}
+
 // Generic fetch wrapper
 const apiCall = async (url: string, options: RequestInit = {}) => {
 	const response = await fetch(url, {
@@ -12,10 +19,10 @@ const apiCall = async (url: string, options: RequestInit = {}) => {
 	const data = await response.json();
 
 	if (!response.ok) {
-		const error = new Error(data.error || `HTTP ${response.status}`);
-		(error as any).duplicate = data.duplicate || false;
-		(error as any).status = response.status;
-		(error as any).responseData = data;
+		const error = new Error(data.error || `HTTP ${response.status}`) as ApiError;
+		error.duplicate = data.duplicate || false;
+		error.status = response.status;
+		error.responseData = data;
 		throw error;
 	}
 
@@ -33,8 +40,10 @@ export const emailAPI = {
 
 // Replies API functions
 export const repliesAPI = {
-	getAll: () => apiCall('/api/replies'),
+	getAll: () => apiCall('/api/replies', { method: 'GET' }),
 	checkForNew: () => apiCall('/api/check-replies', { method: 'POST' }),
+	markAsReviewed: (replyId: number) =>
+		apiCall(`/api/replies/${replyId}`, { method: 'PUT' }),
 };
 
 // Contact API functions
@@ -76,6 +85,10 @@ export const sequenceAPI = {
 		}),
 	deactivate: (sequenceId: number) =>
 		apiCall(`/api/sequences/${sequenceId}`, {
+			method: 'PUT',
+		}),
+	deactivateAll: () =>
+		apiCall('/api/sequences/deactivate-all', {
 			method: 'PUT',
 		}),
 };

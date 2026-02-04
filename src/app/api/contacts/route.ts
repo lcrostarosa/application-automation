@@ -3,8 +3,9 @@ import { getApiUser } from '@/services/getUserService';
 import { prisma } from '@/lib/prisma';
 import { checkRateLimit } from '@/lib/rate-limiter';
 import { auditUserAction, AUDIT_ACTIONS } from '@/lib/audit';
+import { getErrorMessage, isAppError } from '@/lib/errors';
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
 	try {
 		// 1. Check authentication
 		const { user, error } = await getApiUser();
@@ -22,11 +23,13 @@ export async function GET(req: NextRequest) {
 
 		// 4. Return contacts
 		return NextResponse.json({ contacts });
-	} catch (error: any) {
+	} catch (error) {
 		console.error('Error fetching contacts:', error);
+		const message = getErrorMessage(error);
+		const statusCode = isAppError(error) ? error.statusCode : 500;
 		return NextResponse.json(
-			{ error: error.message || 'Failed to fetch contacts' },
-			{ status: 500 }
+			{ error: message },
+			{ status: statusCode }
 		);
 	}
 }
@@ -43,7 +46,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		// 2. Check rate limit (60 requests per minute per user)
-		const rateLimit = checkRateLimit(String(user.id), 'api');
+		const rateLimit = await checkRateLimit(String(user.id), 'api');
 		if (!rateLimit.allowed) {
 			await auditUserAction(
 				req,
@@ -194,11 +197,13 @@ export async function POST(req: NextRequest) {
 			},
 			{ headers: rateLimit.headers }
 		);
-	} catch (error: any) {
+	} catch (error) {
 		console.error('Contact creation error:', error);
+		const message = getErrorMessage(error);
+		const statusCode = isAppError(error) ? error.statusCode : 500;
 		return NextResponse.json(
-			{ error: error.message || 'Failed to create contact' },
-			{ status: 500 }
+			{ error: message },
+			{ status: statusCode }
 		);
 	}
 }

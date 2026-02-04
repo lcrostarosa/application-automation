@@ -1,8 +1,6 @@
 // Helper functions imports
 import { sequenceType } from '@/lib/helperFunctions';
 
-// Hooks imports
-
 // Styles imports
 import styles from './activeSequence.module.scss';
 
@@ -11,9 +9,7 @@ import { SequenceFromDB } from '@/types/sequenceTypes';
 
 // Components imports
 import DeactivateSequenceButton from '@/app/components/buttons/DeactivateSequenceButton';
-import MessagesTable from '../MessagesTable';
-
-// Context imports
+import ActiveSequenceTable from './ActiveSequenceTable';
 
 const ActiveSequence = ({ sequence }: { sequence: SequenceFromDB }) => {
 	const startDate = new Date(sequence.createdAt).toLocaleDateString();
@@ -63,7 +59,7 @@ const ActiveSequence = ({ sequence }: { sequence: SequenceFromDB }) => {
 			</div>
 
 			<div className={styles['sequence-details']}>
-				<MessagesTable messages={sequence.messages} tab={'active'} />
+				<ActiveSequenceTable sequence={sequence} />
 			</div>
 		</div>
 	);

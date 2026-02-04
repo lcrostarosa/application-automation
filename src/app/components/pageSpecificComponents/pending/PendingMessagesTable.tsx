@@ -17,7 +17,7 @@ import { Edit, SwapVert } from '@mui/icons-material';
 import { parseEmailContent } from '@/lib/helperFunctions';
 
 // Types imports
-import { MessageFromDB } from '@/types/messageTypes';
+import { MessageWithContact } from '@/types/messageTypes';
 
 // Components imports
 import TinyEditor from '../../editor/TinyEditor';
@@ -26,7 +26,7 @@ const PendingMessagesTable = ({
 	messages,
 	nested,
 }: {
-	messages: MessageFromDB[];
+	messages: MessageWithContact[];
 	nested?: boolean;
 }) => {
 	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -100,6 +100,7 @@ const PendingMessagesTable = ({
 					? subjectContent.trim()
 					: messages.find((m) => m.id === selectedMessage)?.subject || '',
 			});
+			approveMessage(selectedMessage);
 		}
 		setIsEditing(false);
 		setSelectedMessage(null);
@@ -123,8 +124,8 @@ const PendingMessagesTable = ({
 		<table className={styles.table}>
 			<thead className={styles.tableHeader}>
 				<tr>
-					<th className={styles.md}>Email</th>
-					<th className={styles.lrg}>Content</th>
+					<th className={styles.md}>Contact Name</th>
+					<th className={styles.lrg}>Email</th>
 					<th className={styles.sm}>Status</th>
 					<th className={styles.sm} onClick={() => handleSort()}>
 						<span className={styles.sort}>
@@ -145,6 +146,7 @@ const PendingMessagesTable = ({
 						? new Date() >= messageDateDay
 						: false;
 					const parsedContent = parseEmailContent(message.contents);
+					const emailContent = [`${message.subject}`, ...parsedContent];
 					const messageStatus =
 						message.status === 'pending' ||
 						(message.status === 'scheduled' &&
@@ -153,6 +155,9 @@ const PendingMessagesTable = ({
 							? 'Pending Approval'
 							: 'Scheduled';
 					const messageNeedsApproval = message.needsApproval;
+					const contactName = message.contact?.firstName
+						? message.contact.firstName + ' ' + message.contact?.lastName
+						: 'Unknown';
 
 					return (
 						<tr
@@ -162,7 +167,7 @@ const PendingMessagesTable = ({
 								selectedMessage === message.id ? styles.selectedMessage : ''
 							} ${isEditing ? styles.editing : ''}`}
 						>
-							<td className={styles.md}>{message.subject}</td>
+							<td className={styles.md}>{contactName}</td>
 							<td className={`${styles.lrg} ${styles['content-cell']}`}>
 								{isEditing && selectedMessage === message.id ? (
 									<div className={styles['rte-wrapper']}>
@@ -202,11 +207,11 @@ const PendingMessagesTable = ({
 								) : (
 									<div className={styles['parsed-content']}>
 										<span className={styles['message-preview']}>
-											{parsedContent[0]}
+											{emailContent[0]}
 										</span>
 										{selectedMessage === message.id &&
-											parsedContent.length > 1 &&
-											parsedContent
+											emailContent.length > 1 &&
+											emailContent
 												.slice(1)
 												.map((text, index) => <span key={index}>{text}</span>)}
 									</div>

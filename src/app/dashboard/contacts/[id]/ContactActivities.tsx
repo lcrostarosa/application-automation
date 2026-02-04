@@ -12,9 +12,9 @@ import styles from './contactPage.module.scss';
 
 // Components imports
 import NewEmailForm from '@/app/components/forms/newEmail/NewEmailForm';
-import ActiveSequence from '@/app/components/sequences/active/ActiveSequence';
-import PreviousSequencesTable from '@/app/components/sequences/PreviousSequencesTable';
-import AllActivitiesTable from '@/app/components/sequences/AllActivitiesTable';
+import ActiveSequence from '@/app/components/sequences/ActiveSequence';
+import PreviousSequences from '@/app/components/sequences/PreviousSequences';
+import AllActivities from '@/app/components/sequences/AllActivities';
 
 // Context imports
 
@@ -64,10 +64,7 @@ const ContactActivities = ({
 		previous: {
 			component:
 				previousSequences.length > 0 ? (
-					<PreviousSequencesTable
-						sequences={previousSequences}
-						// previousActivities={previousActivities}
-					/>
+					<PreviousSequences sequences={previousSequences} />
 				) : (
 					<div className={styles.activity}>
 						<p>No previous sequences</p>
@@ -78,7 +75,7 @@ const ContactActivities = ({
 			component: <NewEmailForm contactEmail={contact.email} />,
 		},
 		all: {
-			component: <AllActivitiesTable messages={messageList} />,
+			component: <AllActivities messages={messageList} />,
 		},
 	};
 

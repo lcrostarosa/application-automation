@@ -1,6 +1,3 @@
-// Types imports
-import { SequenceFromDB } from '@/types/sequenceTypes';
-
 export const sequenceType = (type: string, startDate: Date) => {
 	const sequenceTypes: { [key: string]: string } = {
 		'3day': 'Every 3 days',
@@ -48,6 +45,27 @@ export const parseEmailContent = (htmlString: string): string[] => {
 		.filter((text) => text.length > 0);
 
 	return textArray;
+};
+
+export const parseReplyContent = (replyContent: string) => {
+	if (!replyContent) return [];
+
+	const normalized = replyContent.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+	const paragraphs = normalized.split(/\n\s*\n+/);
+
+	const result = paragraphs
+		.map((paragraph) =>
+			paragraph
+				.split('\n')
+				.map((line) => line.trim())
+				.filter(Boolean)
+				.join(' ')
+				.trim()
+		)
+		.filter(Boolean);
+
+	return result;
 };
 
 export const parseSequenceData = (

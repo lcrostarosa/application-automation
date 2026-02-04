@@ -7,6 +7,18 @@ import styles from './sideBar.module.scss';
 // Components imports
 import NavigationItem from '../navigationItem/NavigationItem';
 
+// MUI imports
+import {
+	SpaceDashboardRounded,
+	GroupsRounded,
+	ViewTimelineRounded,
+	ScheduleSendRounded,
+	MailOutlineRounded,
+	ContentCopyRounded,
+	TimelineRounded,
+	SettingsRounded,
+} from '@mui/icons-material';
+
 interface SidebarProps {
 	currentPath?: string;
 	notifications?: boolean;
@@ -19,15 +31,47 @@ export default function SideBar({
 	// Navigation data
 	const navigationItems = [
 		{ href: '/dashboard/new-email', label: 'New Email' },
-		{ href: '/dashboard', label: 'Dashboard' },
-		{ href: '/dashboard/contacts', label: 'Contacts' },
-		{ href: '/dashboard/sequences', label: 'Sequences (Coming Soon)' },
-		{ href: '/dashboard/pending', label: 'Pending' },
-		{ href: '/dashboard/replies', label: 'Replies' },
+		{
+			href: '/dashboard',
+			label: 'Dashboard',
+			icon: <SpaceDashboardRounded className={styles.icon} />,
+		},
+		{
+			href: '/dashboard/contacts',
+			label: 'Contacts',
+			icon: <GroupsRounded className={styles.icon} />,
+		},
+		{
+			href: '/dashboard/sequences',
+			label: 'Sequences',
+			icon: <ViewTimelineRounded className={styles.icon} />,
+		},
+		{
+			href: '/dashboard/pending',
+			label: 'Pending',
+			icon: <ScheduleSendRounded className={styles.icon} />,
+		},
+		{
+			href: '/dashboard/replies',
+			label: 'Replies',
+			icon: <MailOutlineRounded className={styles.icon} />,
+		},
 		// { href: '/dashboard/in-progress', label: 'In Progress' },
-		{ href: '/dashboard/templates', label: 'Templates (Coming Soon)' },
-		{ href: '/dashboard/analytics', label: 'Analytics (Coming Soon)' },
-		{ href: '/dashboard/settings', label: 'Settings (Coming Soon)' },
+		{
+			href: '/dashboard/templates',
+			label: 'Templates (Coming Soon)',
+			icon: <ContentCopyRounded className={styles.icon} />,
+		},
+		{
+			href: '/dashboard/analytics',
+			label: 'Analytics (Coming Soon)',
+			icon: <TimelineRounded className={styles.icon} />,
+		},
+		{
+			href: '/dashboard/settings',
+			label: 'Settings',
+			icon: <SettingsRounded className={styles.icon} />,
+		},
 	];
 
 	return (
@@ -49,6 +93,7 @@ export default function SideBar({
 							label={item.label}
 							isActive={currentPath === item.href}
 							notifications={notifications && item.label === 'Pending'}
+							icon={item.icon}
 						/>
 					))}
 				</ul>

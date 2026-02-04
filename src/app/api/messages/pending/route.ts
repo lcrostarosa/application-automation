@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getApiUser } from '@/services/getUserService';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
 	try {
 		// 1. Check authentication
 		const { user, error } = await getApiUser();
@@ -16,15 +16,16 @@ export async function GET(request: NextRequest) {
 
 		const messages = await prisma.message.findMany({
 			where: { ownerId: user.id, status: { in: ['pending', 'scheduled'] } },
-
+			include: { contact: true },
 			orderBy: { createdAt: 'desc' },
 		});
 
 		return NextResponse.json({ messages });
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error('Error fetching pending messages:', error);
+		const message = error instanceof Error ? error.message : 'Failed to fetch pending messages';
 		return NextResponse.json(
-			{ error: error.message || 'Failed to fetch pending messages' },
+			{ error: message },
 			{ status: 500 }
 		);
 	}

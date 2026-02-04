@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { getApiUser } from '@/services/getUserService';
 import { checkRateLimit } from '@/lib/rate-limiter';
 import { auditUserAction, AUDIT_ACTIONS } from '@/lib/audit';
+import { getErrorMessage, isAppError } from '@/lib/errors';
 
 export async function GET(
 	request: NextRequest,
@@ -20,9 +21,11 @@ export async function GET(
 		return NextResponse.json(contact);
 	} catch (error) {
 		console.error('Error fetching contact:', error);
+		const message = getErrorMessage(error);
+		const statusCode = isAppError(error) ? error.statusCode : 500;
 		return NextResponse.json(
-			{ error: 'Failed to fetch contact' },
-			{ status: 500 }
+			{ error: message },
+			{ status: statusCode }
 		);
 	}
 }
@@ -42,7 +45,7 @@ export async function PUT(
 		}
 
 		// 2. Check rate limit (60 requests per minute per user)
-		const rateLimit = checkRateLimit(String(user.id), 'api');
+		const rateLimit = await checkRateLimit(String(user.id), 'api');
 		if (!rateLimit.allowed) {
 			await auditUserAction(
 				request,
@@ -65,7 +68,7 @@ export async function PUT(
 		const body = await request.json();
 
 		// Remove id from the update data since we don't want to update the ID
-		const { id: bodyId, ...updateData } = body;
+		const { id: _bodyId, ...updateData } = body;
 
 		// Convert importance to integer if it exists
 		if (updateData.importance !== undefined && updateData.importance !== '') {
@@ -115,20 +118,12 @@ export async function PUT(
 			{ headers: rateLimit.headers }
 		);
 	} catch (error) {
-		console.error('Error updating contact:', error);
-		let message = 'Unknown error';
-		let stack = undefined;
-		if (error instanceof Error) {
-			message = error.message;
-			stack = error.stack;
-		}
-		console.error('Error details:', {
-			message,
-			stack,
-		});
+		const message = getErrorMessage(error);
+		const statusCode = isAppError(error) ? error.statusCode : 500;
+		console.error('Error updating contact:', message);
 		return NextResponse.json(
-			{ success: false, error: 'Failed to update contact' },
-			{ status: 500 }
+			{ success: false, error: message },
+			{ status: statusCode }
 		);
 	}
 }
@@ -148,7 +143,7 @@ export async function DELETE(
 		}
 
 		// 2. Check rate limit (60 requests per minute per user)
-		const rateLimit = checkRateLimit(String(user.id), 'api');
+		const rateLimit = await checkRateLimit(String(user.id), 'api');
 		if (!rateLimit.allowed) {
 			await auditUserAction(
 				request,
@@ -191,10 +186,12 @@ export async function DELETE(
 
 		return NextResponse.json({ success: true }, { headers: rateLimit.headers });
 	} catch (error) {
-		console.error('Error deleting contact:', error);
+		const message = getErrorMessage(error);
+		const statusCode = isAppError(error) ? error.statusCode : 500;
+		console.error('Error deleting contact:', message);
 		return NextResponse.json(
-			{ error: 'Failed to delete contact' },
-			{ status: 500 }
+			{ error: message },
+			{ status: statusCode }
 		);
 	}
 }

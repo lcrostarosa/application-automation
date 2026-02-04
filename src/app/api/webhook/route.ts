@@ -1,20 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { google } from 'googleapis';
+import { gmail_v1 } from 'googleapis';
 import { prisma } from '@/lib/prisma';
 import { verifyPubSubToken } from '@/lib/pubsub-auth';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limiter';
 import { auditWebhook, AUDIT_ACTIONS } from '@/lib/audit';
+import { getErrorMessage, isAppError, ExternalServiceError } from '@/lib/errors';
+import {
+	getGmailClientForUser,
+	findUserByGmailAddress,
+	GmailCredentialError,
+} from '@/lib/gmailClientFactory';
 
-const CLIENT_ID = process.env.GOOGLE_CLIENT_ID!;
-const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET!;
-const REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI!;
-const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN!;
+interface GmailHeader {
+	name: string;
+	value: string;
+}
+
+interface PubSubMessage {
+	emailAddress: string;
+	historyId: string;
+}
 
 export async function POST(req: NextRequest) {
 	const clientIp = getClientIp(req);
 
 	// Check rate limit (100 requests per minute per IP)
-	const rateLimit = checkRateLimit(clientIp, 'webhook');
+	const rateLimit = await checkRateLimit(clientIp, 'webhook');
 	if (!rateLimit.allowed) {
 		await auditWebhook(
 			req,
@@ -52,48 +63,70 @@ export async function POST(req: NextRequest) {
 		console.log('Gmail webhook received:', body);
 
 		// Decode the Pub/Sub message
-		const message = JSON.parse(
+		const message: PubSubMessage = JSON.parse(
 			Buffer.from(body.message.data, 'base64').toString()
 		);
 
 		console.log('Decoded message:', message);
 
+		// Find the user by their Gmail address
+		const userId = await findUserByGmailAddress(message.emailAddress);
+
+		if (!userId) {
+			console.log(
+				`No user found for Gmail address: ${message.emailAddress}`
+			);
+			// Still return success to acknowledge the message
+			return NextResponse.json(
+				{ success: true, message: 'No matching user' },
+				{ headers: rateLimit.headers }
+			);
+		}
+
 		// Log successful webhook receipt
 		await auditWebhook(
 			req,
 			AUDIT_ACTIONS.WEBHOOK_RECEIVED,
-			{ historyId: message.historyId, ip: clientIp },
+			{ historyId: message.historyId, ip: clientIp, userId },
 			'success'
 		);
 
-		// Check for new emails
-		await checkForNewEmails(message.historyId);
+		// Check for new emails using user-specific credentials
+		await checkForNewEmails(userId, message.historyId);
 
 		return NextResponse.json({ success: true }, { headers: rateLimit.headers });
-	} catch (error: any) {
+	} catch (error) {
 		console.error('Webhook error:', error);
+		const errorMessage = getErrorMessage(error);
+		const statusCode = isAppError(error) ? error.statusCode : 500;
 		await auditWebhook(
 			req,
 			AUDIT_ACTIONS.WEBHOOK_RECEIVED,
 			{ ip: clientIp },
 			'failure',
-			error.message
+			errorMessage
 		);
 		return NextResponse.json(
-			{ error: error.message },
-			{ status: 500, headers: rateLimit.headers }
+			{ error: errorMessage },
+			{ status: statusCode, headers: rateLimit.headers }
 		);
 	}
 }
 
-async function checkForNewEmails(historyId: string) {
-	const oAuth2Client = new google.auth.OAuth2(
-		CLIENT_ID,
-		CLIENT_SECRET,
-		REDIRECT_URI
-	);
-	oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
-	const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
+async function checkForNewEmails(userId: number, historyId: string) {
+	let gmail: gmail_v1.Gmail;
+	try {
+		const clientResult = await getGmailClientForUser(userId);
+		gmail = clientResult.gmail;
+	} catch (error) {
+		if (error instanceof GmailCredentialError) {
+			console.error(
+				`Invalid credentials for user ${userId}: ${error.message}`
+			);
+			return;
+		}
+		throw error;
+	}
 
 	try {
 		// Use historyId to get only NEW changes (much more efficient)
@@ -107,20 +140,21 @@ async function checkForNewEmails(historyId: string) {
 			for (const historyItem of historyResponse.data.history) {
 				if (historyItem.messagesAdded) {
 					for (const messageAdded of historyItem.messagesAdded) {
-						await processMessage(gmail, messageAdded.message!.id!);
+						await processMessage(gmail, messageAdded.message!.id!, userId);
 					}
 				}
 			}
 		}
 	} catch (error) {
-		console.error('Error checking emails:', error);
+		const gmailError = new ExternalServiceError('Gmail', getErrorMessage(error));
+		console.error('Error checking emails:', gmailError.message);
 		// Fallback to recent messages if history fails
-		await fallbackToRecentMessages(gmail);
+		await fallbackToRecentMessages(gmail, userId);
 	}
 }
 
 // Fallback method (your original approach)
-async function fallbackToRecentMessages(gmail: any) {
+async function fallbackToRecentMessages(gmail: gmail_v1.Gmail, userId: number) {
 	const response = await gmail.users.messages.list({
 		userId: 'me',
 		q: 'in:inbox',
@@ -129,30 +163,37 @@ async function fallbackToRecentMessages(gmail: any) {
 
 	if (response.data.messages) {
 		for (const message of response.data.messages) {
-			await processMessage(gmail, message.id!);
+			await processMessage(gmail, message.id!, userId);
 		}
 	}
 }
 
-async function processMessage(gmail: any, messageId: string) {
+async function processMessage(
+	gmail: gmail_v1.Gmail,
+	messageId: string,
+	userId: number
+) {
 	try {
 		const message = await gmail.users.messages.get({
 			userId: 'me',
 			id: messageId,
 		});
 
-		const headers = message.data.payload.headers;
+		const headers = message.data.payload?.headers as GmailHeader[] | undefined;
 		const threadId = message.data.threadId;
 
+		if (!headers) return;
+
 		// Extract sender email and USE it for validation
-		const from = headers.find((h: any) => h.name === 'From')?.value;
+		const from = headers.find((h: GmailHeader) => h.name === 'From')?.value;
 		const senderEmail = extractEmailFromHeader(from);
 
-		// Check if this is a reply to one of our sent emails
+		// Check if this is a reply to one of our sent emails (for this user)
 		const sentMessage = await prisma.message.findFirst({
 			where: {
 				threadId: threadId,
 				direction: 'outbound',
+				ownerId: userId,
 			},
 			include: {
 				contact: true,
@@ -169,18 +210,18 @@ async function processMessage(gmail: any, messageId: string) {
 			}
 
 			// Rest of processing...
-			const subject = headers.find((h: any) => h.name === 'Subject')?.value;
+			const subject = headers.find((h: GmailHeader) => h.name === 'Subject')?.value;
 
 			// Extract email body (simplified)
 			let bodyContent = '';
-			if (message.data.payload.parts) {
+			if (message.data.payload?.parts) {
 				const textPart = message.data.payload.parts.find(
-					(part: any) => part.mimeType === 'text/plain'
+					(part: gmail_v1.Schema$MessagePart) => part.mimeType === 'text/plain'
 				);
 				if (textPart?.body?.data) {
 					bodyContent = Buffer.from(textPart.body.data, 'base64').toString();
 				}
-			} else if (message.data.payload.body?.data) {
+			} else if (message.data.payload?.body?.data) {
 				bodyContent = Buffer.from(
 					message.data.payload.body.data,
 					'base64'
@@ -197,7 +238,7 @@ async function processMessage(gmail: any, messageId: string) {
 					direction: 'inbound',
 					messageId: messageId,
 					threadId: threadId,
-					createdAt: new Date(parseInt(message.data.internalDate)),
+					createdAt: new Date(parseInt(message.data.internalDate!)),
 				},
 			});
 
@@ -224,12 +265,13 @@ async function processMessage(gmail: any, messageId: string) {
 			);
 		}
 	} catch (error) {
-		console.error('Error processing message:', error);
+		console.error('Error processing message:', getErrorMessage(error));
 	}
 }
 
 // Helper function to extract email from "Name <email@domain.com>" format
-function extractEmailFromHeader(fromHeader: string): string {
-	const emailMatch = fromHeader?.match(/<(.+?)>/);
+function extractEmailFromHeader(fromHeader: string | undefined): string {
+	if (!fromHeader) return '';
+	const emailMatch = fromHeader.match(/<(.+?)>/);
 	return emailMatch ? emailMatch[1] : fromHeader;
 }

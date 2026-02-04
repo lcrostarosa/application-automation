@@ -1,0 +1,16 @@
+.client {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+	align-items: center;
+
+	.client-actions {
+		display: flex;
+		gap: 1rem;
+	}
+
+	.contacts-table {
+		overflow-x: auto;
+		width: 100%;
+	}
+}
