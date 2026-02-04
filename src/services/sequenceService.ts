@@ -4,6 +4,30 @@ import { redirect } from 'next/navigation';
 // Services imports
 import { getApiUser } from './getUserService';
 
+export async function getAllSequencesByUserId() {
+	const { user, error } = await getApiUser();
+	if (error || !user) {
+		console.error('Error fetching user or user not found:', error);
+		redirect('/');
+	}
+
+	const sequences = await prisma.sequence.findMany({
+		where: { ownerId: user.id },
+		include: {
+			contact: true,
+			messages: {
+				orderBy: { createdAt: 'desc' },
+			},
+			emailReplies: {
+				orderBy: { replyDate: 'desc' },
+			},
+		},
+		orderBy: { createdAt: 'desc' },
+	});
+
+	return { sequences };
+}
+
 export async function getSequencesByContactId(contactId: number) {
 	const { user, error } = await getApiUser();
 	if (error || !user) {
@@ -14,6 +38,7 @@ export async function getSequencesByContactId(contactId: number) {
 	const sequences = await prisma.sequence.findMany({
 		where: { ownerId: user.id, contactId: contactId },
 		include: {
+			contact: true,
 			messages: {
 				orderBy: { createdAt: 'desc' },
 			},
@@ -38,6 +63,7 @@ export async function getSequenceById(sequenceId: number) {
 	const sequence = await prisma.sequence.findFirst({
 		where: { ownerId: user.id, id: sequenceId },
 		include: {
+			contact: true,
 			messages: {
 				orderBy: { createdAt: 'desc' },
 			},

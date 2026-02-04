@@ -64,10 +64,7 @@ const ContactActivities = ({
 		previous: {
 			component:
 				previousSequences.length > 0 ? (
-					<PreviousSequencesTable
-						sequences={previousSequences}
-						// previousActivities={previousActivities}
-					/>
+					<PreviousSequencesTable sequences={previousSequences} />
 				) : (
 					<div className={styles.activity}>
 						<p>No previous sequences</p>

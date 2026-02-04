@@ -4,7 +4,8 @@ import { useGetAllReplies, useCheckNewReplies } from '@/hooks/useReplies';
 import styles from './repliesPage.module.scss';
 
 export default function RepliesPage() {
-	const { data: replies = [], isPending, refetch } = useGetAllReplies();
+	const { data, isPending, refetch } = useGetAllReplies();
+	const replies = data?.replies || [];
 	const { mutateAsync: checkForNewReplies, isPending: checking } =
 		useCheckNewReplies();
 
@@ -39,9 +40,9 @@ export default function RepliesPage() {
 					{replies.map((reply) => (
 						<div key={reply.id} className={styles.replyCard}>
 							<div className={styles.replyHeader}>
-								<h3>{reply.contact.firstName || reply.contact.email}</h3>
+								<h3>{reply.contact?.firstName || reply.contact?.email}</h3>
 								<span className={styles.date}>
-									{new Date(reply.date).toLocaleDateString()}
+									{new Date(reply.replyDate).toLocaleDateString()}
 								</span>
 							</div>
 							<div className={styles.subject}>{reply.replySubject}</div>

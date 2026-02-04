@@ -71,11 +71,13 @@ export const ContextProvider = ({ children }: ContextProviderProps) => {
 
 	// Auto-sync isModalOpen with modalType
 	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setIsModalOpen(!!modalType);
 	}, [modalType]);
 
 	// Reset selectedContact on pathname change
 	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setSelectedContact(null);
 	}, [pathname]);
 
@@ -109,6 +111,7 @@ export const ContextProvider = ({ children }: ContextProviderProps) => {
 
 	// Client-side checks only after hydration
 	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setHydrated(true);
 
 		// Detect touch device

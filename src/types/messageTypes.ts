@@ -1,3 +1,5 @@
+import { ContactFromDB } from './contactTypes';
+
 export interface MessageFromDB {
 	contactId: number;
 	contents: string;
@@ -25,8 +27,16 @@ export interface MessageFromDB {
 	nextMessageGenerated: boolean;
 }
 
+export interface MessageWithContact extends MessageFromDB {
+	contact: ContactFromDB;
+}
+
 export interface MessagesResponse {
 	messages: MessageFromDB[] | [];
+}
+
+export interface MessagesWithContactResponse {
+	messages: MessageWithContact[] | [];
 }
 
 export interface MessagesWithActiveSequence extends MessageFromDB {

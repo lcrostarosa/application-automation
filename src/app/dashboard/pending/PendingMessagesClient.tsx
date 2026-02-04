@@ -8,7 +8,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useMessagesGetAllPending } from '@/hooks/useMessages';
 
 // Types imports
-import { MessageFromDB, MessagesResponse } from '@/types/messageTypes';
+import {
+	MessageWithContact,
+	MessagesWithContactResponse,
+} from '@/types/messageTypes';
 
 // Components imports
 import PendingMessagesTable from '@/app/components/pageSpecificComponents/pending/PendingMessagesTable';
@@ -16,16 +19,19 @@ import PendingMessagesTable from '@/app/components/pageSpecificComponents/pendin
 export default function PendingMessagesClient({
 	initialMessages = [],
 }: {
-	initialMessages: MessageFromDB[];
+	initialMessages: MessageWithContact[];
 }) {
 	const queryClient = useQueryClient();
 
 	// hydrate server data into the cache
 	useEffect(() => {
 		if (initialMessages) {
-			queryClient.setQueryData<MessagesResponse>(['pending-messages-get-all'], {
-				messages: initialMessages,
-			});
+			queryClient.setQueryData<MessagesWithContactResponse>(
+				['pending-messages-get-all'],
+				{
+					messages: initialMessages,
+				}
+			);
 		}
 	}, [initialMessages, queryClient]);
 

@@ -7,9 +7,9 @@ import { SequencesResponse } from '@/types/sequenceTypes';
 // Tanstack React Query
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-export const useSequencesByUserId = (userId: number) => {
+export const useAllSequencesByUserId = () => {
 	return useQuery<SequencesResponse>({
-		queryKey: ['sequences-by-user-id', userId],
+		queryKey: ['sequences-by-user-id'],
 		queryFn: () => sequenceAPI.readAll(),
 	});
 };
@@ -27,13 +27,36 @@ export const useSequenceDeactivate = (sequenceId: number) => {
 	return useMutation<void, Error, number>({
 		mutationFn: () => sequenceAPI.deactivate(sequenceId),
 		onSuccess: () => {
-			// Invalidate relevant queries to refetch updated data
-			queryClient.invalidateQueries({ queryKey: ['sequences-by-contact-id'] });
-			queryClient.invalidateQueries({ queryKey: ['sequences-by-user-id'] });
-			queryClient.invalidateQueries({ queryKey: ['contact-get-unique'] });
-			queryClient.invalidateQueries({ queryKey: ['contacts-get-all'] });
 			queryClient.invalidateQueries({
-				queryKey: ['all-messages-by-contact-id'],
+				predicate: (query) =>
+					[
+						'sequences-by-contact-id',
+						'sequences-by-user-id',
+						'contact-get-unique',
+						'contacts-get-all',
+						'all-messages-by-contact-id',
+						'pending-messages-get-all',
+					].includes(query.queryKey[0] as string),
+			});
+		},
+	});
+};
+
+export const useSequenceDeactivateAll = () => {
+	const queryClient = useQueryClient();
+	return useMutation<void, Error, void>({
+		mutationFn: () => sequenceAPI.deactivateAll(),
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				predicate: (query) =>
+					[
+						'sequences-by-contact-id',
+						'sequences-by-user-id',
+						'contact-get-unique',
+						'contacts-get-all',
+						'all-messages-by-contact-id',
+						'pending-messages-get-all',
+					].includes(query.queryKey[0] as string),
 			});
 		},
 	});

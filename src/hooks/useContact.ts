@@ -36,28 +36,15 @@ export const useContactCreate = () => {
 	return useMutation<ContactResponse, Error, ContactData>({
 		mutationFn: contactAPI.create,
 
-		onSuccess: (response: ContactResponse, _contactData: ContactData) => {
+		onSuccess: (response: ContactResponse) => {
 			// If API reports duplicate, set duplicate mode and do not add anything
 			if (response.success === false && response.duplicate) {
 				setDuplicateContact(true);
 				return;
 			}
 
-			// Normal success: add the new contact to the cache
-			if (response?.contact) {
-				queryClient.setQueryData<ContactsResponse>(
-					['contacts-get-all'],
-					(old: any) => {
-						const prev = old?.contacts || [];
-						return {
-							contacts: [response.contact, ...prev],
-						};
-					}
-				);
-			} else {
-				// If server only returns contact id or similar, simply invalidate to refetch authoritative data
-				queryClient.invalidateQueries({ queryKey: ['contacts-get-all'] });
-			}
+			// Invalidate to refetch authoritative data with proper typing
+			queryClient.invalidateQueries({ queryKey: ['contacts-get-all'] });
 		},
 
 		onError: (error: Error) => {
@@ -80,32 +67,13 @@ export const useContactUpdate = () => {
 		mutationFn: contactAPI.update,
 
 		onSuccess: (response: ContactResponse, updateData: ContactUpdateData) => {
-			duplicateContact ? setDuplicateContact(false) : null;
-			// Only update cache if server returns the updated contact
-			if (response?.contact) {
-				queryClient.setQueryData<ContactsResponse>(
-					['contacts-get-all'],
-					(old: any) => {
-						const prev = old?.contacts || [];
-						return {
-							contacts: prev.map((contact: any) =>
-								contact.id === updateData.id ? response.contact : contact
-							),
-						};
-					}
-				);
-				// Invalidate both the contacts list and the unique contact query
-				queryClient.invalidateQueries({ queryKey: ['contacts-get-all'] });
-				queryClient.invalidateQueries({
-					queryKey: ['contact-get-unique', updateData.id],
-				});
-			} else {
-				// If server only returns contact id or similar, simply invalidate to refetch authoritative data
-				queryClient.invalidateQueries({ queryKey: ['contacts-get-all'] });
-				queryClient.invalidateQueries({
-					queryKey: ['contact-get-unique', updateData.id],
-				});
-			}
+			if (duplicateContact) setDuplicateContact(false);
+			// Invalidate to refetch authoritative data with proper typing
+			queryClient.invalidateQueries({ queryKey: ['contacts-get-all'] });
+			// makes sure unique contact query is up to date
+			queryClient.invalidateQueries({
+				queryKey: ['contact-get-unique', updateData.id],
+			});
 		},
 
 		onError: (error: Error) => {
@@ -139,10 +107,10 @@ export const useContactDelete = () => {
 			// Remove the deleted contact from the cache
 			queryClient.setQueryData<ContactsResponse>(
 				['contacts-get-all'],
-				(old: any) => {
+				(old: ContactsResponse | undefined) => {
 					const prev = old?.contacts || [];
 					return {
-						contacts: prev.filter((contact: any) => contact.id !== contactId),
+						contacts: prev.filter((contact: ContactFromDB) => contact.id !== contactId),
 					};
 				}
 			);
@@ -154,13 +122,8 @@ export const useContactDelete = () => {
 		},
 
 		onSettled: () => {
-			// Ensure eventual consistency
-			queryClient.invalidateQueries({ queryKey: ['contacts-get-all'] });
-			queryClient.invalidateQueries({ queryKey: ['contact-get-unique'] });
-			queryClient.invalidateQueries({ queryKey: ['messages-get-by-contact'] });
-			queryClient.invalidateQueries({ queryKey: ['sequences-get-by-contact'] });
-			queryClient.invalidateQueries({ queryKey: ['messages-get-all'] });
-			queryClient.invalidateQueries({ queryKey: ['pending-messages-get-all'] });
+			// Can blanket invalidate all query keys because contact deletion is rare and touches literally everything
+			queryClient.invalidateQueries();
 		},
 	});
 };

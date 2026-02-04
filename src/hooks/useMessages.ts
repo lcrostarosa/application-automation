@@ -2,7 +2,10 @@
 import { messageAPI } from '@/services/api';
 
 // Types imports
-import { MessagesResponse } from '@/types/messageTypes';
+import {
+	MessagesResponse,
+	MessagesWithContactResponse,
+} from '@/types/messageTypes';
 
 // Tanstack React Query
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -16,17 +19,8 @@ export const useAllMessagesByContactId = (contactId: number) => {
 	});
 };
 
-export const useStandaloneMessagesByContactId = (contactId: number) => {
-	return useQuery<MessagesResponse>({
-		queryKey: ['standalone-messages-by-contact-id', contactId],
-		queryFn: () => messageAPI.readStandaloneByContactId(contactId),
-		refetchOnWindowFocus: true,
-		refetchInterval: 1000 * 30, // Refetch every 30 seconds
-	});
-};
-
 export const useMessagesGetAllPending = () => {
-	return useQuery<MessagesResponse>({
+	return useQuery<MessagesWithContactResponse>({
 		queryKey: ['pending-messages-get-all'],
 		queryFn: () => messageAPI.getAllPending(),
 		refetchOnWindowFocus: true,
@@ -40,14 +34,14 @@ export const useMessageApprove = () => {
 	return useMutation<void, Error, number>({
 		mutationFn: (messageId: number) => messageAPI.approveMessage(messageId),
 		onSuccess: () => {
-			// Invalidate pending messages to update the count/list
-			queryClient.invalidateQueries({ queryKey: ['pending-messages-get-all'] });
-			// Also invalidate messages by contact in case viewing contact details
 			queryClient.invalidateQueries({
-				queryKey: ['all-messages-by-contact-id'],
-			});
-			queryClient.invalidateQueries({
-				queryKey: ['standalone-messages-by-contact-id'],
+				predicate: (query) =>
+					[
+						'pending-messages-get-all',
+						'all-messages-by-contact-id',
+						'messages-get-by-contact',
+						'sequences-get-by-contact',
+					].includes(query.queryKey[0] as string),
 			});
 		},
 	});
@@ -64,13 +58,11 @@ export const useMessageUpdate = () => {
 		mutationFn: ({ messageId, contents, subject }) =>
 			messageAPI.updateMessage(messageId, contents, subject),
 		onSuccess: () => {
-			// Invalidate queries to update the data
-			queryClient.invalidateQueries({ queryKey: ['pending-messages-get-all'] });
 			queryClient.invalidateQueries({
-				queryKey: ['all-messages-by-contact-id'],
-			});
-			queryClient.invalidateQueries({
-				queryKey: ['standalone-messages-by-contact-id'],
+				predicate: (query) =>
+					['pending-messages-get-all', 'all-messages-by-contact-id'].includes(
+						query.queryKey[0] as string
+					),
 			});
 		},
 	});

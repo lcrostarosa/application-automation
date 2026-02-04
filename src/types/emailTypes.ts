@@ -39,5 +39,5 @@ export interface PendingEmailData {
 	override?: boolean;
 	referencePreviousEmail?: boolean | null;
 	alterSubjectLine?: boolean | null;
-	activeSequenceId: number;
+	activeSequenceId?: number;
 }
