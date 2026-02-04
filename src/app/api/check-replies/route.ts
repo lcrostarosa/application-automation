@@ -286,9 +286,9 @@ interface ParsedEmail {
 function parseEmailContent(bodyContent: string): ParsedEmail {
 	const lines = bodyContent.split(/\r?\n/);
 
-	let headerLines: string[] = [];
-	let replyLines: string[] = [];
-	let historyLines: string[] = [];
+	const headerLines: string[] = [];
+	const replyLines: string[] = [];
+	const historyLines: string[] = [];
 
 	let currentSection: 'headers' | 'reply' | 'history' = 'headers';
 

@@ -96,7 +96,7 @@ const AllActivities = ({
 		}),
 	};
 
-	return <MasterTable tableData={tableData} tableType='allActivities' />;
+	return <MasterTable tableData={tableData} tableType='allActivities' tableSize={5} />;
 };
 
 export default AllActivities;

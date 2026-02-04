@@ -69,7 +69,7 @@ const ActiveSequenceTable = ({ sequence }: { sequence: SequenceFromDB }) => {
 		}),
 	};
 
-	return <MasterTable tableData={tableData} tableType='activeSequence' />;
+	return <MasterTable tableData={tableData} tableType='activeSequence' tableSize={4} />;
 };
 
 export default ActiveSequenceTable;

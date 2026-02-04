@@ -28,7 +28,7 @@ const RepliesTable = ({ replies }: { replies: RepliesFromDB[] }) => {
 	const clickedReplies = clickedRepliesRef.current;
 
 	useEffect(() => {
-		for (let reply of replies) {
+		for (const reply of replies) {
 			if (reply.processed) {
 				clickedReplies.add(reply.id);
 			}

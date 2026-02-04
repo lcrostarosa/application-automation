@@ -33,7 +33,7 @@ const OverrideModal = () => {
 		<div className={styles['error-modal']}>
 			<div className={styles.message}>
 				<h2>
-					An existing email sequence conflicts with the one you're trying to
+					An existing email sequence conflicts with the one you&apos;re trying to
 					send.
 				</h2>
 				<h2>

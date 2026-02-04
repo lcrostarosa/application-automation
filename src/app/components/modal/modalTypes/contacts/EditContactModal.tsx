@@ -20,10 +20,6 @@ const EditContactModal = ({
 }: {
 	selectedContact?: ContactFromDB;
 }) => {
-	if (!selectedContact) {
-		return null;
-	}
-
 	const {
 		setModalType,
 		setSelectedContact,
@@ -38,25 +34,29 @@ const EditContactModal = ({
 	const {
 		register,
 		handleSubmit,
-		formState: { touchedFields, errors },
+		formState: { errors },
 		reset,
 	} = useForm<ContactFormData>({
 		defaultValues: {
-			firstName: selectedContact.firstName || '',
-			lastName: selectedContact.lastName || '',
-			company: selectedContact.company || '',
-			title: selectedContact.title || '',
-			email: selectedContact.email || '',
-			phone: selectedContact.phone || '',
-			linkedIn: selectedContact.linkedIn || '',
+			firstName: selectedContact?.firstName || '',
+			lastName: selectedContact?.lastName || '',
+			company: selectedContact?.company || '',
+			title: selectedContact?.title || '',
+			email: selectedContact?.email || '',
+			phone: selectedContact?.phone || '',
+			linkedIn: selectedContact?.linkedIn || '',
 			importance:
-				selectedContact.importance !== undefined &&
-				selectedContact.importance !== null
+				selectedContact?.importance !== undefined &&
+				selectedContact?.importance !== null
 					? String(selectedContact.importance)
 					: '',
-			reasonForEmail: selectedContact.reasonForEmail || '',
+			reasonForEmail: selectedContact?.reasonForEmail || '',
 		},
 	});
+
+	if (!selectedContact) {
+		return null;
+	}
 
 	const onSubmit: SubmitHandler<ContactFormData> = async (data) => {
 		try {

@@ -53,6 +53,7 @@ const SearchContactsModal = () => {
 				contacts={contacts}
 				onRowClick={onRowClick}
 				columns={{
+					active: false,
 					reasonForEmail: false,
 					importance: false,
 					lastActivity: true,
