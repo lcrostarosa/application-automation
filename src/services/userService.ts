@@ -1,6 +1,19 @@
 import { prisma } from '@/lib/prisma';
 
-export async function findOrCreateUser(user: any) {
+interface Auth0User {
+	sub: string;
+	email: string;
+	name?: string;
+	given_name?: string;
+	family_name?: string;
+	first_name?: string;
+	last_name?: string;
+	login?: string;
+	nickname?: string;
+	timezone?: string;
+}
+
+export async function findOrCreateUser(user: Auth0User) {
 	// Extract first and last names with fallbacks for different providers
 	let firstName: string | null = null;
 	let lastName: string | null = null;

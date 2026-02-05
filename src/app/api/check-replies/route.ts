@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { google } from 'googleapis';
+import { google, gmail_v1 } from 'googleapis';
 import { prisma } from '@/lib/prisma';
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID!;
@@ -7,7 +7,19 @@ const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET!;
 const REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI!;
 const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN!;
 
-export async function POST(req: NextRequest) {
+// Gmail header type
+interface GmailHeader {
+	name: string;
+	value: string;
+}
+
+// Gmail message part type
+interface GmailMessagePart {
+	mimeType: string;
+	body: { data?: string };
+}
+
+export async function POST(_req: NextRequest) {
 	try {
 		console.log('Checking for new email replies...');
 
@@ -27,14 +39,17 @@ export async function POST(req: NextRequest) {
 			success: true,
 			message: 'Checked for replies successfully',
 		});
-	} catch (error: any) {
+	} catch (error) {
 		console.error('Error checking for replies:', error);
-		return NextResponse.json({ error: error.message }, { status: 500 });
+		return NextResponse.json(
+			{ error: error instanceof Error ? error.message : 'Unknown error' },
+			{ status: 500 }
+		);
 	}
 }
 
 // Reuse existing processMessage function logic
-async function checkForReplies(gmail: any) {
+async function checkForReplies(gmail: gmail_v1.Gmail) {
 	console.log('Fetching recent messages from Gmail...');
 
 	const response = await gmail.users.messages.list({
@@ -53,7 +68,7 @@ async function checkForReplies(gmail: any) {
 	}
 }
 
-async function processMessage(gmail: any, messageId: string) {
+async function processMessage(gmail: gmail_v1.Gmail, messageId: string) {
 	try {
 		const message = await gmail.users.messages.get({
 			userId: 'me',
@@ -64,7 +79,7 @@ async function processMessage(gmail: any, messageId: string) {
 		const threadId = message.data.threadId;
 
 		// Extract sender email and use it for validation
-		const from = headers.find((h: any) => h.name === 'From')?.value;
+		const from = headers.find((h: GmailHeader) => h.name === 'From')?.value;
 		const senderEmail = extractEmailFromHeader(from);
 
 		// Check if this is a reply to one of user's sent emails
@@ -95,7 +110,7 @@ async function processMessage(gmail: any, messageId: string) {
 					'Message already processed:',
 					Buffer.from(
 						message.data.payload.parts.find(
-							(part: any) => part.mimeType === 'text/plain'
+							(part: GmailMessagePart) => part.mimeType === 'text/plain'
 						).body.data,
 						'base64'
 					).toString()
@@ -107,14 +122,14 @@ async function processMessage(gmail: any, messageId: string) {
 
 			// Rest of processing...
 			const subject = headers.find(
-				(header: any) => header.name === 'Subject'
+				(header: GmailHeader) => header.name === 'Subject'
 			)?.value;
 
 			// Extract email body (simplified)
 			let bodyContent = '';
 			if (message.data.payload.parts) {
 				const textPart = message.data.payload.parts.find(
-					(part: any) => part.mimeType === 'text/plain'
+					(part: GmailMessagePart) => part.mimeType === 'text/plain'
 				);
 				if (textPart?.body?.data) {
 					bodyContent = Buffer.from(textPart.body.data, 'base64').toString();
@@ -209,22 +224,22 @@ function extractEmailFromHeader(fromHeader: string): string {
 
 // Check if reply is an automated/out-of-office response
 function isAutomatedReply(
-	headers: any[],
+	headers: GmailHeader[],
 	subject: string,
 	body: string
 ): boolean {
 	// Check headers for automation indicators
 	const autoSubmitted = headers.find(
-		(h: any) => h.name.toLowerCase() === 'auto-submitted'
+		(h) => h.name.toLowerCase() === 'auto-submitted'
 	)?.value;
 	const xAutorespond = headers.find(
-		(h: any) => h.name.toLowerCase() === 'x-autorespond'
+		(h) => h.name.toLowerCase() === 'x-autorespond'
 	)?.value;
 	const xAutoReply = headers.find(
-		(h: any) => h.name.toLowerCase() === 'x-autoreply'
+		(h) => h.name.toLowerCase() === 'x-autoreply'
 	)?.value;
 	const precedence = headers.find(
-		(h: any) => h.name.toLowerCase() === 'precedence'
+		(h) => h.name.toLowerCase() === 'precedence'
 	)?.value;
 
 	// Standard auto-reply headers

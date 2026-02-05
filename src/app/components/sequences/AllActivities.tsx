@@ -1,8 +1,3 @@
-// Library imports
-
-// Styles imports
-import styles from './tableStyles.module.scss';
-
 // Types imports
 import { MessagesWithActiveSequence } from '@/types/messageTypes';
 import { MasterTableData } from '@/types/masterTableTypes';

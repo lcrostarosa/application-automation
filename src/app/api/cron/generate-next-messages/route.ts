@@ -188,10 +188,10 @@ export async function GET(request: NextRequest) {
 			failed,
 			timestamp: new Date().toISOString(),
 		});
-	} catch (error: any) {
+	} catch (error) {
 		console.error('Error in generate-next-messages cron:', error);
 		return NextResponse.json(
-			{ error: 'Internal Server Error', details: error.message },
+			{ error: 'Internal Server Error', details: error instanceof Error ? error.message : 'Unknown error' },
 			{ status: 500 }
 		);
 	}

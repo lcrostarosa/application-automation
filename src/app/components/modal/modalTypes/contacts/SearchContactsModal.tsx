@@ -25,7 +25,6 @@ const SearchContactsModal = () => {
 	const {
 		data: contactsData,
 		error,
-		isPending: loading,
 		refetch,
 	} = useContactsGetAll();
 

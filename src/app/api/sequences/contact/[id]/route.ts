@@ -29,10 +29,10 @@ export async function GET(
 			},
 		});
 		return NextResponse.json({ sequences });
-	} catch (error: any) {
+	} catch (error) {
 		console.error('Error fetching sequences for contact:', error);
 		return NextResponse.json(
-			{ error: error.message || 'Failed to fetch sequences' },
+			{ error: error instanceof Error ? error.message : 'Failed to fetch sequences' },
 			{ status: 500 }
 		);
 	}

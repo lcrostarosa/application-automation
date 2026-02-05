@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getApiUser } from '@/services/getUserService';
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
 	try {
 		const { user, error } = await getApiUser();
 		if (error) {
@@ -25,8 +25,11 @@ export async function GET(req: NextRequest) {
 		});
 
 		return NextResponse.json({ replies });
-	} catch (error: any) {
+	} catch (error) {
 		console.error('Error fetching replies:', error);
-		return NextResponse.json({ error: error.message }, { status: 500 });
+		return NextResponse.json(
+			{ error: error instanceof Error ? error.message : 'Unknown error' },
+			{ status: 500 }
+		);
 	}
 }

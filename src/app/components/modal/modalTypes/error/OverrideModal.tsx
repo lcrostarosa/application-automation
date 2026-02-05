@@ -24,7 +24,7 @@ const OverrideModal = () => {
 		try {
 			await sendEmail({ ...pendingEmail!, override: true });
 			clearEmailContext();
-		} catch (error) {
+		} catch {
 			// Error handling is managed in the hook
 		}
 	};

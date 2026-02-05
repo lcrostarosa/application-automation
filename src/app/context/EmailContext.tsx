@@ -16,8 +16,8 @@ import { PendingEmailData } from '@/types/emailTypes';
 interface EmailContextType {
 	pendingEmail: PendingEmailData | null;
 	setPendingEmail: (data: PendingEmailData | null) => void;
-	lastError: any;
-	setLastError: (err: any) => void;
+	lastError: Error | null;
+	setLastError: (err: Error | null) => void;
 	clearEmailContext: () => void;
 	resetForm: boolean;
 	setResetForm: (callback: boolean) => void;
@@ -34,7 +34,7 @@ export const EmailContextProvider = ({ children }: { children: ReactNode }) => {
 	const [pendingEmail, setPendingEmail] = useState<PendingEmailData | null>(
 		null
 	);
-	const [lastError, setLastError] = useState<any>(null);
+	const [lastError, setLastError] = useState<Error | null>(null);
 	const [resetForm, setResetForm] = useState<boolean>(false);
 	const [selectedSequenceId, setSelectedSequenceId] = useState<number | null>(
 		null

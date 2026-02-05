@@ -2,7 +2,7 @@
 
 // Library imports
 import { useState, useEffect } from 'react';
-import { useForm, SubmitHandler, FieldErrors, set } from 'react-hook-form';
+import { useForm, SubmitHandler, FieldErrors } from 'react-hook-form';
 
 // Hooks imports
 import { useEmailSend } from '@/hooks/useEmail';
@@ -87,9 +87,11 @@ const NewEmailForm = ({ contactEmail }: { contactEmail?: string }) => {
 	}, [followingUp, setValue]);
 
 	useEffect(() => {
-		resetForm && reset();
+		if (resetForm) {
+			reset();
+		}
 		setResetForm(false);
-	}, [resetForm, setResetForm]);
+	}, [resetForm, setResetForm, reset]);
 
 	const onSubmit: SubmitHandler<EmailFormData> = async (data) => {
 		if (!editorContent || editorContent.trim() === '') {
@@ -131,7 +133,7 @@ const NewEmailForm = ({ contactEmail }: { contactEmail?: string }) => {
 				setSelectedContact(result.contact);
 				setModalType('newContactFromNewEmail');
 			}
-		} catch (error) {
+		} catch {
 			// Error handling is done in the hook
 			setLoading(false);
 			setLoadingMessage(null);

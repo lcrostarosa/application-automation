@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getApiUser } from '@/services/getUserService';
 import { prisma } from '@/lib/prisma';
 
-export async function PUT(request: NextRequest) {
+export async function PUT(_request: NextRequest) {
 	try {
 		// 1. Check authentication
 		const { user, error } = await getApiUser();
@@ -55,10 +55,10 @@ export async function PUT(request: NextRequest) {
 			updatedMessages,
 			updatedContacts,
 		});
-	} catch (error: any) {
+	} catch (error) {
 		console.error('Error updating sequences:', error);
 		return NextResponse.json(
-			{ error: error.message || 'Failed to deactivate all sequences' },
+			{ error: error instanceof Error ? error.message : 'Failed to deactivate all sequences' },
 			{ status: 500 }
 		);
 	}

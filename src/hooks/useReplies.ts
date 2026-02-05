@@ -33,17 +33,10 @@ export const useCheckNewReplies = () => {
 };
 
 export const useReplyUpdate = () => {
-	const queryClient = useQueryClient();
-
 	return useMutation({
 		mutationFn: (replyId: number) => repliesAPI.markAsReviewed(replyId),
 		onSuccess: () => {
-			// queryClient.invalidateQueries({
-			// 	predicate: (query) =>
-			// 		['replies-get-all', 'all-messages-by-contact-id'].includes(
-			// 			query.queryKey[0] as string
-			// 		),
-			// });
+			// Invalidation currently disabled
 		},
 		onError: (error: Error) => {
 			console.error('Error marking reply as reviewed:', error);

@@ -17,16 +17,18 @@ interface LoginFormData {
 export default function LoginModal() {
 	const { setModalType } = useAppContext();
 
-	const [isLoading, setIsLoading] = useState(false);
+	// Form handling for email/password login (currently commented out in JSX)
+	const [_isLoading, _setIsLoading] = useState(false);
 	const {
-		register,
-		handleSubmit,
-		formState: { errors },
-		reset,
+		register: _register,
+		handleSubmit: _handleSubmit,
+		formState: { errors: _errors },
+		reset: _reset,
 	} = useForm<LoginFormData>();
 
-	const onSubmit = async (data: LoginFormData) => {
-		setIsLoading(true);
+	// Keeping for future email/password login implementation
+	const _onSubmit = async (data: LoginFormData) => {
+		_setIsLoading(true);
 		try {
 			// Handle email/password login here
 			console.log('Login attempt:', data);
@@ -34,8 +36,8 @@ export default function LoginModal() {
 		} catch (error) {
 			console.error('Login error:', error);
 		} finally {
-			setIsLoading(false);
-			reset();
+			_setIsLoading(false);
+			_reset();
 		}
 	};
 

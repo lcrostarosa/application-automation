@@ -25,10 +25,10 @@ export async function PUT(
 		});
 
 		return NextResponse.json({ reply });
-	} catch (error: any) {
+	} catch (error) {
 		console.error('Error updating reply:', error);
 		return NextResponse.json(
-			{ error: error.message || 'Failed to update reply' },
+			{ error: error instanceof Error ? error.message : 'Failed to update reply' },
 			{ status: 500 }
 		);
 	}

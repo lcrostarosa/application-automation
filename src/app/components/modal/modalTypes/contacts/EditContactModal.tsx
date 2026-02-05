@@ -69,7 +69,7 @@ const EditContactModal = ({
 			setSelectedContact(null);
 			setLoading(false);
 			setLoadingMessage(null);
-		} catch (error) {
+		} catch {
 			// Error handling is done in the hook
 			setLoading(false);
 			setLoadingMessage(null);

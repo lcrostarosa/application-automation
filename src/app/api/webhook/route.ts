@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { google } from 'googleapis';
+import { google, gmail_v1 } from 'googleapis';
 import { prisma } from '@/lib/prisma';
+
+// Gmail types
+interface GmailHeader {
+	name: string;
+	value: string;
+}
+
+interface GmailMessagePart {
+	mimeType: string;
+	body: { data?: string };
+}
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID!;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET!;
@@ -23,9 +34,12 @@ export async function POST(req: NextRequest) {
 		await checkForNewEmails(message.historyId);
 
 		return NextResponse.json({ success: true });
-	} catch (error: any) {
+	} catch (error) {
 		console.error('Webhook error:', error);
-		return NextResponse.json({ error: error.message }, { status: 500 });
+		return NextResponse.json(
+			{ error: error instanceof Error ? error.message : 'Unknown error' },
+			{ status: 500 }
+		);
 	}
 }
 
@@ -63,7 +77,7 @@ async function checkForNewEmails(historyId: string) {
 }
 
 // Fallback method (your original approach)
-async function fallbackToRecentMessages(gmail: any) {
+async function fallbackToRecentMessages(gmail: gmail_v1.Gmail) {
 	const response = await gmail.users.messages.list({
 		userId: 'me',
 		q: 'in:inbox',
@@ -77,7 +91,7 @@ async function fallbackToRecentMessages(gmail: any) {
 	}
 }
 
-async function processMessage(gmail: any, messageId: string) {
+async function processMessage(gmail: gmail_v1.Gmail, messageId: string) {
 	try {
 		const message = await gmail.users.messages.get({
 			userId: 'me',
@@ -88,7 +102,7 @@ async function processMessage(gmail: any, messageId: string) {
 		const threadId = message.data.threadId;
 
 		// Extract sender email and USE it for validation
-		const from = headers.find((h: any) => h.name === 'From')?.value;
+		const from = headers.find((h: GmailHeader) => h.name === 'From')?.value;
 		const senderEmail = extractEmailFromHeader(from);
 
 		// Check if this is a reply to one of our sent emails
@@ -112,13 +126,13 @@ async function processMessage(gmail: any, messageId: string) {
 			}
 
 			// Rest of processing...
-			const subject = headers.find((h: any) => h.name === 'Subject')?.value;
+			const subject = headers.find((h: GmailHeader) => h.name === 'Subject')?.value;
 
 			// Extract email body (simplified)
 			let bodyContent = '';
-			if (message.data.payload.parts) {
+			if (message.data.payload?.parts) {
 				const textPart = message.data.payload.parts.find(
-					(part: any) => part.mimeType === 'text/plain'
+					(part: GmailMessagePart) => part.mimeType === 'text/plain'
 				);
 				if (textPart?.body?.data) {
 					bodyContent = Buffer.from(textPart.body.data, 'base64').toString();

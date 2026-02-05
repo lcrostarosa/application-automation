@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getApiUser } from '@/services/getUserService';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
 	try {
 		// 1. Check authentication
 		const { user, error } = await getApiUser();
@@ -20,10 +20,10 @@ export async function GET(req: NextRequest) {
 
 		// 4. Return contacts
 		return NextResponse.json({ contacts });
-	} catch (error: any) {
+	} catch (error) {
 		console.error('Error fetching contacts:', error);
 		return NextResponse.json(
-			{ error: error.message || 'Failed to fetch contacts' },
+			{ error: error instanceof Error ? error.message : 'Failed to fetch contacts' },
 			{ status: 500 }
 		);
 	}
@@ -153,10 +153,10 @@ export async function POST(req: NextRequest) {
 			success: true,
 			contact,
 		});
-	} catch (error: any) {
+	} catch (error) {
 		console.error('Contact creation error:', error);
 		return NextResponse.json(
-			{ error: error.message || 'Failed to create contact' },
+			{ error: error instanceof Error ? error.message : 'Failed to create contact' },
 			{ status: 500 }
 		);
 	}

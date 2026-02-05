@@ -19,9 +19,9 @@ interface PreviewTileProps {
 const PreviewTile = ({
 	title,
 	children,
-	className,
-	loading,
-	error,
+	className: _className,
+	loading: _loading,
+	error: _error,
 	href,
 }: PreviewTileProps) => {
 	return (

@@ -44,7 +44,7 @@ export async function PUT(
 		const body = await request.json();
 
 		// Remove id from the update data since we don't want to update the ID
-		const { id: bodyId, ...updateData } = body;
+		const { id: _bodyId, ...updateData } = body;
 
 		// Convert importance to integer if it exists
 		if (updateData.importance !== undefined && updateData.importance !== '') {

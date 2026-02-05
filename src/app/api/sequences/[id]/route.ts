@@ -29,10 +29,10 @@ export async function GET(
 			},
 		});
 		return NextResponse.json({ sequence });
-	} catch (error: any) {
+	} catch (error) {
 		console.error('Error fetching sequences for contact:', error);
 		return NextResponse.json(
-			{ error: error.message || 'Failed to fetch sequences' },
+			{ error: error instanceof Error ? error.message : 'Failed to fetch sequences' },
 			{ status: 500 }
 		);
 	}
@@ -74,10 +74,10 @@ export async function PUT(
 			updatedMessages,
 			updatedContact,
 		});
-	} catch (error: any) {
+	} catch (error) {
 		console.error('Error updating sequence:', error);
 		return NextResponse.json(
-			{ error: error.message || 'Failed to update sequence' },
+			{ error: error instanceof Error ? error.message : 'Failed to update sequence' },
 			{ status: 500 }
 		);
 	}

@@ -20,12 +20,21 @@ interface NewMessageData {
 	alterSubjectLine?: boolean | null;
 }
 
+interface ContactData {
+	id: number;
+	active: boolean;
+}
+
+interface MessageData {
+	id: number;
+}
+
 interface NewMessageResponse {
 	success: boolean;
 	messageId: string;
 	threadId: string;
-	contact?: any;
-	message?: any;
+	contact?: ContactData;
+	message?: MessageData;
 	newContact?: boolean;
 }
 
@@ -44,23 +53,27 @@ export const useEmailSend = () => {
 			if (response.contact) {
 				queryClient.setQueryData(
 					['contact-get-unique', response.contact.id],
-					(oldData: any) => {
+					(oldData: ContactData | undefined) => {
+						if (!oldData) return oldData;
 						return {
 							...oldData,
-							active: response.contact.active,
+							active: response.contact!.active,
 						};
 					}
 				);
 
-				queryClient.setQueryData(['contacts-get-all'], (oldData: any) => {
-					if (!oldData) return oldData;
-					const updatedContacts = oldData.contacts.map((contact: any) =>
-						contact.id === response.contact.id
-							? { ...contact, active: response.contact.active }
-							: contact
-					);
-					return { ...oldData, contacts: updatedContacts };
-				});
+				queryClient.setQueryData(
+					['contacts-get-all'],
+					(oldData: { contacts: ContactData[] } | undefined) => {
+						if (!oldData) return oldData;
+						const updatedContacts = oldData.contacts.map((contact) =>
+							contact.id === response.contact!.id
+								? { ...contact, active: response.contact!.active }
+								: contact
+						);
+						return { ...oldData, contacts: updatedContacts };
+					}
+				);
 
 				queryClient.invalidateQueries({
 					predicate: (query) =>
@@ -75,7 +88,7 @@ export const useEmailSend = () => {
 			setModalType('alert');
 			setAlertMessage('Email sent successfully!');
 		},
-		onError: (error: any, emailData: NewMessageData) => {
+		onError: (error: Error & { status?: number; responseData?: { sequenceExists?: boolean; emailData?: NewMessageData } }) => {
 			if (error.status === 409 && error.responseData?.sequenceExists) {
 				setPendingEmail({ ...error.responseData.emailData, override: true });
 				setModalType('override');
