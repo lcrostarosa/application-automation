@@ -2,7 +2,7 @@ import { prisma } from '@/lib/prisma';
 
 interface Auth0User {
 	sub: string;
-	email: string;
+	email?: string;
 	name?: string;
 	given_name?: string;
 	family_name?: string;
@@ -20,11 +20,11 @@ export async function findOrCreateUser(user: Auth0User) {
 
 	// Try to get names from provider-specific fields first
 	if (user.given_name || user.first_name) {
-		firstName = user.given_name || user.first_name;
+		firstName = user.given_name ?? user.first_name ?? null;
 	}
 
 	if (user.family_name || user.last_name) {
-		lastName = user.family_name || user.last_name;
+		lastName = user.family_name ?? user.last_name ?? null;
 	}
 
 	// If we don't have separate names, try to split the full name
@@ -45,7 +45,7 @@ export async function findOrCreateUser(user: Auth0User) {
 
 	const userData = {
 		auth0Id: user.sub,
-		email: user.email,
+		email: user.email || '',
 		firstName,
 		lastName,
 		timezone: user.timezone || null,
