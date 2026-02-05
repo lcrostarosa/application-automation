@@ -59,9 +59,20 @@ vi.mock('@/lib/auth0', () => ({
 	},
 }));
 
+// Custom error class to simulate Next.js redirect behavior
+class RedirectError extends Error {
+	digest: string;
+	constructor(url: string) {
+		super(`NEXT_REDIRECT:${url}`);
+		this.digest = `NEXT_REDIRECT;replace;${url};307`;
+	}
+}
+
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
-	redirect: vi.fn(),
+	redirect: vi.fn((url: string) => {
+		throw new RedirectError(url);
+	}),
 	useRouter: vi.fn(() => ({
 		push: vi.fn(),
 		replace: vi.fn(),

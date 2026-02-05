@@ -108,13 +108,18 @@ describe('emailService', () => {
 			});
 
 			it('uses transaction to create message and update contact', async () => {
+				// Mock the prisma methods to return promise-like objects for transaction
+				const mockMessagePromise = { then: vi.fn() };
+				const mockContactPromise = { then: vi.fn() };
+				mockPrisma.prisma.message.create.mockReturnValue(mockMessagePromise as never);
+				mockPrisma.prisma.contact.update.mockReturnValue(mockContactPromise as never);
 				mockPrisma.prisma.$transaction.mockResolvedValue([mockMessage, mockContact]);
 
 				await storeSentEmail(baseEmailData);
 
 				expect(mockPrisma.prisma.$transaction).toHaveBeenCalledWith([
-					expect.anything(), // message.create
-					expect.anything(), // contact.update
+					mockMessagePromise,
+					mockContactPromise,
 				]);
 			});
 

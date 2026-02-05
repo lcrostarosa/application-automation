@@ -52,8 +52,7 @@ describe('contactsService', () => {
 		it('redirects to home when not authenticated', async () => {
 			setupUnauthenticated();
 
-			await getAllContacts();
-
+			await expect(getAllContacts()).rejects.toThrow('NEXT_REDIRECT:/');
 			expect(mockNavigation.redirect).toHaveBeenCalledWith('/');
 			expect(mockPrisma.prisma.contact.findMany).not.toHaveBeenCalled();
 		});
@@ -64,8 +63,7 @@ describe('contactsService', () => {
 			});
 			mockPrisma.prisma.user.findUnique.mockResolvedValue(null);
 
-			await getAllContacts();
-
+			await expect(getAllContacts()).rejects.toThrow('NEXT_REDIRECT:/');
 			expect(mockNavigation.redirect).toHaveBeenCalledWith('/');
 		});
 
@@ -106,8 +104,7 @@ describe('contactsService', () => {
 		it('redirects to home when not authenticated', async () => {
 			setupUnauthenticated();
 
-			await getContactById(1);
-
+			await expect(getContactById(1)).rejects.toThrow('NEXT_REDIRECT:/');
 			expect(mockNavigation.redirect).toHaveBeenCalledWith('/');
 			expect(mockPrisma.prisma.contact.findFirst).not.toHaveBeenCalled();
 		});

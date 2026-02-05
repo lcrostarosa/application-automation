@@ -50,7 +50,8 @@ describe('contacts API route', () => {
 			const data = await response.json();
 
 			expect(response.status).toBe(200);
-			expect(data.contacts).toEqual(contacts);
+			// Compare with JSON serialized/parsed version since response goes through JSON
+			expect(data.contacts).toEqual(JSON.parse(JSON.stringify(contacts)));
 		});
 
 		it('returns empty array when user has no contacts', async () => {

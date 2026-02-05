@@ -1,6 +1,13 @@
 import OpenAI from 'openai';
 
-const client = new OpenAI();
+// Lazy-initialize client to avoid build-time errors when API key is not set
+let client: OpenAI | null = null;
+function getClient(): OpenAI {
+	if (!client) {
+		client = new OpenAI();
+	}
+	return client;
+}
 
 type PreviousEmailContentsType = {
 	contactName: string | null;
@@ -73,7 +80,7 @@ export const generateMessage = async (
 			// let response: any;
 			// let usedTemperature = true;
 
-			const response = await client.responses.create({
+			const response = await getClient().responses.create({
 				model,
 				input: promptTemplate,
 				max_output_tokens: MAX_TOKENS,

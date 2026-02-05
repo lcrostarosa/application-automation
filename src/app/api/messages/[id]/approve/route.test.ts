@@ -49,7 +49,8 @@ describe('messages/[id]/approve API route', () => {
 			const data = await response.json();
 
 			expect(response.status).toBe(200);
-			expect(data.message).toEqual(approvedMessage);
+			// Compare with JSON serialized/parsed version since response goes through JSON
+			expect(data.message).toEqual(JSON.parse(JSON.stringify(approvedMessage)));
 		});
 
 		it('updates message with correct approval fields', async () => {

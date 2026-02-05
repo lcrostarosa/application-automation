@@ -1,3 +1,6 @@
+/**
+ * @vitest-environment jsdom
+ */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -169,7 +172,9 @@ describe('useContact hooks', () => {
 
 			await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-			expect(mockContactAPI.create).toHaveBeenCalledWith({
+			// TanStack Query passes additional context as second argument
+			expect(mockContactAPI.create).toHaveBeenCalled();
+			expect(mockContactAPI.create.mock.calls[0][0]).toEqual({
 				firstName: 'John',
 				lastName: 'Doe',
 				email: 'john@example.com',
@@ -245,7 +250,9 @@ describe('useContact hooks', () => {
 
 			await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-			expect(mockContactAPI.create).toHaveBeenCalledWith(contactData);
+			// TanStack Query passes additional context as second argument
+			expect(mockContactAPI.create).toHaveBeenCalled();
+			expect(mockContactAPI.create.mock.calls[0][0]).toEqual(contactData);
 		});
 	});
 });
